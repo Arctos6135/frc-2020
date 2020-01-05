@@ -1,0 +1,44 @@
+language: java
+
+jdk:
+  - oraclejdk11
+
+# TODO: Set this up
+# # The encrypted webhook URL
+# env:
+#   global:
+#     secure: ""
+
+install: 
+  # chmod the wrapper to be executable
+  - sudo chmod +x ./gradlew
+  - ./gradlew --version
+
+script:
+  - ./gradlew build
+
+# Enable gradle cache
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+
+# TODO: Set this up
+# after_success:
+#   - export SHORT_COMMIT=${TRAVIS_COMMIT:0:7}
+#   - >
+#     curl --request 'POST' 
+#     --header 'Content-Type: text/plain; charset=utf-8' 
+#     --data "&#9989; Success! The latest commit pushed to **frc-2020** (commit *$SHORT_COMMIT* on branch *$TRAVIS_BRANCH*) has [**passed** CI checks on **$TRAVIS_JDK_VERSION**]($TRAVIS_JOB_WEB_URL)!"
+#     $WEBHOOK_URL
+# after_failure:
+#   - export SHORT_COMMIT=${TRAVIS_COMMIT:0:7}
+#   - >
+#     curl --request 'POST' 
+#     --header 'Content-Type: text/plain; charset=utf-8' 
+#     --data "&#10060; Error! The latest commit pushed to **frc-2020** (commit *$SHORT_COMMIT* on branch *$TRAVIS_BRANCH*) has [**failed** CI checks on **$TRAVIS_JDK_VERSION**]($TRAVIS_JOB_WEB_URL)!" 
+#     $WEBHOOK_URL
