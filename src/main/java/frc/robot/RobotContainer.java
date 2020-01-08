@@ -23,7 +23,7 @@ import frc.robot.subsystems.TalonDriveTrain;
 public class RobotContainer {
 
 	private final TalonDriveTrain talonDriveTrain;
-
+    public static final XboxController driveController;
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
@@ -42,6 +42,8 @@ public class RobotContainer {
      * passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
+        
+        driveController = new XboxController(0);
     }
 
     /**
