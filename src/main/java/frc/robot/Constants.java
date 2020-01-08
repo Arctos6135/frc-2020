@@ -18,4 +18,13 @@ package frc.robot;
  * wherever the constants are needed, to reduce verbosity.
  */
 public final class Constants {
+
+    // These are random values (will change after robot is build and wired up)
+    
+    public static final int RIGHT_CANSPARKMAX = 1;
+    public static final int LEFT_CANSPARKMAX = 2;
+    public static final int BRUSHLESS_MOTOR_TYPE = 1;
+
+
+
 }
