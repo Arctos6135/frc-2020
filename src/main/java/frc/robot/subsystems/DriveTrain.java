@@ -10,14 +10,13 @@ package frc.robot.subsystems;
 
 import frc.robot.Constants;
 
+import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.EncoderType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-import edu.wpi.first.wpilibj.Encoder;
-import edu.wpi.first.wpilibj.CounterBase.EncodingType;
 import edu.wpi.first.wpilibj.Timer;
-
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
@@ -28,8 +27,10 @@ public class DriveTrain extends SubsystemBase {
 
     private final CANSparkMax rightMotor;
     private final CANSparkMax leftMotor;
-    private final Encoder leftEncoder = new Encoder(0, 1, true, EncodingType.k4X);
-    private final Encoder rightEncoder = new Encoder(2, 3, true, EncodingType.k4X);
+    private final CANSparkMax rightFollowerMotor;
+    private final CANSparkMax leftFollowerMotor;
+    private final CANEncoder leftEncoder;
+    private final CANEncoder rightEncoder;
     
     // Having a speed multiplier allows for easy adjustment of top speeds
     private double speedMultiplier = 1.0;
@@ -45,11 +46,12 @@ public class DriveTrain extends SubsystemBase {
      * Sets the left and right side motors of the drivetrain. 
      * The input values are first multiplied by the speed multiplier (see {@link #setSpeedMultiplier(double)}), 
      * and then constrained to [-1, 1].
-     * @param left The left side motors percent output
+     * @param left The left side motors percent output (inverted)
      * @param right The right side motors percent output
      */
     public void setMotors(double left, double right){
-        setLeftMotor(-left);
+        // Inverted in constructor
+        setLeftMotor(left);
         setRightMotor(right);
     }
 
@@ -66,8 +68,8 @@ public class DriveTrain extends SubsystemBase {
 	 * Reset the left and right encoders
 	*/
 	public void resetEncoders() {
-		leftEncoder.reset();
-		rightEncoder.reset();
+		leftEncoder.setPosition(0.0);
+		rightEncoder.setPosition(0.0);
 	}
 
 	/**
@@ -76,7 +78,7 @@ public class DriveTrain extends SubsystemBase {
 	 * @return The distance travelled by the left encoder
 	 */
 	public double getLeftDistance() {
-		return leftEncoder.getDistance();
+		return leftEncoder.getPosition();
 	}
 
 	/**
@@ -85,7 +87,7 @@ public class DriveTrain extends SubsystemBase {
 	 * @return The distance travelled by the right encoder
 	 */
 	public double getRightDistance() {
-		return rightEncoder.getDistance();
+		return rightEncoder.getPosition();
 	}
 
 	/**
@@ -94,7 +96,7 @@ public class DriveTrain extends SubsystemBase {
 	 * @return The speed of the left encoder
 	 */
 	public double getLeftSpeed() {
-		return leftEncoder.getRate();
+		return leftEncoder.getVelocity();
 	}
 
 	/**
@@ -103,7 +105,7 @@ public class DriveTrain extends SubsystemBase {
 	 * @return The speed of the right encoder
 	 */
 	public double getRightSpeed() {
-		return rightEncoder.getRate();
+		return rightEncoder.getVelocity();
 	}
 
 	/**
@@ -120,8 +122,8 @@ public class DriveTrain extends SubsystemBase {
      */
 	public double[] getAccelerations() {
     	double dt = Timer.getFPGATimestamp() - lastTime;
-    	double leftRate = leftEncoder.getRate();
-    	double rightRate = rightEncoder.getRate();
+    	double leftRate = leftEncoder.getVelocity();
+    	double rightRate = rightEncoder.getVelocity();
     	double leftAccel = (leftRate - leftLastRate) / dt;
     	double rightAccel = (rightRate - rightLastRate) / dt;
     	leftLastRate = leftRate;
@@ -130,6 +132,7 @@ public class DriveTrain extends SubsystemBase {
     	return new double[] { leftAccel, rightAccel };
 	}
     
+
     IdleMode idleMode;
     /**
      * Sets the IDLEmode (brake or coast) of all the drivetrain motors.
@@ -151,11 +154,25 @@ public class DriveTrain extends SubsystemBase {
      * Creates a new DriveTrain.
      */
     public DriveTrain() {
-        rightMotor = new CANSparkMax(Constants.RIGHT_CANSPARKMAX, MotorType.fromId(Constants.BRUSHLESS_MOTOR_TYPE));
-        leftMotor = new CANSparkMax(Constants.LEFT_CANSPARKMAX, MotorType.fromId(Constants.BRUSHLESS_MOTOR_TYPE));
+        rightMotor = new CANSparkMax(Constants.RIGHT_CANSPARKMAX, MotorType.kBrushless);
+        leftMotor = new CANSparkMax(Constants.LEFT_CANSPARKMAX, MotorType.kBrushless);
+        rightFollowerMotor = new CANSparkMax(Constants.RIGHT_CANSPARKMAX_FOLLOWER, MotorType.kBrushless);
+        leftFollowerMotor = new  CANSparkMax(Constants.LEFT_CANSPARKMAX_FOLLOWER, MotorType.kBrushless);
+        rightEncoder = rightMotor.getEncoder(EncoderType.kHallSensor, Constants.COUNT_PER_REVOLUTION);
+        leftEncoder = leftMotor.getEncoder(EncoderType.kHallSensor, Constants.COUNT_PER_REVOLUTION);
 
+        leftFollowerMotor.follow(leftMotor);
+        rightFollowerMotor.follow(rightMotor);
         leftMotor.stopMotor();
         rightMotor.stopMotor();
+        leftMotor.setInverted(true);
+
+        leftEncoder.setPosition(0.0);
+        rightEncoder.setPosition(0.0);
+        leftEncoder.setPositionConversionFactor(Constants.POSITION_CONVERSION_FACTOR);
+        rightEncoder.setPositionConversionFactor(Constants.POSITION_CONVERSION_FACTOR);
+        leftEncoder.setVelocityConversionFactor(Constants.VELOCITY_CONVERSION_FACTOR);
+        rightEncoder.setVelocityConversionFactor(Constants.VELOCITY_CONVERSION_FACTOR);
 
     }
 
