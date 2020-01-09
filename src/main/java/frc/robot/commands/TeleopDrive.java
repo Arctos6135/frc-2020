@@ -19,7 +19,8 @@ public class TeleopDrive extends CommandBase {
     static boolean reverseDrive = false;
     static boolean precisionDrive = false;
     static double secondsToFull = 0; //Slowest possible ramp time is 10 seconds
- 
+    static  double DEADZONE = 0.15; //0.15 works well
+
     public TeleopDrive(Drivetrain drivetrain) {
         this.drivetrain = drivetrain;
         addRequirements(drivetrain);
@@ -51,10 +52,10 @@ public class TeleopDrive extends CommandBase {
         double x = RobotContainer.driveController.getRawAxis(Constants.DRIVE_LEFT_RIGHT);
         double y = -RobotContainer.driveController.getRawAxis(Constants.DRIVE_FWD_REV);
 
-        if (!(Math.abs(x) > Constants.DEADZONE)) {
+        if (!(Math.abs(x) > DEADZONE)) {
             x = 0;
         }
-        if (!(Math.abs(y) > Constants.DEADZONE)) {
+        if (!(Math.abs(y) > DEADZONE)) {
             y = 0;
         }
         

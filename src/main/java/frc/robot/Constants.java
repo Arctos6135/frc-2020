@@ -25,7 +25,6 @@ public final class Constants {
 	public static final int RIGHT_TALONSRX_FOLLOWER = 4;
 
 	//	Xbox Controls
-	public static final double DEADZONE = 0.15; //0.15 works well
 	public static final int LSTICK_X_AXIS = 0;
 	public static final int LSTICK_Y_AXIS = 1;
 	public static final int RSTICK_X_AXIS = 4;
