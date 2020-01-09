@@ -23,7 +23,7 @@ import frc.robot.subsystems.TalonDriveTrain;
 public class RobotContainer {
 
 	private final TalonDriveTrain talonDriveTrain;
-    public static final XboxController driveController;
+    public static XboxController driveController;
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */

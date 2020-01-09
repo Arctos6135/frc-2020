@@ -28,9 +28,7 @@ public final class Constants {
 	public static final int LSTICK_Y_AXIS = 1;
 	public static final int RSTICK_X_AXIS = 4;
 	public static final int RSTICK_Y_AXIS = 5;
-	public static final int Drive_FWD_REV = LSTICK_Y_AXIS;
-	public static final int Drive_LEFT_RIGHT = RSTICK_X_AXIS;
-	//Ramping
-	
-	
+	public static final int DRIVE_FWD_REV = LSTICK_Y_AXIS;
+	public static final int DRIVE_LEFT_RIGHT = RSTICK_X_AXIS;
+
 }
