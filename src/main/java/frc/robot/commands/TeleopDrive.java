@@ -18,7 +18,9 @@ public class TeleopDrive extends CommandBase {
     //Drive Settings
     static boolean reverseDrive = false;
     static boolean precisionDrive = false;
-
+    static double secondsToFull = 0;
+    //static double motorTimeout = 0.0;
+ 
     public TeleopDrive(Drivetrain drivetrain) {
         this.drivetrain = drivetrain;
         addRequirements(drivetrain);
@@ -42,7 +44,7 @@ public class TeleopDrive extends CommandBase {
 
     @Override
     public void initialize() {
-        
+        drivetrain.setRamping(secondsToFull);    
     }
 
     @Override
@@ -78,6 +80,7 @@ public class TeleopDrive extends CommandBase {
     @Override
     public void end(boolean interrupted) {
         drivetrain.setMotors(0, 0);
+        drivetrain.setRamping(0);
     }
     
     @Override

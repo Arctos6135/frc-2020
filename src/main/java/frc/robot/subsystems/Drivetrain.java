@@ -55,14 +55,19 @@ public class Drivetrain extends SubsystemBase {
         setLeftMotor(left);
         setRightMotor(right);
 	}
-		
+	
     public void setLeftMotor(double output){
 		leftMotor.set(ControlMode.PercentOutput, output);
 	}
 	
 	public void setRightMotor(double output){
 		rightMotor.set(ControlMode.PercentOutput, output);
-	}
+    }
+    
+    public void setRamping(double seconds){
+        leftMotor.configClosedloopRamp(seconds);
+        rightMotor.configClosedloopRamp(seconds);
+    }
     
     // Encoders
 	/** 
