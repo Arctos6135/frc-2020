@@ -65,8 +65,8 @@ public class Drivetrain extends SubsystemBase {
     }
     
     public void setRamping(double seconds){
-        leftMotor.configClosedloopRamp(seconds);
-        rightMotor.configClosedloopRamp(seconds);
+        leftMotor.configOpenloopRamp(seconds);
+        rightMotor.configOpenloopRamp(seconds);
     }
     
     // Encoders

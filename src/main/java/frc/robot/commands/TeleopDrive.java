@@ -18,8 +18,7 @@ public class TeleopDrive extends CommandBase {
     //Drive Settings
     static boolean reverseDrive = false;
     static boolean precisionDrive = false;
-    static double secondsToFull = 0;
-    //static double motorTimeout = 0.0;
+    static double secondsToFull = 0; //Slowest possible ramp time is 10 seconds
  
     public TeleopDrive(Drivetrain drivetrain) {
         this.drivetrain = drivetrain;
