@@ -53,7 +53,7 @@ public class TalonDriveTrain extends SubsystemBase {
         setLeftMotor(-left);
         setRightMotor(right);
 	}
-	
+		
     public void setLeftMotor(double output){
 		leftMotor.set(ControlMode.PercentOutput, Math.max(-1, Math.min(1, output * speedMultiplier)));
 	}

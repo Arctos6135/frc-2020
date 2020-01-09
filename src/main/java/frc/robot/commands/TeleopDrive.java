@@ -15,17 +15,13 @@ import frc.robot.RobotContainer;
 public class TeleopDrive extends CommandBase {
     private final TalonDriveTrain drivetrain;
 
-    static double rampBandLow = 0.07;
-    static double rampBandHigh = 0.03;
-    static boolean rampingOn = true;
-
+    //Drive Settings
     static boolean reverseDrive = false;
     static boolean precisionDrive = false;
 
     public TeleopDrive(TalonDriveTrain drivetrain) {
         this.drivetrain = drivetrain;
         addRequirements(drivetrain);
-        // Use addRequirements() here to declare subsystem dependencies.
     }
 
     public static boolean isReversed() {
@@ -44,13 +40,11 @@ public class TeleopDrive extends CommandBase {
         precisionDrive = !precisionDrive;
     }
 
-    // Called when the command is initially scheduled.
     @Override
     public void initialize() {
         
     }
 
-    // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
         double x = RobotContainer.driveController.getRawAxis(Constants.DRIVE_LEFT_RIGHT);
@@ -62,7 +56,7 @@ public class TeleopDrive extends CommandBase {
         if (!(Math.abs(y) > Constants.DEADZONE)) {
             y = 0;
         }
-
+        
         x = Math.copySign(Math.pow(x, 4), x);
         y = Math.copySign(y * y, y);
 
@@ -81,13 +75,11 @@ public class TeleopDrive extends CommandBase {
         drivetrain.setMotors(l, r);
     }
 
-    // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
         drivetrain.setMotors(0, 0);
     }
     
-    // Returns true when the command should end.
     @Override
     public boolean isFinished() {
         return false;

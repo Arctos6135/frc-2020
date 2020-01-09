@@ -18,17 +18,16 @@ package frc.robot;
  * wherever the constants are needed, to reduce verbosity.
  */
 public final class Constants {
-
+    //Talon Settings
 	public static final int LEFT_TALONSRX = 1;
 	public static final int RIGHT_TALONSRX = 2;
 
 	//Xbox Controls
-	public static final double DEADZONE = 0.15;
+	public static final double DEADZONE = 0.15; //0.15 works well
 	public static final int LSTICK_X_AXIS = 0;
 	public static final int LSTICK_Y_AXIS = 1;
 	public static final int RSTICK_X_AXIS = 4;
 	public static final int RSTICK_Y_AXIS = 5;
 	public static final int DRIVE_FWD_REV = LSTICK_Y_AXIS;
 	public static final int DRIVE_LEFT_RIGHT = RSTICK_X_AXIS;
-
 }
