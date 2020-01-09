@@ -9,17 +9,17 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
-import frc.robot.subsystems.TalonDriveTrain;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.Drivetrain;
 
 public class TeleopDrive extends CommandBase {
-    private final TalonDriveTrain drivetrain;
+    private final Drivetrain drivetrain;
 
     //Drive Settings
     static boolean reverseDrive = false;
     static boolean precisionDrive = false;
 
-    public TeleopDrive(TalonDriveTrain drivetrain) {
+    public TeleopDrive(Drivetrain drivetrain) {
         this.drivetrain = drivetrain;
         addRequirements(drivetrain);
     }

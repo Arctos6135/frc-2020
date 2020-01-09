@@ -11,7 +11,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.subsystems.TalonDriveTrain;
+import frc.robot.subsystems.Drivetrain;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -22,14 +22,14 @@ import frc.robot.subsystems.TalonDriveTrain;
  */
 public class RobotContainer {
 
-	private final TalonDriveTrain talonDriveTrain;
+	private final Drivetrain Drivetrain;
     public static XboxController driveController;
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
 
-		talonDriveTrain = new TalonDriveTrain();
+		Drivetrain = new Drivetrain();
 
         // Configure the button bindings
         configureButtonBindings();

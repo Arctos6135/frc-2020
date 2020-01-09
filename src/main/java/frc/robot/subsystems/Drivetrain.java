@@ -20,14 +20,16 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 
-public class TalonDriveTrain extends SubsystemBase {
+public class Drivetrain extends SubsystemBase {
 
 	double leftLastRate = 0;
 	double rightLastRate = 0;
     double lastTime;
 
-    private final TalonSRX leftMotor;
-    private final TalonSRX rightMotor;
+	private final TalonSRX leftMotor;
+	private final TalonSRX leftMotorFollower;
+	private final TalonSRX rightMotor;
+	private final TalonSRX rightMotorFollower;
     private final Encoder leftEncoder = new Encoder(0, 1, true, EncodingType.k4X);
     private final Encoder rightEncoder = new Encoder(2, 3, true, EncodingType.k4X);
     
@@ -44,22 +46,22 @@ public class TalonDriveTrain extends SubsystemBase {
 
     /**
      * Sets the left and right side motors of the drivetrain. 
-     * The input values are first multiplied by the speed multiplier (see {@link #setSpeedMultiplier(double)}), 
-     * and then constrained to [-1, 1].
-     * @param left The left side motors percent output
+     * The input values are first multiplied by the speed multiplier (see {@link #setSpeedMultiplier(double)}); 
+     * values are automatically constrained to [-1, 1].
+     * @param left The left side motors percent output (inverted in constructor)
      * @param right The right side motors percent output
      */
     public void setMotors(double left, double right){
-        setLeftMotor(-left);
+        setLeftMotor(left);
         setRightMotor(right);
 	}
 		
     public void setLeftMotor(double output){
-		leftMotor.set(ControlMode.PercentOutput, Math.max(-1, Math.min(1, output * speedMultiplier)));
+		leftMotor.set(ControlMode.PercentOutput, output);
 	}
 	
 	public void setRightMotor(double output){
-		rightMotor.set(ControlMode.PercentOutput, Math.max(-1, Math.min(1, output * speedMultiplier)));
+		rightMotor.set(ControlMode.PercentOutput, output);
 	}
     
     // Encoders
@@ -152,9 +154,16 @@ public class TalonDriveTrain extends SubsystemBase {
     /**
      * Creates a new DriveTrain.
      */
-    public TalonDriveTrain() {
+    public Drivetrain() {
 		leftMotor = new TalonSRX(Constants.LEFT_TALONSRX);
-		rightMotor = new TalonSRX(Constants.LEFT_TALONSRX);
+		leftMotorFollower = new TalonSRX(Constants.LEFT_TALONSRX_FOLLOWER);
+		rightMotor = new TalonSRX(Constants.RIGHT_TALONSRX);
+		rightMotorFollower = new TalonSRX(Constants.RIGHT_TALONSRX_FOLLOWER);
+		
+		leftMotorFollower.follow(leftMotor);
+		rightMotorFollower.follow(rightMotor);
+		
+		leftMotor.setInverted(true);
     }
 
     @Override
