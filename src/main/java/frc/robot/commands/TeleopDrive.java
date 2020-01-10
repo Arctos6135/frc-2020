@@ -61,8 +61,8 @@ public class TeleopDrive extends CommandBase {
 			y = 0;
 		}
 
-		x = Math.copySign(Math.pow(x, 4), x);
-		y = Math.copySign(Math.pow(y, 2), y);
+		x = Math.copySign(x * x, x);
+		y = Math.copySign(y * y, y);
 
 		if (reverseDrive) {
 			y = -y;

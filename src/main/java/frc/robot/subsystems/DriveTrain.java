@@ -43,7 +43,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
-     * Sets the left and right side motors of the driveTrain. 
+     * Sets the left and right side motors of the drivetrain. 
      * The input values are first multiplied by the speed multiplier (see {@link #setSpeedMultiplier(double)}), 
      * and then constrained to [-1, 1].
      * @param left The left side motors percent output (inverted)
@@ -135,7 +135,7 @@ public class Drivetrain extends SubsystemBase {
 
     IdleMode idleMode;
     /**
-     * Sets the IDLEmode (brake or coast) of all the driveTrain motors.
+     * Sets the IDLEmode (brake or coast) of all the drivetrain motors.
      */
     public void setMotorMode (IdleMode mode){
         idleMode = mode;
@@ -144,14 +144,14 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
-     * Gets the neutral mode of all the driveTrain motors.
+     * Gets the neutral mode of all the drivetrain motors.
      */
     public IdleMode getIdleMode() {
         return idleMode;
     }
 
     /**
-     * Creates a new Drivetrain.
+     * Creates a new drivetrain.
      */
     public Drivetrain() {
         rightMotor = new CANSparkMax(Constants.RIGHT_CANSPARKMAX, MotorType.kBrushless);
