@@ -10,18 +10,18 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.DriveTrain;
 
 public class TeleopDrive extends CommandBase {
 
-	private final Drivetrain drivetrain;
+	private final DriveTrain driveTrain;
 
 	static boolean reverseDrive = false;
     static boolean precisionDrive = false; 
 
-	public TeleopDrive(Drivetrain drivetrain) {
-		this.drivetrain = drivetrain;
-		addRequirements(drivetrain);
+	public TeleopDrive(DriveTrain driveTrain) {
+		this.driveTrain = driveTrain;
+		addRequirements(driveTrain);
 	}
 
 	public static boolean isReversed() {
@@ -76,12 +76,12 @@ public class TeleopDrive extends CommandBase {
 			r = r / 2;
 		}
 
-		drivetrain.setMotors(l, r);
+		driveTrain.setMotors(l, r);
 	}
 
 	@Override
 	public void end(boolean interrupted) {
-		drivetrain.setMotors(0, 0);
+		driveTrain.setMotors(0, 0);
 	}
 
 	@Override

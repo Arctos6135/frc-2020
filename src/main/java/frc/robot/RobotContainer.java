@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 
-import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.DriveTrain;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -23,7 +23,7 @@ import frc.robot.subsystems.Drivetrain;
  */
 public class RobotContainer {
 
-	private final Drivetrain drivetrain;
+	private final DriveTrain drivetrain;
 	public static XboxController driverController;
 
     /**
@@ -31,7 +31,7 @@ public class RobotContainer {
      */
     public RobotContainer() {
 
-		drivetrain = new Drivetrain();
+		drivetrain = new DriveTrain();
 		
         // Configure the button bindings
         configureButtonBindings();

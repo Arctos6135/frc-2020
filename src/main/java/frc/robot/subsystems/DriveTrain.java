@@ -7,6 +7,7 @@
 
 package frc.robot.subsystems;
 
+
 import frc.robot.Constants;
 
 import com.revrobotics.CANEncoder;
@@ -19,7 +20,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
-public class Drivetrain extends SubsystemBase {
+public class DriveTrain extends SubsystemBase {
     
     double leftLastRate = 0, rightLastRate = 0;
     double lastTime;
@@ -152,7 +153,7 @@ public class Drivetrain extends SubsystemBase {
     /**
      * Creates a new drivetrain.
      */
-    public Drivetrain() {
+    public DriveTrain() {
         rightMotor = new CANSparkMax(Constants.RIGHT_CANSPARKMAX, MotorType.kBrushless);
         leftMotor = new CANSparkMax(Constants.LEFT_CANSPARKMAX, MotorType.kBrushless);
         rightFollowerMotor = new CANSparkMax(Constants.RIGHT_CANSPARKMAX_FOLLOWER, MotorType.kBrushless);
