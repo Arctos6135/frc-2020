@@ -20,10 +20,10 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
-public class DriveTrain extends SubsystemBase {
+public class Drivetrain extends SubsystemBase {
     
-    double leftLastRate = 0, rightLastRate = 0;
-    double lastTime;
+    private double leftLastRate = 0, rightLastRate = 0;
+    private double lastTime;
 
     private final CANSparkMax rightMotor;
     private final CANSparkMax leftMotor;
@@ -56,11 +56,11 @@ public class DriveTrain extends SubsystemBase {
     }
 
     public void setLeftMotor(double output){
-        leftMotor.set(Math.max(-1, Math.min(1, output * speedMultiplier)));
+        leftMotor.set(output * speedMultiplier);
     }
 
     public void setRightMotor(double output){
-        rightMotor.set(Math.max(-1, Math.min(1, output * speedMultiplier)));
+        rightMotor.set(output * speedMultiplier);
     }
     
     // Encoders
@@ -153,7 +153,7 @@ public class DriveTrain extends SubsystemBase {
     /**
      * Creates a new drivetrain.
      */
-    public DriveTrain() {
+    public Drivetrain() {
         rightMotor = new CANSparkMax(Constants.RIGHT_CANSPARKMAX, MotorType.kBrushless);
         leftMotor = new CANSparkMax(Constants.LEFT_CANSPARKMAX, MotorType.kBrushless);
         rightFollowerMotor = new CANSparkMax(Constants.RIGHT_CANSPARKMAX_FOLLOWER, MotorType.kBrushless);
@@ -166,6 +166,7 @@ public class DriveTrain extends SubsystemBase {
         leftMotor.stopMotor();
         rightMotor.stopMotor();
         leftMotor.setInverted(true);
+		leftFollowerMotor.setInverted(true);
 
         leftEncoder.setPosition(0.0);
         rightEncoder.setPosition(0.0);

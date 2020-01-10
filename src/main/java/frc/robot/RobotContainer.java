@@ -11,8 +11,8 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-
-import frc.robot.subsystems.DriveTrain;
+import frc.robot.commands.TeleopDrive;
+import frc.robot.subsystems.Drivetrain;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -23,7 +23,7 @@ import frc.robot.subsystems.DriveTrain;
  */
 public class RobotContainer {
 
-	private final DriveTrain drivetrain;
+	private final Drivetrain drivetrain;
 	public static XboxController driverController;
 
     /**
@@ -31,7 +31,8 @@ public class RobotContainer {
      */
     public RobotContainer() {
 
-		drivetrain = new DriveTrain();
+        drivetrain = new Drivetrain();
+        drivetrain.setDefaultCommand(new TeleopDrive(drivetrain));
 		
         // Configure the button bindings
         configureButtonBindings();
