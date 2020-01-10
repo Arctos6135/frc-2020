@@ -19,18 +19,28 @@ package frc.robot;
  */
 public final class Constants {
 
-    // These are random values (will change after robot is build and wired up)
+    // SPARK MAX motors; placeholder port values
     
     public static final int RIGHT_CANSPARKMAX = 1;
     public static final int LEFT_CANSPARKMAX = 2;
     public static final int RIGHT_CANSPARKMAX_FOLLOWER = 3;
     public static final int LEFT_CANSPARKMAX_FOLLOWER = 4;
     
-    // Encoder constants
-	public static final int WHEEL_DIAMETER = 6; //INCHES
+    // SPARK MAX encoder constants
+	public static final int WHEEL_DIAMETER = 6; // in inches
 	public static final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
     public static final double POSITION_CONVERSION_FACTOR = WHEEL_CIRCUMFERENCE;
     public static final double VELOCITY_CONVERSION_FACTOR = WHEEL_CIRCUMFERENCE;
     public static final int COUNT_PER_REVOLUTION = 42;
 
+
+	// Xbox Controller constants
+	public static final int XBOX_CONTROLLER = 0; // placeholder controller port
+	public static final int LSTICK_X_AXIS = 0;
+	public static final int LSTICK_Y_AXIS = 1;
+	public static final int RSTICK_X_AXIS = 4;
+	public static final int RSTICK_Y_AXIS = 5;
+	public static final int DRIVE_FWD_REV = LSTICK_Y_AXIS;
+	public static final int DRIVE_LEFT_RIGHT = RSTICK_X_AXIS;
+	public static final double DEADZONE = 0.15;
 }

@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
-public class DriveTrain extends SubsystemBase {
+public class Drivetrain extends SubsystemBase {
     
     double leftLastRate = 0, rightLastRate = 0;
     double lastTime;
@@ -43,7 +43,7 @@ public class DriveTrain extends SubsystemBase {
     }
 
     /**
-     * Sets the left and right side motors of the drivetrain. 
+     * Sets the left and right side motors of the driveTrain. 
      * The input values are first multiplied by the speed multiplier (see {@link #setSpeedMultiplier(double)}), 
      * and then constrained to [-1, 1].
      * @param left The left side motors percent output (inverted)
@@ -135,7 +135,7 @@ public class DriveTrain extends SubsystemBase {
 
     IdleMode idleMode;
     /**
-     * Sets the IDLEmode (brake or coast) of all the drivetrain motors.
+     * Sets the IDLEmode (brake or coast) of all the driveTrain motors.
      */
     public void setMotorMode (IdleMode mode){
         idleMode = mode;
@@ -144,16 +144,16 @@ public class DriveTrain extends SubsystemBase {
     }
 
     /**
-     * Gets the neutral mode of all the drivetrain motors.
+     * Gets the neutral mode of all the driveTrain motors.
      */
     public IdleMode getIdleMode() {
         return idleMode;
     }
 
     /**
-     * Creates a new DriveTrain.
+     * Creates a new Drivetrain.
      */
-    public DriveTrain() {
+    public Drivetrain() {
         rightMotor = new CANSparkMax(Constants.RIGHT_CANSPARKMAX, MotorType.kBrushless);
         leftMotor = new CANSparkMax(Constants.LEFT_CANSPARKMAX, MotorType.kBrushless);
         rightFollowerMotor = new CANSparkMax(Constants.RIGHT_CANSPARKMAX_FOLLOWER, MotorType.kBrushless);
