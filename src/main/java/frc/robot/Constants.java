@@ -38,11 +38,10 @@ public final class Constants {
 
 	// Xbox Controller constants
 	public static final int XBOX_CONTROLLER = 0; // placeholder controller port
-	public static final int LSTICK_X_AXIS = XboxControllerButtons.LSTICK_X_AXIS;
-	public static final int LSTICK_Y_AXIS = XboxControllerButtons.LSTICK_Y_AXIS;
-	public static final int RSTICK_X_AXIS = XboxControllerButtons.RSTICK_X_AXIS;
-	public static final int RSTICK_Y_AXIS = XboxControllerButtons.RSTICK_Y_AXIS;
+	public static final int LSTICK_X_AXIS = 0;
+	public static final int LSTICK_Y_AXIS = 1;
+	public static final int RSTICK_X_AXIS = 4;
+	public static final int RSTICK_Y_AXIS = 5;
 	public static final int DRIVE_FWD_REV = LSTICK_Y_AXIS;
 	public static final int DRIVE_LEFT_RIGHT = RSTICK_X_AXIS;
-	public static final double DEADZONE = 0.15;
 }

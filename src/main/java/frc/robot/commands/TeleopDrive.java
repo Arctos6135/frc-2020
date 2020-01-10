@@ -13,9 +13,9 @@ import frc.robot.RobotContainer;
 import frc.robot.subsystems.Drivetrain;
 
 public class TeleopDrive extends CommandBase {
-
-	private final Drivetrain driveTrain;
-
+    private final Drivetrain driveTrain;
+    
+    static double DEADZONE = 0.15;
 	static boolean reverseDrive = false;
     static boolean precisionDrive = false; 
 
@@ -54,10 +54,10 @@ public class TeleopDrive extends CommandBase {
 		double x = RobotContainer.driverController.getRawAxis(Constants.DRIVE_LEFT_RIGHT);
 		double y = -RobotContainer.driverController.getRawAxis(Constants.DRIVE_FWD_REV);
 
-		if (!(Math.abs(x) > Constants.DEADZONE)) {
+		if (!(Math.abs(x) > DEADZONE)) {
 			x = 0;
 		}
-		if (!(Math.abs(y) > Constants.DEADZONE)) {
+		if (!(Math.abs(y) > DEADZONE)) {
 			y = 0;
 		}
 
