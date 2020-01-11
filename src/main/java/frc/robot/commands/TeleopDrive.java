@@ -18,6 +18,7 @@ public class TeleopDrive extends CommandBase {
     static double DEADZONE = 0.15;
 	static boolean reverseDrive = false;
     static boolean precisionDrive = false; 
+    static double rampingRate = 5; //Time in seconds to go from 0 to full throttle.
 
 	public TeleopDrive(Drivetrain driveTrain) {
 		this.driveTrain = driveTrain;
@@ -47,6 +48,7 @@ public class TeleopDrive extends CommandBase {
 
 	@Override
     public void initialize() {
+        driveTrain.setRamping(rampingRate);
 	}
 	
 	@Override
@@ -81,6 +83,7 @@ public class TeleopDrive extends CommandBase {
 
 	@Override
 	public void end(boolean interrupted) {
+        driveTrain.setRamping(0);
 		driveTrain.setMotors(0, 0);
 	}
 

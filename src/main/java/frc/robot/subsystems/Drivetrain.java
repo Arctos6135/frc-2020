@@ -63,6 +63,10 @@ public class Drivetrain extends SubsystemBase {
         rightMotor.set(output * speedMultiplier);
     }
     
+    public void setRamping(double rate){
+        leftMotor.setOpenLoopRampRate(rate);
+        rightMotor.setOpenLoopRampRate(rate);
+    }
     // Encoders
 	/** 
 	 * Reset the left and right encoders
