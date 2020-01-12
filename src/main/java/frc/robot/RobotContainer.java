@@ -7,8 +7,14 @@
 
 package frc.robot;
 
+import java.util.Map;
+
+import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.TeleopDrive;
@@ -23,8 +29,8 @@ import frc.robot.subsystems.Drivetrain;
  */
 public class RobotContainer {
 
-	private final Drivetrain drivetrain;
-	public static XboxController driverController;
+    private final Drivetrain drivetrain;
+    public static XboxController driverController;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -33,9 +39,25 @@ public class RobotContainer {
 
         drivetrain = new Drivetrain();
         drivetrain.setDefaultCommand(new TeleopDrive(drivetrain));
-		
+
         // Configure the button bindings
         configureButtonBindings();
+
+        // Put the precision factor on the dashboard and make it configurable
+        ShuffleboardTab configTab = Shuffleboard.getTab("Config");
+        configTab.add("Precision Drive Factor", TeleopDrive.getPrecisionFactor())
+                // Use a number slider from 0-1
+                .withWidget(BuiltInWidgets.kNumberSlider).withProperties(Map.of("min", 0.0, "max", 1.0)).getEntry()
+                // Add a listener to update the value in code once the entry updates
+                .addListener(notif -> {
+                    TeleopDrive.setPrecisionFactor(notif.value.getDouble());
+                }, EntryListenerFlags.kUpdate);
+        // Do the same with the ramping rate
+        configTab.add("Ramping Rate", TeleopDrive.getRampingRate())
+                .withWidget(BuiltInWidgets.kNumberSlider).withProperties(Map.of("min", 0.0, "max", 3.0)).getEntry()
+                .addListener(notif -> {
+                    TeleopDrive.setRampingRate(notif.value.getDouble());
+                }, EntryListenerFlags.kUpdate);
     }
 
     /**
@@ -46,8 +68,8 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
 
-		driverController = new XboxController(Constants.XBOX_CONTROLLER);
-		
+        driverController = new XboxController(Constants.XBOX_CONTROLLER);
+
     }
 
     /**

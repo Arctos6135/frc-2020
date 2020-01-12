@@ -104,6 +104,34 @@ public class TeleopDrive extends CommandBase {
 		return precisionFactor;
 	}
 
+	/**
+	 * Set the ramping rate.
+	 * 
+	 * <p>
+	 * This is the number of seconds it takes to go from neutral to full throttle.
+	 * Note that this doesn't immediately configure the ramping rate! The command
+	 * has to be restart for it to take effect.
+	 * </p>
+	 * 
+	 * @param rampingRate The ramping rate to set
+	 */
+	public static void setRampingRate(double rampingRate) {
+		TeleopDrive.rampingRate = rampingRate;
+	}
+
+	/**
+	 * Get the ramping rate.
+	 * 
+	 * <p>
+	 * This is the number of seconds it takes to go from neutral to full throttle.
+	 * </p>
+	 * 
+	 * @return The ramping rate
+	 */
+	public static double getRampingRate() {
+		return rampingRate;
+	}
+
 	@Override
 	public void initialize() {
 		driveTrain.setRamping(rampingRate);
