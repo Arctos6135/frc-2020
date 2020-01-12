@@ -22,7 +22,6 @@ import com.arctos6135.robotlib.oi.XboxControllerButtons;
 public final class Constants {
 
     // SPARK MAX motors; placeholder port values
-    
     public static final int RIGHT_CANSPARKMAX = 1;
     public static final int LEFT_CANSPARKMAX = 2;
     public static final int RIGHT_CANSPARKMAX_FOLLOWER = 3;

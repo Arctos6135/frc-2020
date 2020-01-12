@@ -15,10 +15,16 @@ import frc.robot.subsystems.Drivetrain;
 public class TeleopDrive extends CommandBase {
     private final Drivetrain driveTrain;
     
+    //Controller related
     static double DEADZONE = 0.15;
-	static boolean reverseDrive = false;
-    static boolean precisionDrive = false; 
-    static double rampingRate = 5; //Time in seconds to go from 0 to full throttle.
+    
+    //Steering or movement related
+    static boolean reverseDrive = false;
+    static boolean precisionDrive = false;  
+    static double precisionFactor = 0.5; //Percentage of default steering input when driving with precisionDrive
+    
+    //Ramping related
+    static double rampingRate = 1; //Time in seconds to go from 0 to full throttle.
 
 	public TeleopDrive(Drivetrain driveTrain) {
 		this.driveTrain = driveTrain;
@@ -74,8 +80,8 @@ public class TeleopDrive extends CommandBase {
 		double r = y - x;
 
 		if (precisionDrive) {
-			l = l / 2;
-			r = r / 2;
+			l = l * precisionFactor;
+			r = r * precisionFactor;
 		}
 
 		driveTrain.setMotors(l, r);
