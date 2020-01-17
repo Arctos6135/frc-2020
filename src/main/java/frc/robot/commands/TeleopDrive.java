@@ -7,28 +7,33 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants;
-import frc.robot.RobotContainer;
 import frc.robot.subsystems.Drivetrain;
 
 public class TeleopDrive extends CommandBase {
-	private final Drivetrain driveTrain;
+	private final Drivetrain drivetrain;
+	private final GenericHID controller;
+	private final int X_AXIS;
+	private final int Y_AXIS;
 
 	// Controller related
-	static double DEADZONE = 0.15;
+	private static final double DEADZONE = 0.15;
 
 	// Steering or movement related
-	static boolean reverseDrive = false;
-	static boolean precisionDrive = false;
-	static double precisionFactor = 0.5; // Percentage of default steering input when driving with precisionDrive
+	private static boolean reverseDrive = false;
+	private static boolean precisionDrive = false;
+	private static double precisionFactor = 0.5; // Percentage of default steering input when driving with precisionDrive
 
 	// Ramping related
-	static double rampingRate = 1; // Time in seconds to go from 0 to full throttle.
+	private static double rampingRate = 1; // Time in seconds to go from 0 to full throttle.
 
-	public TeleopDrive(Drivetrain driveTrain) {
-		this.driveTrain = driveTrain;
-		addRequirements(driveTrain);
+	public TeleopDrive(Drivetrain drivetrain, GenericHID controller, int fwdRevAxis, int leftRightAxis) {
+		this.drivetrain = drivetrain;
+		this.controller = controller;
+		this.X_AXIS = fwdRevAxis;
+		this.Y_AXIS = leftRightAxis;
+		addRequirements(drivetrain);
 	}
 
 	/**
@@ -134,13 +139,13 @@ public class TeleopDrive extends CommandBase {
 
 	@Override
 	public void initialize() {
-		driveTrain.setRamping(rampingRate);
+		drivetrain.setRamping(rampingRate);
 	}
 
 	@Override
 	public void execute() {
-		double x = RobotContainer.driverController.getRawAxis(Constants.DRIVE_LEFT_RIGHT);
-		double y = -RobotContainer.driverController.getRawAxis(Constants.DRIVE_FWD_REV);
+		double x = controller.getRawAxis(X_AXIS);
+		double y = -controller.getRawAxis(Y_AXIS);
 
 		if (!(Math.abs(x) > DEADZONE)) {
 			x = 0;
@@ -164,13 +169,13 @@ public class TeleopDrive extends CommandBase {
 			r = r * precisionFactor;
 		}
 
-		driveTrain.setMotors(l, r);
+		drivetrain.setMotors(l, r);
 	}
 
 	@Override
 	public void end(boolean interrupted) {
-		driveTrain.setRamping(0);
-		driveTrain.setMotors(0, 0);
+		drivetrain.setRamping(0);
+		drivetrain.setMotors(0, 0);
 	}
 
 	@Override

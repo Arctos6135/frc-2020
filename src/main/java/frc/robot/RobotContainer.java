@@ -30,15 +30,18 @@ import frc.robot.subsystems.Drivetrain;
 public class RobotContainer {
 
     private final Drivetrain drivetrain;
-    public static XboxController driverController;
+
+    private static XboxController driverController;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
 
-        drivetrain = new Drivetrain();
-        drivetrain.setDefaultCommand(new TeleopDrive(drivetrain));
+        drivetrain = new Drivetrain(Constants.LEFT_CANSPARKMAX, Constants.LEFT_CANSPARKMAX_FOLLOWER,
+                Constants.RIGHT_CANSPARKMAX, Constants.RIGHT_CANSPARKMAX_FOLLOWER);
+        drivetrain.setDefaultCommand(
+                new TeleopDrive(drivetrain, driverController, Constants.DRIVE_FWD_REV, Constants.DRIVE_LEFT_RIGHT));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -53,9 +56,8 @@ public class RobotContainer {
                     TeleopDrive.setPrecisionFactor(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
         // Do the same with the ramping rate
-        configTab.add("Ramping Rate", TeleopDrive.getRampingRate())
-                .withWidget(BuiltInWidgets.kNumberSlider).withProperties(Map.of("min", 0.0, "max", 3.0)).getEntry()
-                .addListener(notif -> {
+        configTab.add("Ramping Rate", TeleopDrive.getRampingRate()).withWidget(BuiltInWidgets.kNumberSlider)
+                .withProperties(Map.of("min", 0.0, "max", 3.0)).getEntry().addListener(notif -> {
                     TeleopDrive.setRampingRate(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
     }
