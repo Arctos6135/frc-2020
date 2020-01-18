@@ -31,8 +31,8 @@ public class TeleopDrive extends CommandBase {
 	public TeleopDrive(Drivetrain drivetrain, GenericHID controller, int fwdRevAxis, int leftRightAxis) {
 		this.drivetrain = drivetrain;
 		this.controller = controller;
-		this.X_AXIS = fwdRevAxis;
-		this.Y_AXIS = leftRightAxis;
+		this.Y_AXIS = fwdRevAxis;
+		this.X_AXIS = leftRightAxis;
 		addRequirements(drivetrain);
 	}
 
