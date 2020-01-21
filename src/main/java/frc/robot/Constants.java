@@ -42,5 +42,6 @@ public final class Constants {
 	// Xbox Controller constants
 	public static final int XBOX_CONTROLLER = 0;
 	public static final int DRIVE_FWD_REV = XboxControllerButtons.LSTICK_Y_AXIS;
-	public static final int DRIVE_LEFT_RIGHT = XboxControllerButtons.RSTICK_X_AXIS;
+    public static final int DRIVE_LEFT_RIGHT = XboxControllerButtons.RSTICK_X_AXIS;
+    public static final int REVERSE_DRIVE_DIRECTION = XboxControllerButtons.BUTTON_LSTICK;
 }

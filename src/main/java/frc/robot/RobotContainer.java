@@ -10,6 +10,7 @@ package frc.robot;
 import java.util.Map;
 
 import edu.wpi.first.networktables.EntryListenerFlags;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -17,6 +18,8 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.Button;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.subsystems.Drivetrain;
 
@@ -33,6 +36,11 @@ public class RobotContainer {
 
     private static XboxController driverController;
 
+    private static ShuffleboardTab configTab;
+    private static ShuffleboardTab driveTab;
+
+    private static NetworkTableEntry driveReversedEntry;
+
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
@@ -47,8 +55,9 @@ public class RobotContainer {
         // Configure the button bindings
         configureButtonBindings();
 
+        configTab = Shuffleboard.getTab("Config");
+        driveTab = Shuffleboard.getTab("Drive");
         // Put the precision factor on the dashboard and make it configurable
-        ShuffleboardTab configTab = Shuffleboard.getTab("Config");
         configTab.add("Precision Drive Factor", TeleopDrive.getPrecisionFactor())
                 // Use a number slider from 0-1
                 .withWidget(BuiltInWidgets.kNumberSlider).withProperties(Map.of("min", 0.0, "max", 1.0)).getEntry()
@@ -61,6 +70,8 @@ public class RobotContainer {
                 .withProperties(Map.of("min", 0.0, "max", 3.0)).getEntry().addListener(notif -> {
                     TeleopDrive.setRampingRate(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
+        driveReversedEntry = driveTab.add("Reversed", TeleopDrive.isReversed()).withWidget(BuiltInWidgets.kBooleanBox)
+                .getEntry();
     }
 
     /**
@@ -70,7 +81,11 @@ public class RobotContainer {
      * passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
-
+        Button reverseDriveButton = new JoystickButton(driverController, Constants.REVERSE_DRIVE_DIRECTION);
+        reverseDriveButton.whenPressed(new InstantCommand(() -> {
+            TeleopDrive.toggleReverseDrive();
+            driveReversedEntry.setBoolean(TeleopDrive.isReversed());
+        }));
     }
 
     /**
