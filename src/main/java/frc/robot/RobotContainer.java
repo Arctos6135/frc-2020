@@ -7,10 +7,21 @@
 
 package frc.robot;
 
+import java.util.Map;
+
+import edu.wpi.first.networktables.EntryListenerFlags;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.Button;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.TeleopDrive;
+import frc.robot.subsystems.Drivetrain;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -21,12 +32,46 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
  */
 public class RobotContainer {
 
+    private final Drivetrain drivetrain;
+
+    private static XboxController driverController;
+
+    private static ShuffleboardTab configTab;
+    private static ShuffleboardTab driveTab;
+
+    private static NetworkTableEntry driveReversedEntry;
+
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
+        driverController = new XboxController(Constants.XBOX_CONTROLLER);
+
+        drivetrain = new Drivetrain(Constants.LEFT_CANSPARKMAX, Constants.LEFT_CANSPARKMAX_FOLLOWER,
+                Constants.RIGHT_CANSPARKMAX, Constants.RIGHT_CANSPARKMAX_FOLLOWER);
+        drivetrain.setDefaultCommand(
+                new TeleopDrive(drivetrain, driverController, Constants.DRIVE_FWD_REV, Constants.DRIVE_LEFT_RIGHT));
+
         // Configure the button bindings
         configureButtonBindings();
+
+        configTab = Shuffleboard.getTab("Config");
+        driveTab = Shuffleboard.getTab("Drive");
+        // Put the precision factor on the dashboard and make it configurable
+        configTab.add("Precision Drive Factor", TeleopDrive.getPrecisionFactor())
+                // Use a number slider from 0-1
+                .withWidget(BuiltInWidgets.kNumberSlider).withProperties(Map.of("min", 0.0, "max", 1.0)).getEntry()
+                // Add a listener to update the value in code once the entry updates
+                .addListener(notif -> {
+                    TeleopDrive.setPrecisionFactor(notif.value.getDouble());
+                }, EntryListenerFlags.kUpdate);
+        // Do the same with the ramping rate
+        configTab.add("Ramping Rate", TeleopDrive.getRampingRate()).withWidget(BuiltInWidgets.kNumberSlider)
+                .withProperties(Map.of("min", 0.0, "max", 3.0)).getEntry().addListener(notif -> {
+                    TeleopDrive.setRampingRate(notif.value.getDouble());
+                }, EntryListenerFlags.kUpdate);
+        driveReversedEntry = driveTab.add("Reversed", TeleopDrive.isReversed()).withWidget(BuiltInWidgets.kBooleanBox)
+                .getEntry();
     }
 
     /**
@@ -36,6 +81,11 @@ public class RobotContainer {
      * passing it to a {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
      */
     private void configureButtonBindings() {
+        Button reverseDriveButton = new JoystickButton(driverController, Constants.REVERSE_DRIVE_DIRECTION);
+        reverseDriveButton.whenPressed(new InstantCommand(() -> {
+            TeleopDrive.toggleReverseDrive();
+            driveReversedEntry.setBoolean(TeleopDrive.isReversed());
+        }));
     }
 
     /**
