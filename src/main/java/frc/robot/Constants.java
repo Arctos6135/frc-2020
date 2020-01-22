@@ -9,6 +9,9 @@ package frc.robot;
 
 import com.arctos6135.robotlib.oi.XboxControllerButtons;
 
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.XboxController.Axis;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
  * numerical or boolean constants. This class should not be used for any other
@@ -39,9 +42,9 @@ public final class Constants {
     public static final int COUNTS_PER_REVOLUTION = 42;
 
 
-	// Xbox Controller constants
-	public static final int XBOX_CONTROLLER = 0;
-	public static final int DRIVE_FWD_REV = XboxControllerButtons.LSTICK_Y_AXIS;
-    public static final int DRIVE_LEFT_RIGHT = XboxControllerButtons.RSTICK_X_AXIS;
+    // Xbox Controller constants
+	public static final int XBOX_CONTROLLER = 0; 
+	public static final int DRIVE_FWD_REV = XboxController.Axis.kLeftY.value;
+    public static final int DRIVE_LEFT_RIGHT = XboxController.Axis.kRightX.value;
     public static final int REVERSE_DRIVE_DIRECTION = XboxControllerButtons.BUTTON_LSTICK;
 }
