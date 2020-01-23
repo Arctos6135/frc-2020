@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.Limelight;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -33,6 +34,7 @@ import frc.robot.subsystems.Drivetrain;
 public class RobotContainer {
 
     private final Drivetrain drivetrain;
+    public final Limelight limelight;
 
     private static XboxController driverController;
 
@@ -49,6 +51,8 @@ public class RobotContainer {
 
         drivetrain = new Drivetrain(Constants.LEFT_CANSPARKMAX, Constants.LEFT_CANSPARKMAX_FOLLOWER,
                 Constants.RIGHT_CANSPARKMAX, Constants.RIGHT_CANSPARKMAX_FOLLOWER);
+        limelight = new Limelight();
+
         drivetrain.setDefaultCommand(
                 new TeleopDrive(drivetrain, driverController, Constants.DRIVE_FWD_REV, Constants.DRIVE_LEFT_RIGHT));
 

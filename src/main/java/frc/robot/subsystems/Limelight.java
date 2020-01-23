@@ -12,6 +12,9 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/**
+ * A Limelight smart camera.
+ */
 public class Limelight extends SubsystemBase {
 
     /**
@@ -114,7 +117,7 @@ public class Limelight extends SubsystemBase {
     /**
      * Get the horizontal angle offset from the crosshair to the target.
      * 
-     * @return The horizontal angle offset
+     * @return The horizontal angle offset (in degrees)
      */
     public double getHorizontalAngle() {
         return tx.getDouble(0);
@@ -123,7 +126,7 @@ public class Limelight extends SubsystemBase {
     /**
      * Get the vertical angle offset from the crosshair to the target.
      * 
-     * @return The vertical angle offset
+     * @return The vertical angle offset (in degrees)
      */
     public double getVerticalAngle() {
         return ty.getDouble(0);
@@ -219,7 +222,7 @@ public class Limelight extends SubsystemBase {
     /**
      * Get the 3D rotation of the camera with respect to the target.
      * 
-     * @return The rotation
+     * @return The rotation (in degrees)
      */
     public Rotation3D getRotation() {
         double[] tran = camtran.getDoubleArray(new double[] { 0, 0, 0, 0, 0, 0 });
@@ -281,6 +284,19 @@ public class Limelight extends SubsystemBase {
      */
     public void setSnapshotOn(boolean on) {
         snapshot.setNumber(on ? 1 : 0);
+    }
+
+    /**
+     * Estimates the distance to the target based on its vertical angle.
+     * 
+     * @param camHeight The height of the camera
+     * @param targetHeight The height of the target
+     * @param camAngle The angle of the camera (in degrees)
+     * @return The estimated distance
+     */
+    public double estimateDistance(double camHeight, double targetHeight, double camAngle) {
+        double targetAngle = Math.toRadians(getVerticalAngle());
+        return (targetHeight - camHeight) / Math.tan(Math.toRadians(camAngle) + targetAngle);
     }
 
     /**
