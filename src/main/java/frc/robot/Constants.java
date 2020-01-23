@@ -46,5 +46,5 @@ public final class Constants {
 	public static final int XBOX_CONTROLLER = 0; 
 	public static final int DRIVE_FWD_REV = XboxController.Axis.kLeftY.value;
     public static final int DRIVE_LEFT_RIGHT = XboxController.Axis.kRightX.value;
-    public static final int REVERSE_DRIVE_DIRECTION = XboxControllerButtons.BUTTON_LSTICK;
+    public static final int REVERSE_DRIVE_DIRECTION = XboxController.Button.kStickLeft.value;
 }

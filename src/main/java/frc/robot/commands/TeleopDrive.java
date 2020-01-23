@@ -144,8 +144,6 @@ public class TeleopDrive extends CommandBase {
 
 	@Override
 	public void execute() {
-		//double x = controller.getRawAxis(X_AXIS);
-		//double y = -controller.getRawAxis(Y_AXIS);
         double x = controller.getRawAxis(X_AXIS);
 		double y = -controller.getRawAxis(Y_AXIS);
 		if (!(Math.abs(x) > DEADZONE)) {
