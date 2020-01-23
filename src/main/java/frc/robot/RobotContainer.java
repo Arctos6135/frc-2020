@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.AlignToTarget;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Limelight;
@@ -61,7 +62,11 @@ public class RobotContainer {
 
         configTab = Shuffleboard.getTab("Config");
         driveTab = Shuffleboard.getTab("Drive");
-        // Put the precision factor on the dashboard and make it configurable
+        addConfigurableValues();
+    }
+
+    private void addConfigurableValues() {
+        // Add stuff to the dashboard to make them configurable
         configTab.add("Precision Drive Factor", TeleopDrive.getPrecisionFactor())
                 // Use a number slider from 0-1
                 .withWidget(BuiltInWidgets.kNumberSlider).withProperties(Map.of("min", 0.0, "max", 1.0)).getEntry()
@@ -69,11 +74,28 @@ public class RobotContainer {
                 .addListener(notif -> {
                     TeleopDrive.setPrecisionFactor(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
-        // Do the same with the ramping rate
         configTab.add("Ramping Rate", TeleopDrive.getRampingRate()).withWidget(BuiltInWidgets.kNumberSlider)
                 .withProperties(Map.of("min", 0.0, "max", 3.0)).getEntry().addListener(notif -> {
                     TeleopDrive.setRampingRate(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
+
+        configTab.add("Align kP", AlignToTarget.getKP()).withWidget(BuiltInWidgets.kTextView).getEntry()
+                .addListener(notif -> {
+                    AlignToTarget.setKP(notif.value.getDouble());
+                }, EntryListenerFlags.kUpdate);
+        configTab.add("Align kI", AlignToTarget.getKI()).withWidget(BuiltInWidgets.kTextView).getEntry()
+                .addListener(notif -> {
+                    AlignToTarget.setKI(notif.value.getDouble());
+                }, EntryListenerFlags.kUpdate);
+        configTab.add("Align kD", AlignToTarget.getKD()).withWidget(BuiltInWidgets.kTextView).getEntry()
+                .addListener(notif -> {
+                    AlignToTarget.setKD(notif.value.getDouble());
+                }, EntryListenerFlags.kUpdate);
+        configTab.add("Align Tolerance", AlignToTarget.getTolerance()).withWidget(BuiltInWidgets.kTextView).getEntry()
+                .addListener(notif -> {
+                    AlignToTarget.setTolerance(notif.value.getDouble());
+                }, EntryListenerFlags.kUpdate);
+
         driveReversedEntry = driveTab.add("Reversed", TeleopDrive.isReversed()).withWidget(BuiltInWidgets.kBooleanBox)
                 .getEntry();
     }
@@ -86,10 +108,12 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         Button reverseDriveButton = new JoystickButton(driverController, Constants.REVERSE_DRIVE_DIRECTION);
+        Button autoAlignButton = new JoystickButton(driverController, Constants.AUTO_ALIGN);
         reverseDriveButton.whenPressed(new InstantCommand(() -> {
             TeleopDrive.toggleReverseDrive();
             driveReversedEntry.setBoolean(TeleopDrive.isReversed());
         }));
+        autoAlignButton.whenPressed(new AlignToTarget(drivetrain, limelight));
     }
 
     /**
