@@ -7,12 +7,14 @@
 
 package frc.robot.subsystems;
 
+import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.EncoderType;
 
+import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -28,6 +30,8 @@ public class Drivetrain extends SubsystemBase {
     private final CANSparkMax leftFollowerMotor;
     private final CANEncoder leftEncoder;
     private final CANEncoder rightEncoder;
+
+    private final AHRS ahrs;
 
     // Having a speed multiplier allows for easy adjustment of top speeds
     private double speedMultiplier = 1.0;
@@ -147,7 +151,7 @@ public class Drivetrain extends SubsystemBase {
         return new double[] { leftAccel, rightAccel };
     }
 
-    IdleMode idleMode;
+    private IdleMode idleMode;
 
     /**
      * Sets the IDLEmode (brake or coast) of all the drivetrain motors.
@@ -166,9 +170,35 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
+     * Return the heading of the robot.
+     * 
+     * @return The heading of the robot in degrees
+     */
+    public double getHeading() {
+        return ahrs.getFusedHeading();
+    }
+
+    /**
+     * Reset the heading of the robot.
+     */
+    public void zeroHeading() {
+        ahrs.reset();
+    }
+
+    /**
+     * Get the robot's Attitude and Heading Reference System (NavX IMU).
+     * 
+     * @return The AHRS
+     */
+    public AHRS getAHRS() {
+        return ahrs;
+    }
+
+    /**
      * Creates a new drivetrain.
      */
     public Drivetrain(int leftMaster, int leftFollower, int rightMaster, int rightFollower) {
+        ahrs = new AHRS(I2C.Port.kOnboard);
         rightMotor = new CANSparkMax(rightMaster, MotorType.kBrushless);
         leftMotor = new CANSparkMax(leftMaster, MotorType.kBrushless);
         rightFollowerMotor = new CANSparkMax(rightFollower, MotorType.kBrushless);

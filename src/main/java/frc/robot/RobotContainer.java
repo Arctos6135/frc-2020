@@ -57,7 +57,11 @@ public class RobotContainer {
 
         configTab = Shuffleboard.getTab("Config");
         driveTab = Shuffleboard.getTab("Drive");
-        // Put the precision factor on the dashboard and make it configurable
+        addConfigurableValues();
+    }
+
+    private void addConfigurableValues() {
+        // Add stuff to the dashboard to make them configurable
         configTab.add("Precision Drive Factor", TeleopDrive.getPrecisionFactor())
                 // Use a number slider from 0-1
                 .withWidget(BuiltInWidgets.kNumberSlider).withProperties(Map.of("min", 0.0, "max", 1.0)).getEntry()
@@ -65,13 +69,15 @@ public class RobotContainer {
                 .addListener(notif -> {
                     TeleopDrive.setPrecisionFactor(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
-        // Do the same with the ramping rate
         configTab.add("Ramping Rate", TeleopDrive.getRampingRate()).withWidget(BuiltInWidgets.kNumberSlider)
                 .withProperties(Map.of("min", 0.0, "max", 3.0)).getEntry().addListener(notif -> {
                     TeleopDrive.setRampingRate(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
+
         driveReversedEntry = driveTab.add("Reversed", TeleopDrive.isReversed()).withWidget(BuiltInWidgets.kBooleanBox)
                 .getEntry();
+        
+        driveTab.add("Gyro", drivetrain.getAHRS()).withWidget(BuiltInWidgets.kGyro);
     }
 
     /**
