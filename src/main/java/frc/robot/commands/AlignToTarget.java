@@ -79,6 +79,9 @@ public class AlignToTarget extends PIDCommand {
         this.drivetrain = drivetrain;
         this.limelight = limelight;
         addRequirements(this.drivetrain, this.limelight);
+
+        PIDController controller = getController();
+        controller.setTolerance(tolerance);
     }
 
     @Override
@@ -93,6 +96,6 @@ public class AlignToTarget extends PIDCommand {
     // Returns true when the command should end.
     @Override
     public boolean isFinished() {
-        return !limelight.hasValidTargets() || Math.abs(limelight.getHorizontalAngle()) <= tolerance;
+        return !limelight.hasValidTargets() || getController().atSetpoint();
     }
 }
