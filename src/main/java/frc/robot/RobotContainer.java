@@ -113,20 +113,27 @@ public class RobotContainer {
         driveReversedEntry = driveTab.add("Reversed", TeleopDrive.isReversed()).withWidget(BuiltInWidgets.kBooleanBox)
                 .getEntry();
         drivetrainMotorStatus = driveTab.add("DT Motor Status", true).withWidget(BuiltInWidgets.kBooleanBox)
-                .withProperties(Map.of("color when true", 0x00FF00FF, "color when false", 0xFF0000FF));
+                .withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK, "color when false",
+                        Constants.COLOR_MOTOR_WARNING));
         drivetrain.setOverheatShutoffCallback((motor, temp) -> {
-            // Make it red
-            drivetrainMotorStatus.withProperties(Map.of("color when false", 0xFF0000FF)).getEntry().setBoolean(false);
+            if (!drivetrain.getOverheatShutoffOverride()) {
+                // Make it red
+                drivetrainMotorStatus.withProperties(Map.of("color when false", Constants.COLOR_MOTOR_SHUTOFF))
+                        .getEntry().setBoolean(false);
+                errorRumble.execute();
+            }
             getLogger().logError(
                     "Drivetrain motor " + motor.getDeviceId() + " reached overheat shutoff limit at " + temp + "C!");
-            errorRumble.execute();
         });
         drivetrain.setOverheatWarningCallback((motor, temp) -> {
-            // Make it yellow
-            drivetrainMotorStatus.withProperties(Map.of("color when false", 0xFFFF00FF)).getEntry().setBoolean(false);
+            if (!drivetrain.getOverheatShutoffOverride()) {
+                // Make it yellow
+                drivetrainMotorStatus.withProperties(Map.of("color when false", Constants.COLOR_MOTOR_WARNING))
+                        .getEntry().setBoolean(false);
+                warningRumble.execute();
+            }
             getLogger().logWarning(
                     "Drivetrain motor " + motor.getDeviceId() + " reached overheat warning at " + temp + "C!");
-            warningRumble.execute();
         });
         drivetrain.setNormalTempCallback(() -> {
             drivetrainMotorStatus.getEntry().setBoolean(true);
@@ -144,10 +151,28 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         Button reverseDriveButton = new JoystickButton(driverController, Constants.REVERSE_DRIVE_DIRECTION);
-        reverseDriveButton.whenPressed(new InstantCommand(() -> {
+        Button overrideMotorProtectionButton = new JoystickButton(driverController,
+                Constants.OVERRIDE_MOTOR_PROTECTION);
+        reverseDriveButton.whenPressed(() -> {
             TeleopDrive.toggleReverseDrive();
             driveReversedEntry.setBoolean(TeleopDrive.isReversed());
-        }));
+            getLogger().logInfo("Drive reverse set to " + TeleopDrive.isReversed());
+        });
+        overrideMotorProtectionButton.whenPressed(() -> {
+            boolean override = !drivetrain.getOverheatShutoffOverride();
+            drivetrain.setOverheatShutoffOverride(override);
+            if (override) {
+                // Set the colour to a new one
+                drivetrainMotorStatus.withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OVERRIDDEN))
+                        .getEntry().setBoolean(true);
+                getLogger().logWarning("Motor temperature protection overridden");
+            } else {
+                // Set the colour back
+                drivetrainMotorStatus.withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK)).getEntry()
+                        .setBoolean(!(drivetrain.isOverheating() || drivetrain.isOverheatWarning()));
+                getLogger().logInfo("Motor temperature protection re-enabled");
+            }
+        });
     }
 
     private void initLogger() {

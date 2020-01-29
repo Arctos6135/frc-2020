@@ -33,6 +33,7 @@ public class Drivetrain extends SubsystemBase {
 
     private boolean overheatShutoff = false;
     private boolean overheatWarning = false;
+    private boolean protectionOverridden = false;
     private BiConsumer<CANSparkMax, Double> overheatCallback;
     private BiConsumer<CANSparkMax, Double> overheatWarningCallback;
     private Runnable normalTempCallback;
@@ -62,12 +63,24 @@ public class Drivetrain extends SubsystemBase {
         setRightMotor(right);
     }
 
+    /**
+     * Set the percentage output of the left motor. 
+     * 
+     * @param output The motor output
+     * @see #setMotors(double, double)
+     */
     public void setLeftMotor(double output) {
-        leftMotor.set(overheatShutoff ? 0 : output * speedMultiplier);
+        leftMotor.set(overheatShutoff && !protectionOverridden ? 0 : output * speedMultiplier);
     }
 
+    /**
+     * Set the percentage output of the right motor.
+     * 
+     * @param output The motor output
+     * @see #setMotors(double, double)
+     */
     public void setRightMotor(double output) {
-        rightMotor.set(overheatShutoff ? 0 : output * speedMultiplier);
+        rightMotor.set(overheatShutoff && !protectionOverridden ? 0 : output * speedMultiplier);
     }
 
     /**
@@ -100,6 +113,36 @@ public class Drivetrain extends SubsystemBase {
      */
     public boolean isOverheatWarning() {
         return overheatWarning;
+    }
+
+    /**
+     * Set whether the overheat shutoff is overridden.
+     * 
+     * <p>
+     * When overridden, the motors will still be active even if the shutoff limit
+     * was reached. However, callbacks will still be called and the motors will
+     * still be in a "shutoff" or "warning" state.
+     * </p>
+     * 
+     * @param override Whether the overheat shutoff should be overridden
+     */
+    public void setOverheatShutoffOverride(boolean override) {
+        this.protectionOverridden = override;
+    }
+
+    /**
+     * Return whether the overheat shutoff was overridden.
+     * 
+     * <p>
+     * When overridden, the motors will still be active even if the shutoff limit
+     * was reached. However, callbacks will still be called and the motors will
+     * still be in a "shutoff" or "warning" state.
+     * </p>
+     * 
+     * @return Whether the overheat shutoff has been overridden
+     */
+    public boolean getOverheatShutoffOverride() {
+        return protectionOverridden;
     }
 
     /**
@@ -288,7 +331,7 @@ public class Drivetrain extends SubsystemBase {
             }
         }
         // Run the return to normal callback
-        if((overheatShutoff || overheatWarning) && (!shutoff && !warning) && normalTempCallback != null) {
+        if ((overheatShutoff || overheatWarning) && (!shutoff && !warning) && normalTempCallback != null) {
             normalTempCallback.run();
         }
 
