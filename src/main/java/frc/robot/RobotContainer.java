@@ -88,15 +88,15 @@ public class RobotContainer {
         driveReversedEntry = driveTab.add("Reversed", TeleopDrive.isReversed()).withWidget(BuiltInWidgets.kBooleanBox)
                 .getEntry();
         drivetrainMotorStatus = driveTab.add("DT Motor Status", true).withWidget(BuiltInWidgets.kBooleanBox)
-                .withProperties(Map.of("color when false", 0xFF000000));
+                .withProperties(Map.of("color when true", 0x00FF00FF, "color when false", 0xFF0000FF));
         drivetrain.setOverheatShutoffCallback((motor, temp) -> {
             // Make it red
-            drivetrainMotorStatus.withProperties(Map.of("color when false", 0xFF000000)).getEntry().setBoolean(false);
+            drivetrainMotorStatus.withProperties(Map.of("color when false", 0xFF0000FF)).getEntry().setBoolean(false);
             // TODO: Log this as an error and rumble
         });
         drivetrain.setOverheatWarningCallback((motor, temp) -> {
             // Make it yellow
-            drivetrainMotorStatus.withProperties(Map.of("color when false", 0xFFFF0000)).getEntry().setBoolean(false);
+            drivetrainMotorStatus.withProperties(Map.of("color when false", 0xFFFF00FF)).getEntry().setBoolean(false);
         });
         drivetrain.setNormalTempCallback(() -> {
             drivetrainMotorStatus.getEntry().setBoolean(true);

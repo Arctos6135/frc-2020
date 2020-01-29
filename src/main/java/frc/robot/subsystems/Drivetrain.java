@@ -288,7 +288,7 @@ public class Drivetrain extends SubsystemBase {
             }
         }
         // Run the return to normal callback
-        if((overheatShutoff || warning) && (!shutoff && !warning) && normalTempCallback != null) {
+        if((overheatShutoff || overheatWarning) && (!shutoff && !warning) && normalTempCallback != null) {
             normalTempCallback.run();
         }
 
