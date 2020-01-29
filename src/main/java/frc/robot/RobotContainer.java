@@ -7,10 +7,15 @@
 
 package frc.robot;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.logging.Level;
+
+import com.arctos6135.robotlib.logging.RobotLogger;
 
 import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -43,6 +48,11 @@ public class RobotContainer {
     private NetworkTableEntry driveReversedEntry;
     private SimpleWidget drivetrainMotorStatus;
 
+    private NetworkTableEntry lastError;
+    private NetworkTableEntry lastWarning;
+
+    private static RobotLogger logger = new RobotLogger();
+
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
@@ -60,6 +70,19 @@ public class RobotContainer {
         configTab = Shuffleboard.getTab("Config");
         driveTab = Shuffleboard.getTab("Drive");
         addConfigurableValues();
+
+        // Wait for DS to attach before initializing the logger
+        // The roboRIO's system time only gets updated after connecting
+        while (!DriverStation.getInstance().isDSAttached()) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                // Should never happen
+                e.printStackTrace();
+                lastError.setString("InterruptedException while waiting for DS");
+            }
+        }
+        initLogger();
     }
 
     private void addConfigurableValues() {
@@ -92,15 +115,22 @@ public class RobotContainer {
         drivetrain.setOverheatShutoffCallback((motor, temp) -> {
             // Make it red
             drivetrainMotorStatus.withProperties(Map.of("color when false", 0xFF0000FF)).getEntry().setBoolean(false);
-            // TODO: Log this as an error and rumble
+            // TODO: rumble
+            getLogger().logError(
+                    "Drivetrain motor " + motor.getDeviceId() + " reached overheat shutoff limit at " + temp + "C!");
         });
         drivetrain.setOverheatWarningCallback((motor, temp) -> {
             // Make it yellow
             drivetrainMotorStatus.withProperties(Map.of("color when false", 0xFFFF00FF)).getEntry().setBoolean(false);
+            getLogger().logWarning(
+                    "Drivetrain motor " + motor.getDeviceId() + " reached overheat warning at " + temp + "C!");
         });
         drivetrain.setNormalTempCallback(() -> {
             drivetrainMotorStatus.getEntry().setBoolean(true);
         });
+
+        lastError = driveTab.add("Last Error", "").getEntry();
+        lastWarning = driveTab.add("Last Warning", "").getEntry();
     }
 
     /**
@@ -117,6 +147,30 @@ public class RobotContainer {
         }));
     }
 
+    private void initLogger() {
+        try {
+            logger.init(Robot.class);
+
+            // Set logger level
+            // Change this to include or exclude information
+            logger.setLevel(Level.FINE);
+            // Attach log handler to set the last error and warning
+            logger.setLogHandler((level, message) -> {
+                if (level == Level.SEVERE) {
+                    lastError.setString(message);
+                } else if (level == Level.WARNING) {
+                    lastWarning.setString(message);
+                }
+            });
+            // Clean old logs
+            logger.cleanLogs(72);
+            logger.logInfo("Logger initialized");
+        } catch (IOException e) {
+            e.printStackTrace();
+            lastError.setString("Failed to init logger!");
+        }
+    }
+
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
      *
@@ -125,5 +179,14 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         // TODO
         return new InstantCommand();
+    }
+
+    /**
+     * Get the robot logger.
+     * 
+     * @return The robot logger
+     */
+    public static RobotLogger getLogger() {
+        return logger;
     }
 }
