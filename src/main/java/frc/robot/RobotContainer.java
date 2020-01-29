@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import com.arctos6135.robotlib.logging.RobotLogger;
+import com.arctos6135.robotlib.oi.Rumble;
 
 import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -40,10 +41,13 @@ public class RobotContainer {
 
     private final Drivetrain drivetrain;
 
-    private XboxController driverController;
+    private final XboxController driverController = new XboxController(Constants.XBOX_CONTROLLER);
 
-    private ShuffleboardTab configTab;
-    private ShuffleboardTab driveTab;
+    private final Rumble errorRumble = new Rumble(driverController, Rumble.SIDE_BOTH, 1, 400, 3);
+    private final Rumble warningRumble = new Rumble(driverController, Rumble.SIDE_BOTH, 0.75, 300);
+
+    private final ShuffleboardTab configTab;
+    private final ShuffleboardTab driveTab;
 
     private NetworkTableEntry driveReversedEntry;
     private SimpleWidget drivetrainMotorStatus;
@@ -57,8 +61,6 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
-        driverController = new XboxController(Constants.XBOX_CONTROLLER);
-
         drivetrain = new Drivetrain(Constants.LEFT_CANSPARKMAX, Constants.LEFT_CANSPARKMAX_FOLLOWER,
                 Constants.RIGHT_CANSPARKMAX, Constants.RIGHT_CANSPARKMAX_FOLLOWER);
         drivetrain.setDefaultCommand(
@@ -115,15 +117,16 @@ public class RobotContainer {
         drivetrain.setOverheatShutoffCallback((motor, temp) -> {
             // Make it red
             drivetrainMotorStatus.withProperties(Map.of("color when false", 0xFF0000FF)).getEntry().setBoolean(false);
-            // TODO: rumble
             getLogger().logError(
                     "Drivetrain motor " + motor.getDeviceId() + " reached overheat shutoff limit at " + temp + "C!");
+            errorRumble.execute();
         });
         drivetrain.setOverheatWarningCallback((motor, temp) -> {
             // Make it yellow
             drivetrainMotorStatus.withProperties(Map.of("color when false", 0xFFFF00FF)).getEntry().setBoolean(false);
             getLogger().logWarning(
                     "Drivetrain motor " + motor.getDeviceId() + " reached overheat warning at " + temp + "C!");
+            warningRumble.execute();
         });
         drivetrain.setNormalTempCallback(() -> {
             drivetrainMotorStatus.getEntry().setBoolean(true);
