@@ -7,10 +7,7 @@
 
 package frc.robot;
 
-import com.arctos6135.robotlib.oi.XboxControllerButtons;
-
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.XboxController.Axis;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide
@@ -41,6 +38,8 @@ public final class Constants {
     public static final double VELOCITY_CONVERSION_FACTOR = WHEEL_CIRCUMFERENCE * GEARBOX_RATIO;
     public static final int COUNTS_PER_REVOLUTION = 42;
 
+    public static double MOTOR_WARNING_TEMP = 70;
+    public static double MOTOR_SHUTOFF_TEMP = 90;
 
     // Xbox Controller constants
 	public static final int XBOX_CONTROLLER = 0; 

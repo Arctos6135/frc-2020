@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
@@ -34,12 +35,13 @@ public class RobotContainer {
 
     private final Drivetrain drivetrain;
 
-    private static XboxController driverController;
+    private XboxController driverController;
 
-    private static ShuffleboardTab configTab;
-    private static ShuffleboardTab driveTab;
+    private ShuffleboardTab configTab;
+    private ShuffleboardTab driveTab;
 
-    private static NetworkTableEntry driveReversedEntry;
+    private NetworkTableEntry driveReversedEntry;
+    private SimpleWidget drivetrainMotorStatus;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -57,6 +59,10 @@ public class RobotContainer {
 
         configTab = Shuffleboard.getTab("Config");
         driveTab = Shuffleboard.getTab("Drive");
+        addConfigurableValues();
+    }
+
+    private void addConfigurableValues() {
         // Put the precision factor on the dashboard and make it configurable
         configTab.add("Precision Drive Factor", TeleopDrive.getPrecisionFactor())
                 // Use a number slider from 0-1
@@ -70,8 +76,31 @@ public class RobotContainer {
                 .withProperties(Map.of("min", 0.0, "max", 3.0)).getEntry().addListener(notif -> {
                     TeleopDrive.setRampingRate(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
+        configTab.add("Motor Warning Temp.", Constants.MOTOR_WARNING_TEMP).withWidget(BuiltInWidgets.kNumberSlider)
+                .withProperties(Map.of("min", 0.0, "max", 150.0)).getEntry().addListener(notif -> {
+                    Constants.MOTOR_WARNING_TEMP = notif.value.getDouble();
+                }, EntryListenerFlags.kUpdate);
+        configTab.add("Motor Shutoff Temp.", Constants.MOTOR_SHUTOFF_TEMP).withWidget(BuiltInWidgets.kNumberSlider)
+                .withProperties(Map.of("min", 0.0, "max", 150.0)).getEntry().addListener(notif -> {
+                    Constants.MOTOR_SHUTOFF_TEMP = notif.value.getDouble();
+                }, EntryListenerFlags.kUpdate);
+
         driveReversedEntry = driveTab.add("Reversed", TeleopDrive.isReversed()).withWidget(BuiltInWidgets.kBooleanBox)
                 .getEntry();
+        drivetrainMotorStatus = driveTab.add("DT Motor Status", true).withWidget(BuiltInWidgets.kBooleanBox)
+                .withProperties(Map.of("color when false", 0xFF000000));
+        drivetrain.setOverheatShutoffCallback((motor, temp) -> {
+            // Make it red
+            drivetrainMotorStatus.withProperties(Map.of("color when false", 0xFF000000)).getEntry().setBoolean(false);
+            // TODO: Log this as an error and rumble
+        });
+        drivetrain.setOverheatWarningCallback((motor, temp) -> {
+            // Make it yellow
+            drivetrainMotorStatus.withProperties(Map.of("color when false", 0xFFFF0000)).getEntry().setBoolean(false);
+        });
+        drivetrain.setNormalTempCallback(() -> {
+            drivetrainMotorStatus.getEntry().setBoolean(true);
+        });
     }
 
     /**

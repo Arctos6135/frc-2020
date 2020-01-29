@@ -7,6 +7,8 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.BiConsumer;
+
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
@@ -28,6 +30,12 @@ public class Drivetrain extends SubsystemBase {
     private final CANSparkMax leftFollowerMotor;
     private final CANEncoder leftEncoder;
     private final CANEncoder rightEncoder;
+
+    private boolean overheatShutoff = false;
+    private boolean overheatWarning = false;
+    private BiConsumer<CANSparkMax, Double> overheatCallback;
+    private BiConsumer<CANSparkMax, Double> overheatWarningCallback;
+    private Runnable normalTempCallback;
 
     // Having a speed multiplier allows for easy adjustment of top speeds
     private double speedMultiplier = 1.0;
@@ -55,16 +63,81 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void setLeftMotor(double output) {
-        leftMotor.set(output * speedMultiplier);
+        leftMotor.set(overheatShutoff ? 0 : output * speedMultiplier);
     }
 
     public void setRightMotor(double output) {
-        rightMotor.set(output * speedMultiplier);
+        rightMotor.set(overheatShutoff ? 0 : output * speedMultiplier);
     }
 
+    /**
+     * Set the ramping rate of the motors.
+     * 
+     * @param rate The number of seconds from neutral to full speed
+     */
     public void setRamping(double rate) {
         leftMotor.setOpenLoopRampRate(rate);
         rightMotor.setOpenLoopRampRate(rate);
+    }
+
+    /**
+     * Get whether any motor is overheating.
+     * 
+     * <p>
+     * If any motor is overheating, the setMotor methods will do nothing.
+     * </p>
+     * 
+     * @return Whether the motors are overheating
+     */
+    public boolean isOverheating() {
+        return overheatShutoff;
+    }
+
+    /**
+     * Get whether any motor has triggered the overheat warning.
+     * 
+     * @return Whether the motors have triggered the warning
+     */
+    public boolean isOverheatWarning() {
+        return overheatWarning;
+    }
+
+    /**
+     * Set the overheat shutoff callback.
+     * 
+     * <p>
+     * The first argument of the callback is the motor that's overheating, and the
+     * second is the temperature.
+     * </p>
+     * 
+     * @param callback The callback
+     */
+    public void setOverheatShutoffCallback(BiConsumer<CANSparkMax, Double> callback) {
+        overheatCallback = callback;
+    }
+
+    /**
+     * Set the overheat warning callback.
+     * 
+     * <p>
+     * The first argument of the callback is the motor that's overheating, and the
+     * second is the temperature.
+     * </p>
+     * 
+     * @param callback The callback
+     */
+    public void setOverheatWarningCallback(BiConsumer<CANSparkMax, Double> callback) {
+        overheatWarningCallback = callback;
+    }
+
+    /**
+     * Set the callback to be called when the motor's temperature has returned to
+     * normal.
+     * 
+     * @param callback The callback
+     */
+    public void setNormalTempCallback(Runnable callback) {
+        normalTempCallback = callback;
     }
 
     // Encoders
@@ -150,7 +223,7 @@ public class Drivetrain extends SubsystemBase {
     IdleMode idleMode;
 
     /**
-     * Sets the IDLEmode (brake or coast) of all the drivetrain motors.
+     * Sets the idle mode (brake or coast) of all the drivetrain motors.
      */
     public void setMotorMode(IdleMode mode) {
         idleMode = mode;
@@ -194,7 +267,33 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // This method will be called once per scheduler run
+        CANSparkMax[] motors = { leftMotor, leftFollowerMotor, rightMotor, rightFollowerMotor };
+        boolean shutoff = false;
+        boolean warning = false;
+        for (var motor : motors) {
+            // Check every motor for temperature
+            double temp = motor.getMotorTemperature();
+
+            if (temp >= Constants.MOTOR_SHUTOFF_TEMP) {
+                // Only call the callback if not already overheating
+                if (!overheatShutoff && overheatCallback != null) {
+                    overheatCallback.accept(motor, temp);
+                }
+                shutoff = true;
+            } else if (temp >= Constants.MOTOR_WARNING_TEMP) {
+                if (!overheatWarning && overheatWarningCallback != null) {
+                    overheatWarningCallback.accept(motor, temp);
+                }
+                warning = true;
+            }
+        }
+        // Run the return to normal callback
+        if((overheatShutoff || warning) && (!shutoff && !warning) && normalTempCallback != null) {
+            normalTempCallback.run();
+        }
+
+        overheatShutoff = shutoff;
+        overheatWarning = warning;
     }
 
 }
