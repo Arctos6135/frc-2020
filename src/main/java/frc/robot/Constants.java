@@ -38,10 +38,18 @@ public final class Constants {
     public static final double VELOCITY_CONVERSION_FACTOR = WHEEL_CIRCUMFERENCE * GEARBOX_RATIO / 60;
     public static final int COUNTS_PER_REVOLUTION = 42;
 
+    public static double MOTOR_WARNING_TEMP = 70;
+    public static double MOTOR_SHUTOFF_TEMP = 90;
 
     // Xbox Controller constants
 	public static final int XBOX_CONTROLLER = 0; 
 	public static final int DRIVE_FWD_REV = XboxController.Axis.kLeftY.value;
     public static final int DRIVE_LEFT_RIGHT = XboxController.Axis.kRightX.value;
     public static final int REVERSE_DRIVE_DIRECTION = XboxController.Button.kStickLeft.value;
+    public static final int OVERRIDE_MOTOR_PROTECTION = XboxController.Button.kB.value;
+
+    public static final int COLOR_MOTOR_OK = 0x00FF00FF;
+    public static final int COLOR_MOTOR_WARNING = 0xFFFF00FF;
+    public static final int COLOR_MOTOR_SHUTOFF = 0xFF0000FF;
+    public static final int COLOR_MOTOR_OVERRIDDEN = 0xA72DFFFF;
 }
