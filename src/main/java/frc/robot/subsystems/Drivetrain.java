@@ -16,10 +16,13 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.EncoderType;
 
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Drivetrain extends SubsystemBase {
+
+    private static final double DEADZONE = 0.15;
 
     private double leftLastRate = 0, rightLastRate = 0;
     private double lastTime;
@@ -31,6 +34,8 @@ public class Drivetrain extends SubsystemBase {
     private final CANEncoder leftEncoder;
     private final CANEncoder rightEncoder;
 
+    private final DifferentialDrive driveBase;
+
     private boolean overheatShutoff = false;
     private boolean overheatWarning = false;
     private boolean protectionOverridden = false;
@@ -41,10 +46,32 @@ public class Drivetrain extends SubsystemBase {
     // Having a speed multiplier allows for easy adjustment of top speeds
     private double speedMultiplier = 1.0;
 
+    /**
+     * Set the speed multiplier.
+     * 
+     * <p>
+     * The speed to be set is multiplied by this multiplier, and then given to the
+     * motors.
+     * </p>
+     * 
+     * @param multiplier The speed multiplier
+     */
     public void setSpeedMultiplier(double multiplier) {
         speedMultiplier = multiplier;
+
+        driveBase.setMaxOutput(speedMultiplier);
     }
 
+    /**
+     * Get the speed multiplier.
+     * 
+     * <p>
+     * The speed to be set is multiplied by this multiplier, and then given to the
+     * motors.
+     * </p>
+     * 
+     * @return The speed multiplier
+     */
     public double getSpeedMultiplier() {
         return speedMultiplier;
     }
@@ -58,29 +85,16 @@ public class Drivetrain extends SubsystemBase {
      * @param right The right side motors percent output
      */
     public void setMotors(double left, double right) {
-        // Inverted in constructor
-        setLeftMotor(left);
-        setRightMotor(right);
+        driveBase.tankDrive(left, right, false);
     }
 
     /**
-     * Set the percentage output of the left motor. 
+     * Get the robot drive base object for the drivetrain.
      * 
-     * @param output The motor output
-     * @see #setMotors(double, double)
+     * @return The drive base
      */
-    public void setLeftMotor(double output) {
-        leftMotor.set(overheatShutoff && !protectionOverridden ? 0 : output * speedMultiplier);
-    }
-
-    /**
-     * Set the percentage output of the right motor.
-     * 
-     * @param output The motor output
-     * @see #setMotors(double, double)
-     */
-    public void setRightMotor(double output) {
-        rightMotor.set(overheatShutoff && !protectionOverridden ? 0 : output * speedMultiplier);
+    public DifferentialDrive getDriveBase() {
+        return driveBase;
     }
 
     /**
@@ -285,10 +299,10 @@ public class Drivetrain extends SubsystemBase {
      * Creates a new drivetrain.
      */
     public Drivetrain(int leftMaster, int leftFollower, int rightMaster, int rightFollower) {
-        rightMotor = new CANSparkMax(rightMaster, MotorType.kBrushless);
-        leftMotor = new CANSparkMax(leftMaster, MotorType.kBrushless);
-        rightFollowerMotor = new CANSparkMax(rightFollower, MotorType.kBrushless);
-        leftFollowerMotor = new CANSparkMax(leftFollower, MotorType.kBrushless);
+        rightMotor = new ProtectedCANSparkMax(rightMaster, MotorType.kBrushless);
+        leftMotor = new ProtectedCANSparkMax(leftMaster, MotorType.kBrushless);
+        rightFollowerMotor = new ProtectedCANSparkMax(rightFollower, MotorType.kBrushless);
+        leftFollowerMotor = new ProtectedCANSparkMax(leftFollower, MotorType.kBrushless);
         rightEncoder = rightMotor.getEncoder(EncoderType.kHallSensor, Constants.COUNTS_PER_REVOLUTION);
         leftEncoder = leftMotor.getEncoder(EncoderType.kHallSensor, Constants.COUNTS_PER_REVOLUTION);
 
@@ -306,6 +320,16 @@ public class Drivetrain extends SubsystemBase {
         leftEncoder.setVelocityConversionFactor(Constants.VELOCITY_CONVERSION_FACTOR);
         rightEncoder.setVelocityConversionFactor(Constants.VELOCITY_CONVERSION_FACTOR);
         resetEncoders();
+
+        driveBase = new DifferentialDrive(leftMotor, rightMotor);
+        // By default the right side output is inverted
+        // Since it is already inverted in the MC, disable this behavior
+        driveBase.setRightSideInverted(false);
+        driveBase.setDeadband(DEADZONE);
+        driveBase.setMaxOutput(speedMultiplier);
+        // Disable motor safety on it
+        // We don't need this
+        driveBase.setSafetyEnabled(false);
     }
 
     @Override
@@ -339,4 +363,32 @@ public class Drivetrain extends SubsystemBase {
         overheatWarning = warning;
     }
 
+    /**
+     * A CANSparkMax that disables the motor if overheatShutoff is true and
+     * protection is not overridden.
+     */
+    private class ProtectedCANSparkMax extends CANSparkMax {
+
+        /**
+         * Create a new SPARK MAX Controller.
+         * 
+         * @param deviceID The device ID.
+         * @param type     The motor type connected to the controller. Brushless motors
+         *                 must be connected to their matching color and the hall sensor
+         *                 plugged in. Brushed motors must be connected to the Red and
+         *                 Black terminals only.
+         */
+        public ProtectedCANSparkMax(int deviceID, MotorType type) {
+            super(deviceID, type);
+        }
+
+        @Override
+        public void set(double speed) {
+            if (overheatShutoff && !protectionOverridden) {
+                super.set(0);
+            } else {
+                super.set(speed);
+            }
+        }
+    }
 }
