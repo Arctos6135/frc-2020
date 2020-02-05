@@ -22,8 +22,6 @@ import frc.robot.Constants;
 
 public class Drivetrain extends SubsystemBase {
 
-    private static final double DEADZONE = 0.15;
-
     private double leftLastRate = 0, rightLastRate = 0;
     private double lastTime;
 
@@ -313,7 +311,8 @@ public class Drivetrain extends SubsystemBase {
 
         // According to the docs, setInverted() has no effect if motor is a follower
         // Therefore only the master needs to be inverted
-        leftMotor.setInverted(true);
+        leftMotor.setInverted(false);
+        rightMotor.setInverted(true);
 
         leftEncoder.setPositionConversionFactor(Constants.POSITION_CONVERSION_FACTOR);
         rightEncoder.setPositionConversionFactor(Constants.POSITION_CONVERSION_FACTOR);
@@ -325,7 +324,6 @@ public class Drivetrain extends SubsystemBase {
         // By default the right side output is inverted
         // Since it is already inverted in the MC, disable this behavior
         driveBase.setRightSideInverted(false);
-        driveBase.setDeadband(DEADZONE);
         driveBase.setMaxOutput(speedMultiplier);
         // Disable motor safety on it
         // We don't need this

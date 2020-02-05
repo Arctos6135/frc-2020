@@ -23,7 +23,8 @@ public class TeleopDrive extends CommandBase {
 	// Steering or movement related
 	private static boolean reverseDrive = false;
 	private static boolean precisionDrive = false;
-	private static double precisionFactor = 0.5; // Percentage of default steering input when driving with precisionDrive
+	private static double precisionFactor = 0.5; // Percentage of default steering input when driving with
+													// precisionDrive
 
 	// Ramping related
 	private static double rampingRate = 1; // Time in seconds to go from 0 to full throttle.
@@ -140,41 +141,33 @@ public class TeleopDrive extends CommandBase {
 	@Override
 	public void initialize() {
 		drivetrain.setRamping(rampingRate);
+		drivetrain.getDriveBase().setDeadband(DEADZONE);
 	}
 
 	@Override
 	public void execute() {
-        double x = controller.getRawAxis(X_AXIS);
-		double y = -controller.getRawAxis(Y_AXIS);
-		if (!(Math.abs(x) > DEADZONE)) {
-			x = 0;
-		}
-		if (!(Math.abs(y) > DEADZONE)) {
-			y = 0;
+		double tmp = 0;
+		if (precisionDrive) {
+			tmp = drivetrain.getSpeedMultiplier();
+			drivetrain.setSpeedMultiplier(precisionFactor);
 		}
 
-		x = Math.copySign(x * x, x);
-		y = Math.copySign(y * y, y);
-
-		if (reverseDrive) {
-			y = -y;
-		}
-
-		double l = y + x;
-		double r = y - x;
+		// Reverse the controller input if reverseDrive is NOT true
+		// Because pushing forward on the stick is a negative value
+		drivetrain.getDriveBase().arcadeDrive(
+				reverseDrive ? controller.getRawAxis(Y_AXIS) : -controller.getRawAxis(Y_AXIS),
+				controller.getRawAxis(X_AXIS), true);
 
 		if (precisionDrive) {
-			l = l * precisionFactor;
-			r = r * precisionFactor;
+			drivetrain.setSpeedMultiplier(tmp);
 		}
-
-		drivetrain.setMotors(l, r);
 	}
 
 	@Override
 	public void end(boolean interrupted) {
 		drivetrain.setRamping(0);
 		drivetrain.setMotors(0, 0);
+		drivetrain.getDriveBase().setDeadband(0.02);
 	}
 
 	@Override
