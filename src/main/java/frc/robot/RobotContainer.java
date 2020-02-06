@@ -13,6 +13,7 @@ import java.util.logging.Level;
 
 import com.arctos6135.robotlib.logging.RobotLogger;
 import com.arctos6135.robotlib.oi.Rumble;
+import com.arctos6135.stdplug.api.StdPlugWidgets;
 
 import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -27,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.FollowTrajectory;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.subsystems.Drivetrain;
 
@@ -101,7 +103,6 @@ public class RobotContainer {
                 .withProperties(Map.of("min", 0.0, "max", 3.0)).getEntry().addListener(notif -> {
                     TeleopDrive.setRampingRate(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
-        driveTab.add("Gyro", drivetrain.getAHRS()).withWidget(BuiltInWidgets.kGyro);
         configTab.add("Motor Warning Temp.", Constants.MOTOR_WARNING_TEMP).withWidget(BuiltInWidgets.kNumberSlider)
                 .withProperties(Map.of("min", 0.0, "max", 150.0)).getEntry().addListener(notif -> {
                     Constants.MOTOR_WARNING_TEMP = notif.value.getDouble();
@@ -110,7 +111,14 @@ public class RobotContainer {
                 .withProperties(Map.of("min", 0.0, "max", 150.0)).getEntry().addListener(notif -> {
                     Constants.MOTOR_SHUTOFF_TEMP = notif.value.getDouble();
                 }, EntryListenerFlags.kUpdate);
+        configTab.add("Follower Gains", FollowTrajectory.getGains()).withWidget(StdPlugWidgets.PIDVA_GAINS)
+                .withProperties(Map.of("Show kDP", true));
+        configTab.add("Update Delay", FollowTrajectory.getUpdateDelay()).withWidget(BuiltInWidgets.kTextView).getEntry()
+                .addListener(notif -> {
+                    FollowTrajectory.setUpdateDelay(notif.value.getDouble());
+                }, EntryListenerFlags.kUpdate);
 
+        driveTab.add("Gyro", drivetrain.getAHRS()).withWidget(BuiltInWidgets.kGyro);
         driveReversedEntry = driveTab.add("Reversed", TeleopDrive.isReversed()).withWidget(BuiltInWidgets.kBooleanBox)
                 .getEntry();
         drivetrainMotorStatus = driveTab.add("DT Motor Status", true).withWidget(BuiltInWidgets.kBooleanBox)
