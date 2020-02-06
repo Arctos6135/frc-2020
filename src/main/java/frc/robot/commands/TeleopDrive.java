@@ -23,7 +23,8 @@ public class TeleopDrive extends CommandBase {
 	// Steering or movement related
 	private static boolean reverseDrive = false;
 	private static boolean precisionDrive = false;
-	private static double precisionFactor = 0.5; // Percentage of default steering input when driving with precisionDrive
+	private static double precisionFactor = 0.5; // Percentage of default steering input when driving with
+													// precisionDrive
 
 	// Ramping related
 	private static double rampingRate = 1; // Time in seconds to go from 0 to full throttle.
@@ -137,6 +138,26 @@ public class TeleopDrive extends CommandBase {
 		return rampingRate;
 	}
 
+	/**
+	 * Applies the controller deadband to a value.
+	 * 
+	 * <p>
+	 * Any value that has an absolute value below the controller deadband will be
+	 * reduced to 0. Values above this (in the range [deadband, 1.0] or [-1.0,
+	 * -deadband]) will be scaled to the range [-1.0, 1.0].
+	 * </p>
+	 * 
+	 * @param x The value to apply to ([-1.0, 1.0])
+	 * @param deadband The deadband ([-1.0, 1.0])
+	 * @return The value after the deadband was applied
+	 */
+	public static double applyDeadband(double x, double deadband) {
+		if (Math.abs(x) <= deadband) {
+			return 0;
+		}
+		return Math.copySign(1.0 - Math.abs(x), x) / (1.0 - deadband);
+	}
+
 	@Override
 	public void initialize() {
 		drivetrain.setRamping(rampingRate);
@@ -144,31 +165,16 @@ public class TeleopDrive extends CommandBase {
 
 	@Override
 	public void execute() {
-        double x = controller.getRawAxis(X_AXIS);
-		double y = -controller.getRawAxis(Y_AXIS);
-		if (!(Math.abs(x) > DEADZONE)) {
-			x = 0;
-		}
-		if (!(Math.abs(y) > DEADZONE)) {
-			y = 0;
-		}
+		double x = applyDeadband(controller.getRawAxis(X_AXIS), DEADZONE);
+		// Note the value is negated if the drive is NOT reversed
+		// Because pushing forward on the stick is a negative Y value
+		double y = applyDeadband(reverseDrive ? controller.getRawAxis(Y_AXIS) : -controller.getRawAxis(Y_AXIS), DEADZONE);
 
+		// Square input values to have more control
 		x = Math.copySign(x * x, x);
 		y = Math.copySign(y * y, y);
 
-		if (reverseDrive) {
-			y = -y;
-		}
-
-		double l = y + x;
-		double r = y - x;
-
-		if (precisionDrive) {
-			l = l * precisionFactor;
-			r = r * precisionFactor;
-		}
-
-		drivetrain.setMotors(l, r);
+		drivetrain.arcadeDrive(y, x, precisionDrive ? precisionFactor : 1.0);
 	}
 
 	@Override

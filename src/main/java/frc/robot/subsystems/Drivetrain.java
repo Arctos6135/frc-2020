@@ -64,7 +64,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
-     * Set the percentage output of the left motor. 
+     * Set the percentage output of the left motor.
      * 
      * @param output The motor output
      * @see #setMotors(double, double)
@@ -279,6 +279,84 @@ public class Drivetrain extends SubsystemBase {
      */
     public IdleMode getIdleMode() {
         return idleMode;
+    }
+
+    /**
+     * Drives the robot with forwards/backwards translation and rotation.
+     * 
+     * @param translation The translation ([-1.0, 1.0])
+     * @param rotation    The rotation ([-1.0, 1.0])
+     */
+    public void arcadeDriveSimple(double translation, double rotation) {
+        arcadeDriveSimple(translation, rotation, 1.0);
+    }
+
+    /**
+     * Drives the robot with forwards/backwards translation and rotation.
+     * 
+     * <p>
+     * The values will be scaled by the scaling factor before given to the motors.
+     * </p>
+     * 
+     * @param translation   The translation ([-1.0, 1.0])
+     * @param rotation      The rotation ([-1.0, 1.0])
+     * @param scalingFactor The scaling factor to multiply the output by
+     */
+    public void arcadeDriveSimple(double translation, double rotation, double scalingFactor) {
+        double l = (translation - rotation) * scalingFactor;
+        double r = (translation + rotation) * scalingFactor;
+
+        setMotors(l, r);
+    }
+
+    /**
+     * Drives the robot with forwards/backwards translation and rotation.
+     * 
+     * @param translation The translation ([-1.0, 1.0])
+     * @param rotation    The rotation ([-1.0, 1.0])
+     */
+    public void arcadeDrive(double translation, double rotation) {
+        arcadeDrive(translation, rotation, 1.0);
+    }
+
+    /**
+     * Drives the robot with forwards/backwards translation and rotation.
+     * 
+     * <p>
+     * The values will be scaled by the scaling factor before given to the motors.
+     * </p>
+     * 
+     * @param translation   The translation ([-1.0, 1.0])
+     * @param rotation      The rotation ([-1.0, 1.0])
+     * @param scalingFactor The scaling factor to multiply the output by
+     */
+    public void arcadeDrive(double translation, double rotation, double scalingFactor) {
+        // Copied from edu.wpi.first.wpilibj.drive.DifferentialDrive.arcadeDrive(double,
+        // double, boolean)
+        double l, r;
+        double maxInput = Math.copySign(Math.max(Math.abs(translation), Math.abs(rotation)), translation);
+
+        if (translation >= 0.0) {
+            // First quadrant, else second quadrant
+            if (rotation >= 0.0) {
+                l = maxInput;
+                r = translation - rotation;
+            } else {
+                l = translation + rotation;
+                r = maxInput;
+            }
+        } else {
+            // Third quadrant, else fourth quadrant
+            if (rotation >= 0.0) {
+                l = translation + rotation;
+                r = maxInput;
+            } else {
+                l = maxInput;
+                r = translation - rotation;
+            }
+        }
+
+        setMotors(l, r);
     }
 
     /**
