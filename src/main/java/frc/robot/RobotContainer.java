@@ -29,7 +29,7 @@ import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.subsystems.Drivetrain;
-
+import frc.robot.subsystems.PneumaticSubsystem;
 /**
  * This class is where the bulk of the robot should be declared. Since
  * Command-based is a "declarative" paradigm, very little robot logic should
@@ -40,6 +40,7 @@ import frc.robot.subsystems.Drivetrain;
 public class RobotContainer {
 
     private final Drivetrain drivetrain;
+    private final PneumaticSubsystem pneumaticSubsystem;
 
     private final XboxController driverController = new XboxController(Constants.XBOX_CONTROLLER);
     private final XboxController intakeController = new XboxController(Constants.XBOX_CONTROLLER2);
@@ -62,10 +63,10 @@ public class RobotContainer {
      * The container for the robot. Contains subsystems, OI devices, and commands.
      */
     public RobotContainer() {
-        drivetrain = new Drivetrain(Constants.LEFT_CANSPARKMAX, Constants.LEFT_CANSPARKMAX_FOLLOWER,
-                Constants.RIGHT_CANSPARKMAX, Constants.RIGHT_CANSPARKMAX_FOLLOWER);
-        drivetrain.setDefaultCommand(
-                new TeleopDrive(drivetrain, driverController, Constants.DRIVE_FWD_REV, Constants.DRIVE_LEFT_RIGHT));
+        drivetrain = new Drivetrain(Constants.LEFT_CANSPARKMAX, Constants.LEFT_CANSPARKMAX_FOLLOWER,Constants.RIGHT_CANSPARKMAX, Constants.RIGHT_CANSPARKMAX_FOLLOWER);
+        drivetrain.setDefaultCommand(new TeleopDrive(drivetrain, driverController, Constants.DRIVE_FWD_REV, Constants.DRIVE_LEFT_RIGHT));
+
+        pneumaticSubsystem = new PneumaticSubsystem(Constants.SOLENOID_CHANNEL_1, Constants.SOLENOID_CHANNEL_2);
 
         // Configure the button bindings
         configureButtonBindings();
@@ -153,7 +154,7 @@ public class RobotContainer {
     private void configureButtonBindings() {
         Button reverseDriveButton = new JoystickButton(driverController, Constants.REVERSE_DRIVE_DIRECTION);
         Button overrideMotorProtectionButton = new JoystickButton(driverController, Constants.OVERRIDE_MOTOR_PROTECTION);
-        Button toggleIntake = new JoystickButton(intakeController, Constants.INTAKE_TOGGLE);
+        Button toggleIntakeButton = new JoystickButton(intakeController, Constants.INTAKE_TOGGLE);
         reverseDriveButton.whenPressed(() -> {
             TeleopDrive.toggleReverseDrive();
             driveReversedEntry.setBoolean(TeleopDrive.isReversed());
@@ -164,16 +165,15 @@ public class RobotContainer {
             drivetrain.setOverheatShutoffOverride(override);
             if (override) {
                 // Set the colour to a new one
-                drivetrainMotorStatus.withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OVERRIDDEN))
-                        .getEntry().setBoolean(true);
+                drivetrainMotorStatus.withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OVERRIDDEN)).getEntry().setBoolean(true);
                 getLogger().logWarning("Motor temperature protection overridden");
             } else {
                 // Set the colour back
-                drivetrainMotorStatus.withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK)).getEntry()
-                        .setBoolean(!(drivetrain.isOverheating() || drivetrain.isOverheatWarning()));
+                drivetrainMotorStatus.withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK)).getEntry().setBoolean(!(drivetrain.isOverheating() || drivetrain.isOverheatWarning()));
                 getLogger().logInfo("Motor temperature protection re-enabled");
             }
         });
+        //toggleIntakeButton.whileActiveOnce()
     }
 
     private void initLogger() {

@@ -10,10 +10,10 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Pneumatics extends SubsystemBase {
+public class PneumaticSubsystem extends SubsystemBase {
     private final DoubleSolenoid solenoid;
     
-	public Pneumatics(int forwardChannel, int reverseChannel) {
+	public PneumaticSubsystem(int forwardChannel, int reverseChannel) {
 		solenoid = new DoubleSolenoid(forwardChannel, reverseChannel);
         set(DoubleSolenoid.Value.kReverse); //Start raised
 	}
