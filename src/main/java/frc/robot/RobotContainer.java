@@ -42,6 +42,7 @@ public class RobotContainer {
     private final Drivetrain drivetrain;
 
     private final XboxController driverController = new XboxController(Constants.XBOX_CONTROLLER);
+    private final XboxController intakeController = new XboxController(Constants.XBOX_CONTROLLER2);
 
     private final Rumble errorRumble = new Rumble(driverController, Rumble.SIDE_BOTH, 1, 400, 3);
     private final Rumble warningRumble = new Rumble(driverController, Rumble.SIDE_BOTH, 0.75, 300);
@@ -151,8 +152,8 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         Button reverseDriveButton = new JoystickButton(driverController, Constants.REVERSE_DRIVE_DIRECTION);
-        Button overrideMotorProtectionButton = new JoystickButton(driverController,
-                Constants.OVERRIDE_MOTOR_PROTECTION);
+        Button overrideMotorProtectionButton = new JoystickButton(driverController, Constants.OVERRIDE_MOTOR_PROTECTION);
+        Button toggleIntake = new JoystickButton(intakeController, Constants.INTAKE_TOGGLE);
         reverseDriveButton.whenPressed(() -> {
             TeleopDrive.toggleReverseDrive();
             driveReversedEntry.setBoolean(TeleopDrive.isReversed());
