@@ -28,8 +28,10 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.TeleopDrive;
+import frc.robot.commands.ManualIntake;
 import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.PneumaticSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.IndexerSubsystem;
 /**
  * This class is where the bulk of the robot should be declared. Since
  * Command-based is a "declarative" paradigm, very little robot logic should
@@ -40,10 +42,11 @@ import frc.robot.subsystems.PneumaticSubsystem;
 public class RobotContainer {
 
     private final Drivetrain drivetrain;
-    private final PneumaticSubsystem pneumaticSubsystem;
+    private final IntakeSubsystem intakeSubsystem;
+    private final IndexerSubsystem indexerSubsystem;
 
-    private final XboxController driverController = new XboxController(Constants.XBOX_CONTROLLER);
-    private final XboxController intakeController = new XboxController(Constants.XBOX_CONTROLLER2);
+    private final XboxController driverController = new XboxController(Constants.XBOX_DRIVER);
+    private final XboxController operatorController = new XboxController(Constants.XBOX_INTAKE);
 
     private final Rumble errorRumble = new Rumble(driverController, Rumble.SIDE_BOTH, 1, 400, 3);
     private final Rumble warningRumble = new Rumble(driverController, Rumble.SIDE_BOTH, 0.75, 300);
@@ -66,7 +69,10 @@ public class RobotContainer {
         drivetrain = new Drivetrain(Constants.LEFT_CANSPARKMAX, Constants.LEFT_CANSPARKMAX_FOLLOWER,Constants.RIGHT_CANSPARKMAX, Constants.RIGHT_CANSPARKMAX_FOLLOWER);
         drivetrain.setDefaultCommand(new TeleopDrive(drivetrain, driverController, Constants.DRIVE_FWD_REV, Constants.DRIVE_LEFT_RIGHT));
 
-        pneumaticSubsystem = new PneumaticSubsystem(Constants.SOLENOID_CHANNEL_1, Constants.SOLENOID_CHANNEL_2);
+        intakeSubsystem = new IntakeSubsystem();
+
+        indexerSubsystem = new IndexerSubsystem();
+        indexerSubsystem.setDefaultCommand(new ManualIntake(indexerSubsystem, operatorController, Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -154,7 +160,7 @@ public class RobotContainer {
     private void configureButtonBindings() {
         Button reverseDriveButton = new JoystickButton(driverController, Constants.REVERSE_DRIVE_DIRECTION);
         Button overrideMotorProtectionButton = new JoystickButton(driverController, Constants.OVERRIDE_MOTOR_PROTECTION);
-        Button toggleIntakeButton = new JoystickButton(intakeController, Constants.INTAKE_TOGGLE);
+        Button toggleIntakeButton = new JoystickButton(operatorController, Constants.INTAKE_TOGGLE);
         reverseDriveButton.whenPressed(() -> {
             TeleopDrive.toggleReverseDrive();
             driveReversedEntry.setBoolean(TeleopDrive.isReversed());
@@ -173,7 +179,7 @@ public class RobotContainer {
                 getLogger().logInfo("Motor temperature protection re-enabled");
             }
         });
-        //toggleIntakeButton.whileActiveOnce()
+        //toggleIntakeButton.whenPressed()
     }
 
     private void initLogger() {
