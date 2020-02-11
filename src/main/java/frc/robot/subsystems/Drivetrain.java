@@ -68,7 +68,7 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
-     * Set the percentage output of the left motor. 
+     * Set the percentage output of the left motor.
      * 
      * @param output The motor output
      * @see #setMotors(double, double)
@@ -311,6 +311,35 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
+     * Drives the robot with forwards/backwards translation and rotation.
+     * 
+     * @param translation The translation ([-1.0, 1.0])
+     * @param rotation    The rotation ([-1.0, 1.0])
+     */
+    public void arcadeDrive(double translation, double rotation) {
+        arcadeDrive(translation, rotation, 1.0);
+    }
+
+    /**
+     * Drives the robot with forwards/backwards translation and rotation.
+     * 
+     * <p>
+     * The values will be scaled by the scaling factor before given to the motors. A
+     * negative rotation value rotates the robot counterclockwise.
+     * </p>
+     * 
+     * @param translation   The translation ([-1.0, 1.0])
+     * @param rotation      The rotation ([-1.0, 1.0])
+     * @param scalingFactor The scaling factor to multiply the output by
+     */
+    public void arcadeDrive(double translation, double rotation, double scalingFactor) {
+        double l = (translation + rotation) * scalingFactor;
+        double r = (translation - rotation) * scalingFactor;
+
+        setMotors(l, r);
+    }
+
+    /**
      * Creates a new drivetrain.
      */
     public Drivetrain(int leftMaster, int leftFollower, int rightMaster, int rightFollower) {
@@ -330,6 +359,7 @@ public class Drivetrain extends SubsystemBase {
         // According to the docs, setInverted() has no effect if motor is a follower
         // Therefore only the master needs to be inverted
         leftMotor.setInverted(true);
+        rightMotor.setInverted(false);
 
         leftEncoder.setPositionConversionFactor(Constants.POSITION_CONVERSION_FACTOR);
         rightEncoder.setPositionConversionFactor(Constants.POSITION_CONVERSION_FACTOR);

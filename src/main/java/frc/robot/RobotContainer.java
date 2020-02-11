@@ -100,7 +100,7 @@ public class RobotContainer {
                     TeleopDrive.setPrecisionFactor(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
         configTab.add("Ramping Rate", TeleopDrive.getRampingRate()).withWidget(BuiltInWidgets.kNumberSlider)
-                .withProperties(Map.of("min", 0.0, "max", 3.0)).getEntry().addListener(notif -> {
+                .withProperties(Map.of("min", 0.0, "max", 1.0)).getEntry().addListener(notif -> {
                     TeleopDrive.setRampingRate(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
         configTab.add("Motor Warning Temp.", Constants.MOTOR_WARNING_TEMP).withWidget(BuiltInWidgets.kNumberSlider)
