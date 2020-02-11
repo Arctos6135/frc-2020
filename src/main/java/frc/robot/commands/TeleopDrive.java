@@ -27,7 +27,7 @@ public class TeleopDrive extends CommandBase {
 													// precisionDrive
 
 	// Ramping related
-	private static double rampingRate = 1; // Time in seconds to go from 0 to full throttle.
+	private static double rampingRate = 0.375; // Time in seconds to go from 0 to full throttle.
 
 	public TeleopDrive(Drivetrain drivetrain, GenericHID controller, int fwdRevAxis, int leftRightAxis) {
 		this.drivetrain = drivetrain;
@@ -155,7 +155,7 @@ public class TeleopDrive extends CommandBase {
 		if (Math.abs(x) <= deadband) {
 			return 0;
 		}
-		return Math.copySign(1.0 - Math.abs(x), x) / (1.0 - deadband);
+		return Math.copySign(Math.abs(x) - deadband, x) / (1.0 - deadband);
 	}
 
 	@Override
