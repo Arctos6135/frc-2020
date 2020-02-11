@@ -51,15 +51,13 @@ public final class Constants {
     // Intake Related 
     public static final int XBOX_INTAKE = 1;
     public static final int INTAKE_TOGGLE = XboxController.Button.kB.value;
-    // | Pneumatics Constants
-    public static final int SOLENOID_CHANNEL_1 = 0;
-    public static final int SOLENOID_CHANNEL_2 = 1;
-    // | Roller Motor Constsants
-    public static final int UPPER_ROLLER_TALONSRX = 1;
-    public static final int LOWER_ROLLER_TALONSRX = 2;
-    // | Indexer Constants
     public static final int INTAKE_FORWARD_BUTTON = XboxController.Button.kBumperLeft.value;
     public static final int INTAKE_REVERSE_BUTTON = XboxController.Button.kBumperRight.value;
+    // | Pneumatics Constants
+    public static final int SOLENOID_CHANNEL_1 = 1;
+    public static final int SOLENOID_CHANNEL_2 = 2;
+    // | Roller Motor Constsants
+    public static final int MAIN_ROLLER_TALONSRX = 0;
 
     public static final int COLOR_MOTOR_OK = 0x00FF00FF;
     public static final int COLOR_MOTOR_WARNING = 0xFFFF00FF;

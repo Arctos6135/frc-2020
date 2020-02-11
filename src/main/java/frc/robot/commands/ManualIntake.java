@@ -9,21 +9,22 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.IndexerSubsystem;;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.Constants;
 
 public class ManualIntake extends CommandBase {
-    private final IndexerSubsystem indexerSubsystem;
+    private final IntakeSubsystem intakeSubsystem;
     private final GenericHID controller;
     private final int forwardButton;
     private final int reverseButton;
+    private boolean isExtended = false;
 
-    public ManualIntake(IndexerSubsystem indexerSubsystem, GenericHID controller, int forwardButton, int reverseButton) {
-        this.indexerSubsystem = indexerSubsystem;
+    public ManualIntake(IntakeSubsystem intakeSubsystem, GenericHID controller, int forwardButton, int reverseButton) {
+        this.intakeSubsystem = intakeSubsystem;
         this.controller = controller;
         this.forwardButton = forwardButton;
         this.reverseButton = reverseButton;
-        addRequirements(indexerSubsystem);
+        addRequirements(intakeSubsystem);
     }
 
     // Called when the command is initially scheduled.
@@ -36,21 +37,33 @@ public class ManualIntake extends CommandBase {
     public void execute() {
         boolean forward = controller.getRawButton(Constants.INTAKE_FORWARD_BUTTON);
         boolean reverse = controller.getRawButton(Constants.INTAKE_REVERSE_BUTTON);
+        boolean toggle = controller.getRawButtonPressed(Constants.INTAKE_TOGGLE);
+        //Roller Code
         if(forward & !reverse){
-            indexerSubsystem.setMotors(1);
+            intakeSubsystem.setMotors(1);
         }
         else if(!forward & reverse){
-            indexerSubsystem.setMotors(-1);
+            intakeSubsystem.setMotors(-1);
         }
         else{
-            indexerSubsystem.setMotors(0);
+            intakeSubsystem.setMotors(0);
+        }
+        //Piston Code
+        if(toggle){
+            boolean stateExtension = intakeSubsystem.getExtended();
+            if(stateExtension){
+                intakeSubsystem.setPistons(0);
+            }
+            else{
+                intakeSubsystem.setPistons(1);
+            }
         }
     }
 
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
-        indexerSubsystem.setMotors(0);
+        intakeSubsystem.setMotors(0);
     }
 
     // Returns true when the command should end.

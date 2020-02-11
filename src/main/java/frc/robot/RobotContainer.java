@@ -31,7 +31,6 @@ import frc.robot.commands.TeleopDrive;
 import frc.robot.commands.ManualIntake;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.IndexerSubsystem;
 /**
  * This class is where the bulk of the robot should be declared. Since
  * Command-based is a "declarative" paradigm, very little robot logic should
@@ -43,7 +42,6 @@ public class RobotContainer {
 
     private final Drivetrain drivetrain;
     private final IntakeSubsystem intakeSubsystem;
-    private final IndexerSubsystem indexerSubsystem;
 
     private final XboxController driverController = new XboxController(Constants.XBOX_DRIVER);
     private final XboxController operatorController = new XboxController(Constants.XBOX_INTAKE);
@@ -69,10 +67,11 @@ public class RobotContainer {
         drivetrain = new Drivetrain(Constants.LEFT_CANSPARKMAX, Constants.LEFT_CANSPARKMAX_FOLLOWER,Constants.RIGHT_CANSPARKMAX, Constants.RIGHT_CANSPARKMAX_FOLLOWER);
         drivetrain.setDefaultCommand(new TeleopDrive(drivetrain, driverController, Constants.DRIVE_FWD_REV, Constants.DRIVE_LEFT_RIGHT));
 
-        intakeSubsystem = new IntakeSubsystem();
+        intakeSubsystem = new IntakeSubsystem(Constants.MAIN_ROLLER_TALONSRX,Constants.SOLENOID_CHANNEL_1,Constants.SOLENOID_CHANNEL_2);
+        intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, operatorController, Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON))
 
-        indexerSubsystem = new IndexerSubsystem();
-        indexerSubsystem.setDefaultCommand(new ManualIntake(indexerSubsystem, operatorController, Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
+        //indexerSubsystem = new IndexerSubsystem();
+        //indexerSubsystem.setDefaultCommand(new ManualIntake(indexerSubsystem, operatorController, Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
 
         // Configure the button bindings
         configureButtonBindings();
