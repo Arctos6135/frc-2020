@@ -68,11 +68,8 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(new TeleopDrive(drivetrain, driverController, Constants.DRIVE_FWD_REV, Constants.DRIVE_LEFT_RIGHT));
 
         intakeSubsystem = new IntakeSubsystem(Constants.MAIN_ROLLER_TALONSRX,Constants.SOLENOID_CHANNEL_1,Constants.SOLENOID_CHANNEL_2);
-        intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, operatorController, Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON))
-
-        //indexerSubsystem = new IndexerSubsystem();
-        //indexerSubsystem.setDefaultCommand(new ManualIntake(indexerSubsystem, operatorController, Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
-
+        intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, operatorController, Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
+        
         // Configure the button bindings
         configureButtonBindings();
 
