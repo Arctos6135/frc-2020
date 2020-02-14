@@ -50,6 +50,7 @@ public class RobotContainer {
     private final ShuffleboardTab driveTab;
 
     private NetworkTableEntry driveReversedEntry;
+    private NetworkTableEntry precisionDriveEntry;
     private SimpleWidget drivetrainMotorStatus;
 
     private NetworkTableEntry lastError;
@@ -112,6 +113,8 @@ public class RobotContainer {
 
         driveReversedEntry = driveTab.add("Reversed", TeleopDrive.isReversed()).withWidget(BuiltInWidgets.kBooleanBox)
                 .getEntry();
+        precisionDriveEntry = driveTab.add("Precision Drive", TeleopDrive.isPrecisionDrive())
+                .withWidget(BuiltInWidgets.kBooleanBox).getEntry();
         drivetrainMotorStatus = driveTab.add("DT Motor Status", true).withWidget(BuiltInWidgets.kBooleanBox)
                 .withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK, "color when false",
                         Constants.COLOR_MOTOR_WARNING));
@@ -151,12 +154,18 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         Button reverseDriveButton = new JoystickButton(driverController, Constants.REVERSE_DRIVE_DIRECTION);
+        Button precisionDriveButton = new JoystickButton(driverController, Constants.PRECISION_DRIVE_TOGGLE);
         Button overrideMotorProtectionButton = new JoystickButton(driverController,
                 Constants.OVERRIDE_MOTOR_PROTECTION);
         reverseDriveButton.whenPressed(() -> {
             TeleopDrive.toggleReverseDrive();
             driveReversedEntry.setBoolean(TeleopDrive.isReversed());
             getLogger().logInfo("Drive reverse set to " + TeleopDrive.isReversed());
+        });
+        precisionDriveButton.whenPressed(() -> {
+            TeleopDrive.togglePrecisionDrive();
+            precisionDriveEntry.setBoolean(TeleopDrive.isPrecisionDrive());
+            getLogger().logInfo(TeleopDrive.isPrecisionDrive() ? "Precision drive is ON" : "Precision drive is OFF");
         });
         overrideMotorProtectionButton.whenPressed(() -> {
             boolean override = !drivetrain.getOverheatShutoffOverride();
