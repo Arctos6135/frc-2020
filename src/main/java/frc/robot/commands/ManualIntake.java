@@ -10,14 +10,12 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.Constants;
 
 public class ManualIntake extends CommandBase {
     private final IntakeSubsystem intakeSubsystem;
     private final GenericHID controller;
     private final int forwardButton;
     private final int reverseButton;
-    private boolean isExtended = false;
 
     public ManualIntake(IntakeSubsystem intakeSubsystem, GenericHID controller, int forwardButton, int reverseButton) {
         this.intakeSubsystem = intakeSubsystem;

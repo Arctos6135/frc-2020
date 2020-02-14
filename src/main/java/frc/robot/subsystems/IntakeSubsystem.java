@@ -26,7 +26,6 @@ public class IntakeSubsystem extends SubsystemBase {
 
     // | Neutral Mode
     NeutralMode neutralMode;
-
     public void setNeutralMode(NeutralMode mode) {
         neutralMode = mode;
         mainMotor.setNeutralMode(mode);
