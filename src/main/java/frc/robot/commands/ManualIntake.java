@@ -37,7 +37,7 @@ public class ManualIntake extends CommandBase {
     public void execute() {
         boolean forward = controller.getRawButton(Constants.INTAKE_FORWARD_BUTTON);
         boolean reverse = controller.getRawButton(Constants.INTAKE_REVERSE_BUTTON);
-        boolean toggle = controller.getRawButtonPressed(Constants.INTAKE_TOGGLE);
+        
         //Roller Code
         if(forward & !reverse){
             intakeSubsystem.setMotors(1);
@@ -47,16 +47,6 @@ public class ManualIntake extends CommandBase {
         }
         else{
             intakeSubsystem.setMotors(0);
-        }
-        //Piston Code
-        if(toggle){
-            boolean stateExtension = intakeSubsystem.getExtended();
-            if(stateExtension){
-                intakeSubsystem.setPistons(0);
-            }
-            else{
-                intakeSubsystem.setPistons(1);
-            }
         }
     }
 

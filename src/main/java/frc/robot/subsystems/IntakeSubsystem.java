@@ -15,52 +15,51 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class IntakeSubsystem extends SubsystemBase {
-    //Motor Related Variables
+    // Motor Related Variables
     private final TalonSRX mainMotor;
-    //Pneumatic Related Variables
+    // Pneumatic Related Variables
     private final DoubleSolenoid solenoid;
     private boolean isExtended = false;
 
-    //Motor Related
-    public void setMotors(double scale){
+    // Motor Related
+    public void setMotors(double scale) {
         mainMotor.set(ControlMode.PercentOutput, scale);
-	}
+    }
 
     // | Neutral Mode
     NeutralMode neutralMode;
+
     public void setNeutralMode(NeutralMode mode) {
         neutralMode = mode;
-		mainMotor.setNeutralMode(mode);
+        mainMotor.setNeutralMode(mode);
     }
 
     public NeutralMode getNeutralMode() {
         return neutralMode;
     }
 
-    public boolean getExtended() {
+    public boolean getPistons() {
         return isExtended;
     }
 
-    //Pneumatic related
-    public void setPistons(int Extend){
-        //Set Extended to either 0 or 1
-        if(Extend==1&!isExtended){
+    // Pneumatic related
+    public void setPistons(boolean State) {
+        //true for extended, false for retracted
+        if (State && !isExtended) {
             isExtended = true;
             solenoid.set(DoubleSolenoid.Value.kForward);
-        }
-        else if(Extend==0&isExtended){
+        } else if (!State && isExtended) {
             isExtended = false;
             solenoid.set(DoubleSolenoid.Value.kReverse);
         }
-        
     }
 
     public IntakeSubsystem(int master, int forwardChannel, int reverseChannel) {
-        //Motors
+        // Motors
         mainMotor = new TalonSRX(master);
-        //Pneumatics
+        // Pneumatics
         solenoid = new DoubleSolenoid(forwardChannel, reverseChannel);
-        setPistons(1);
+        setPistons(true);
     }
 
     @Override

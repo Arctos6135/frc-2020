@@ -157,6 +157,18 @@ public class RobotContainer {
         Button reverseDriveButton = new JoystickButton(driverController, Constants.REVERSE_DRIVE_DIRECTION);
         Button overrideMotorProtectionButton = new JoystickButton(driverController, Constants.OVERRIDE_MOTOR_PROTECTION);
         Button toggleIntakeButton = new JoystickButton(operatorController, Constants.INTAKE_TOGGLE);
+        //Piston Toggle Code
+        toggleIntakeButton.whenPressed(new InstantCommand(() -> {
+            //Piston Code
+            boolean stateExtension = intakeSubsystem.getPistons();
+            if(stateExtension){
+                intakeSubsystem.setPistons(false);
+            }
+            else{
+                intakeSubsystem.setPistons(true);
+            }
+        }, intakeSubsystem));
+
         reverseDriveButton.whenPressed(() -> {
             TeleopDrive.toggleReverseDrive();
             driveReversedEntry.setBoolean(TeleopDrive.isReversed());

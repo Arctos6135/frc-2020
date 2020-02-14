@@ -54,8 +54,8 @@ public final class Constants {
     public static final int INTAKE_FORWARD_BUTTON = XboxController.Button.kBumperLeft.value;
     public static final int INTAKE_REVERSE_BUTTON = XboxController.Button.kBumperRight.value;
     // | Pneumatics Constants
-    public static final int SOLENOID_CHANNEL_1 = 1;
-    public static final int SOLENOID_CHANNEL_2 = 2;
+    public static final int SOLENOID_CHANNEL_1 = 0;
+    public static final int SOLENOID_CHANNEL_2 = 1;
     // | Roller Motor Constsants
     public static final int MAIN_ROLLER_TALONSRX = 0;
 
