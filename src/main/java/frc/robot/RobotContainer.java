@@ -68,8 +68,8 @@ public class RobotContainer {
                 Constants.RIGHT_CANSPARKMAX, Constants.RIGHT_CANSPARKMAX_FOLLOWER);
         limelight = new Limelight();
 
-        drivetrain.setDefaultCommand(
-                new TeleopDrive(drivetrain, driverController, Constants.DRIVE_FWD_REV, Constants.DRIVE_LEFT_RIGHT));
+        drivetrain.setDefaultCommand(new TeleopDrive(drivetrain, limelight, driverController, Constants.DRIVE_FWD_REV,
+                Constants.DRIVE_LEFT_RIGHT, Constants.AUTO_ALIGN));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -172,14 +172,15 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         Button reverseDriveButton = new JoystickButton(driverController, Constants.REVERSE_DRIVE_DIRECTION);
-        Button autoAlignButton = new JoystickButton(driverController, Constants.AUTO_ALIGN);
+        // Button autoAlignButton = new JoystickButton(driverController,
+        // Constants.AUTO_ALIGN);
         Button overrideMotorProtectionButton = new JoystickButton(driverController,
                 Constants.OVERRIDE_MOTOR_PROTECTION);
         reverseDriveButton.whenPressed(new InstantCommand(() -> {
             TeleopDrive.toggleReverseDrive();
             driveReversedEntry.setBoolean(TeleopDrive.isReversed());
         }));
-        autoAlignButton.whenPressed(new AlignToTarget(drivetrain, limelight));
+        // autoAlignButton.whenPressed(new AlignToTarget(drivetrain, limelight));
         reverseDriveButton.whenPressed(() -> {
             TeleopDrive.toggleReverseDrive();
             driveReversedEntry.setBoolean(TeleopDrive.isReversed());

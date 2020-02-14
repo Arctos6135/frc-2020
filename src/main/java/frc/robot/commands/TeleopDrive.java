@@ -10,12 +10,15 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.Limelight;
 
 public class TeleopDrive extends CommandBase {
 	private final Drivetrain drivetrain;
+	private final Limelight limelight;
 	private final GenericHID controller;
 	private final int X_AXIS;
 	private final int Y_AXIS;
+	private final int AUTO_ALIGN;
 
 	// Controller related
 	private static final double DEADZONE = 0.15;
@@ -24,16 +27,19 @@ public class TeleopDrive extends CommandBase {
 	private static boolean reverseDrive = false;
 	private static boolean precisionDrive = false;
 	private static double precisionFactor = 0.5; // Percentage of default steering input when driving with
-													// precisionDrive
+												 // precisionDrive
 
 	// Ramping related
 	private static double rampingRate = 0.375; // Time in seconds to go from 0 to full throttle.
 
-	public TeleopDrive(Drivetrain drivetrain, GenericHID controller, int fwdRevAxis, int leftRightAxis) {
+	public TeleopDrive(Drivetrain drivetrain, Limelight limelight, GenericHID controller, int fwdRevAxis,
+			int leftRightAxis, int autoAlignButton) {
 		this.drivetrain = drivetrain;
+		this.limelight = limelight;
 		this.controller = controller;
 		this.Y_AXIS = fwdRevAxis;
 		this.X_AXIS = leftRightAxis;
+		this.AUTO_ALIGN = autoAlignButton;
 		addRequirements(drivetrain);
 	}
 
@@ -147,7 +153,7 @@ public class TeleopDrive extends CommandBase {
 	 * -deadband]) will be scaled to the range [-1.0, 1.0].
 	 * </p>
 	 * 
-	 * @param x The value to apply to ([-1.0, 1.0])
+	 * @param x        The value to apply to ([-1.0, 1.0])
 	 * @param deadband The deadband ([-1.0, 1.0])
 	 * @return The value after the deadband was applied
 	 */
@@ -165,14 +171,22 @@ public class TeleopDrive extends CommandBase {
 
 	@Override
 	public void execute() {
-		double x = applyDeadband(controller.getRawAxis(X_AXIS), DEADZONE);
 		// Note the value is negated if the drive is NOT reversed
 		// Because pushing forward on the stick is a negative Y value
-		double y = applyDeadband(reverseDrive ? controller.getRawAxis(Y_AXIS) : -controller.getRawAxis(Y_AXIS), DEADZONE);
-
+		double y = applyDeadband(reverseDrive ? controller.getRawAxis(Y_AXIS) : -controller.getRawAxis(Y_AXIS),
+				DEADZONE);
 		// Square input values to have more control
-		x = Math.copySign(x * x, x);
 		y = Math.copySign(y * y, y);
+
+		double x;
+		// Limelight control steering
+		if (controller.getRawButton(AUTO_ALIGN) && limelight.hasValidTargets()) {
+			// May be changed later
+			x = limelight.getHorizontalAngle() / 27;
+		} else {
+			x = applyDeadband(controller.getRawAxis(X_AXIS), DEADZONE);
+			x = Math.copySign(x * x, x);
+		}
 
 		drivetrain.arcadeDrive(y, x, precisionDrive ? precisionFactor : 1.0);
 	}
