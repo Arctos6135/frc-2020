@@ -35,8 +35,8 @@ public class ManualIntake extends CommandBase {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        boolean forward = controller.getRawButton(Constants.INTAKE_FORWARD_BUTTON);
-        boolean reverse = controller.getRawButton(Constants.INTAKE_REVERSE_BUTTON);
+        boolean forward = controller.getRawButton(forwardButton);
+        boolean reverse = controller.getRawButton(reverseButton);
         
         //Roller Code
         if(forward & !reverse){
