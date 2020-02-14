@@ -73,7 +73,7 @@ public class AlignToTarget extends PIDCommand {
                 () -> 0,
                 // This uses the output
                 output -> {
-                    drivetrain.setMotors(output, -output);
+                    drivetrain.arcadeDrive(0, output);
                 });
 
         this.drivetrain = drivetrain;

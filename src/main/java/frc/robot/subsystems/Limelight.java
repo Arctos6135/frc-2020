@@ -73,15 +73,21 @@ public class Limelight extends SubsystemBase {
     /**
      * Sets limelight’s LED state
      * 
-     * 0 use the LED Mode set in the current pipeline 1 force off 2 force blink 3
-     * force on
+     * <ul>
+     * <li>0 use the LED Mode set in the current pipeline</li>
+     * <li>1 force off</li>
+     * <li>2 force blink</li>
+     * <li>3 force on</li>
+     * </ul>
      */
     private NetworkTableEntry ledMode;
     /**
      * Sets limelight’s operation mode
      * 
-     * 0 Vision processor 1 Driver Camera (Increases exposure, disables vision
-     * processing)
+     * <ul>
+     * <li>0 Vision processor</li>
+     * <li>1 Driver Camera (Increases exposure, disables vision processing)</li>
+     * </ul>
      */
     private NetworkTableEntry camMode;
     /**
@@ -93,15 +99,23 @@ public class Limelight extends SubsystemBase {
     /**
      * Sets limelight’s streaming mode
      * 
-     * 0 Standard - Side-by-side streams if a webcam is attached to Limelight 1 PiP
-     * Main - The secondary camera stream is placed in the lower-right corner of the
-     * primary camera stream 2 PiP Secondary - The primary camera stream is placed
-     * in the lower-right corner of the secondary camera stream
+     * <ul>
+     * <li>0 Standard - Side-by-side streams if a webcam is attached to
+     * Limelight</li>
+     * <li>1 PiP Main - The secondary camera stream is placed in the lower-right
+     * corner of the primary camera stream</li>
+     * <li>2 PiP Secondary - The primary camera stream is placed in the lower-right
+     * corner of the secondary camera stream</li>
+     * </ul>
      */
     private NetworkTableEntry stream;
     /**
-     * Allows users to take snapshots during a match 0 Stop taking snapshots 1 Take
-     * two snapshots per second
+     * Allows users to take snapshots during a match
+     * 
+     * <ul>
+     * <li>0 Stop taking snapshots</li>
+     * <li>1 Take two snapshots per second</li>
+     * </ul>
      */
     private NetworkTableEntry snapshot;
 
@@ -289,9 +303,9 @@ public class Limelight extends SubsystemBase {
     /**
      * Estimates the distance to the target based on its vertical angle.
      * 
-     * @param camHeight The height of the camera
+     * @param camHeight    The height of the camera
      * @param targetHeight The height of the target
-     * @param camAngle The angle of the camera (in degrees)
+     * @param camAngle     The angle of the camera (in degrees)
      * @return The estimated distance
      */
     public double estimateDistance(double camHeight, double targetHeight, double camAngle) {
