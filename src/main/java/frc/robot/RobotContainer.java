@@ -24,8 +24,8 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.FollowTrajectory;
@@ -50,6 +50,9 @@ public class RobotContainer {
 
     private final ShuffleboardTab configTab;
     private final ShuffleboardTab driveTab;
+    private final ShuffleboardTab prematchTab;
+
+    private final SendableChooser<Command> autoChooser = new SendableChooser<>();
 
     private NetworkTableEntry driveReversedEntry;
     private SimpleWidget drivetrainMotorStatus;
@@ -73,7 +76,8 @@ public class RobotContainer {
 
         configTab = Shuffleboard.getTab("Config");
         driveTab = Shuffleboard.getTab("Drive");
-        addConfigurableValues();
+        prematchTab = Shuffleboard.getTab("Pre-match");
+        configureDashboard();
 
         // Wait for DS to attach before initializing the logger
         // The roboRIO's system time only gets updated after connecting
@@ -89,7 +93,7 @@ public class RobotContainer {
         initLogger();
     }
 
-    private void addConfigurableValues() {
+    private void configureDashboard() {
         // Add stuff to the dashboard to make them configurable
         // Put the precision factor on the dashboard and make it configurable
         configTab.add("Precision Drive Factor", TeleopDrive.getPrecisionFactor())
@@ -147,6 +151,11 @@ public class RobotContainer {
         drivetrain.setNormalTempCallback(() -> {
             drivetrainMotorStatus.getEntry().setBoolean(true);
         });
+
+        // Set up autos
+        autoChooser.setDefaultOption("None", null);
+        autoChooser.addOption("Debug", null);
+        prematchTab.add("Auto Mode", autoChooser);
 
         lastError = driveTab.add("Last Error", "").getEntry();
         lastWarning = driveTab.add("Last Warning", "").getEntry();
@@ -214,8 +223,7 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        // TODO
-        return new InstantCommand();
+        return autoChooser.getSelected();
     }
 
     /**
