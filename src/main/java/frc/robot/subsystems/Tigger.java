@@ -9,12 +9,11 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
-public class Trigger extends SubsystemBase {
+public class Tigger extends SubsystemBase {
 
     // motors
     private final TalonSRX backRoller;
@@ -81,14 +80,14 @@ public class Trigger extends SubsystemBase {
     }
 
     /**
-      * Creates a new Trigger.
+      * Creates a new Tigger.
       */
-    public Trigger() {
+    public Tigger(int backMotor, int frontMotor, int bottomSensorChannel, int topSensorChannel) {
         // motors and sensors
-        backRoller = new TalonSRX(Constants.TRIGGER_BACK_ROLLER);
-        frontRoller = new TalonSRX(Constants.TRIGGER_FRONT_ROLLER);
-        bottomSensor = new DigitalInput(Constants.TRIGGER_BOTTON_SENSOR);
-        topSensor = new DigitalInput(Constants.TRIGGER_TOP_SENSOR);
+        backRoller = new TalonSRX(backMotor);
+        frontRoller = new TalonSRX(frontMotor);
+        bottomSensor = new DigitalInput(bottomSensorChannel);
+        topSensor = new DigitalInput(topSensorChannel);
         
         frontMotorSpeed = 0.5;
         backMotorSpeed = 0.5;

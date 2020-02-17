@@ -11,7 +11,6 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 
 public class Indexer extends SubsystemBase {
 
@@ -41,9 +40,9 @@ public class Indexer extends SubsystemBase {
 	/**
 	 * Creates a new Indexer.
 	 */
-	public Indexer() {
-        leftRoller = new TalonSRX(Constants.INDEXER_LEFT_ROLLER);
-        rightRoller = new TalonSRX(Constants.INDEXER_RIGHT_ROLLER);
+	public Indexer(int leftMotor, int rightMotor) {
+        leftRoller = new TalonSRX(leftMotor);
+        rightRoller = new TalonSRX(rightMotor);
 		rightRoller.follow(leftRoller);
 
 		motorSpeed =  0.5;
