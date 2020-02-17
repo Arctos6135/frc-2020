@@ -47,16 +47,19 @@ public final class Constants {
     public static final int DRIVE_LEFT_RIGHT = XboxController.Axis.kRightX.value;
     public static final int REVERSE_DRIVE_DIRECTION = XboxController.Button.kStickLeft.value;
     public static final int OVERRIDE_MOTOR_PROTECTION = XboxController.Button.kB.value;
+    public static final int PRECISION_DRIVE_TOGGLE = XboxController.Button.kX.value;
     
     // Intake Related 
     public static final int XBOX_INTAKE = 1;
     public static final int INTAKE_TOGGLE = XboxController.Button.kB.value;
     public static final int INTAKE_FORWARD_BUTTON = XboxController.Button.kBumperLeft.value;
     public static final int INTAKE_REVERSE_BUTTON = XboxController.Button.kBumperRight.value;
+
     // | Pneumatics Constants
     public static final int SOLENOID_CHANNEL_1 = 0;
     public static final int SOLENOID_CHANNEL_2 = 1;
-    // | Roller Motor Constsants
+
+    // | Roller Motor Constants
     public static final int MAIN_ROLLER_TALONSRX = 0;
 
     public static final int COLOR_MOTOR_OK = 0x00FF00FF;
