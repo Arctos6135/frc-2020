@@ -31,6 +31,7 @@ import frc.robot.commands.ManualIntake;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.Shooter;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -43,6 +44,7 @@ public class RobotContainer {
 
     private final Drivetrain drivetrain;
     private final IntakeSubsystem intakeSubsystem;
+    private final Shooter shooter;
 
     private final XboxController driverController = new XboxController(Constants.XBOX_DRIVER);
     private final XboxController operatorController = new XboxController(Constants.XBOX_INTAKE);
@@ -75,6 +77,8 @@ public class RobotContainer {
                 Constants.SOLENOID_CHANNEL_2);
         intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, operatorController,
                 Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
+
+        shooter = new Shooter(Constants.SHOOTER_MOTOR_1, Constants.SHOOTER_MOTOR_2);
 
         // Configure the button bindings
         configureButtonBindings();
@@ -122,6 +126,8 @@ public class RobotContainer {
                 .addListener(notif -> {
                     Constants.MOTOR_SHUTOFF_TEMP = notif.value.getDouble();
                 }, EntryListenerFlags.kUpdate);
+        configTab.add(new Shooter.SendableCANPIDController(shooter.getPIDController()))
+                .withWidget(BuiltInWidgets.kPIDController).withPosition(0, 4);
 
         driveReversedEntry = driveTab.add("Reversed", TeleopDrive.isReversed()).withWidget(BuiltInWidgets.kBooleanBox)
                 .withPosition(0, 0).withSize(4, 4).getEntry();
