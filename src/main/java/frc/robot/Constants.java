@@ -41,13 +41,26 @@ public final class Constants {
     public static double MOTOR_WARNING_TEMP = 70;
     public static double MOTOR_SHUTOFF_TEMP = 90;
 
-    // Xbox Controller constants
-	public static final int XBOX_CONTROLLER = 0; 
+    // Driver Controller constants
+    public static final int XBOX_DRIVER = 0; 
 	public static final int DRIVE_FWD_REV = XboxController.Axis.kLeftY.value;
     public static final int DRIVE_LEFT_RIGHT = XboxController.Axis.kRightX.value;
     public static final int REVERSE_DRIVE_DIRECTION = XboxController.Button.kStickLeft.value;
     public static final int OVERRIDE_MOTOR_PROTECTION = XboxController.Button.kB.value;
     public static final int PRECISION_DRIVE_TOGGLE = XboxController.Button.kX.value;
+    
+    // Intake Related 
+    public static final int XBOX_INTAKE = 1;
+    public static final int INTAKE_TOGGLE = XboxController.Button.kB.value;
+    public static final int INTAKE_FORWARD_BUTTON = XboxController.Button.kBumperLeft.value;
+    public static final int INTAKE_REVERSE_BUTTON = XboxController.Button.kBumperRight.value;
+
+    // | Pneumatics Constants
+    public static final int SOLENOID_CHANNEL_1 = 0;
+    public static final int SOLENOID_CHANNEL_2 = 1;
+
+    // | Roller Motor Constants
+    public static final int MAIN_ROLLER_TALONSRX = 0;
 
     public static final int COLOR_MOTOR_OK = 0x00FF00FF;
     public static final int COLOR_MOTOR_WARNING = 0xFFFF00FF;
