@@ -28,8 +28,10 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.AlignToTarget;
+import frc.robot.commands.ManualIntake;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.Limelight;
 
 /**
@@ -42,9 +44,11 @@ import frc.robot.subsystems.Limelight;
 public class RobotContainer {
 
     private final Drivetrain drivetrain;
-    public final Limelight limelight;
+    private final Limelight limelight;
+    private final IntakeSubsystem intakeSubsystem;
 
-    private final XboxController driverController = new XboxController(Constants.XBOX_CONTROLLER);
+    private final XboxController driverController = new XboxController(Constants.XBOX_DRIVER);
+    private final XboxController operatorController = new XboxController(Constants.XBOX_INTAKE);
 
     private final Rumble errorRumble = new Rumble(driverController, Rumble.SIDE_BOTH, 1, 400, 3);
     private final Rumble warningRumble = new Rumble(driverController, Rumble.SIDE_BOTH, 0.75, 300);
@@ -53,6 +57,7 @@ public class RobotContainer {
     private final ShuffleboardTab driveTab;
 
     private NetworkTableEntry driveReversedEntry;
+    private NetworkTableEntry precisionDriveEntry;
     private SimpleWidget drivetrainMotorStatus;
 
     private NetworkTableEntry lastError;
@@ -70,6 +75,11 @@ public class RobotContainer {
 
         drivetrain.setDefaultCommand(new TeleopDrive(drivetrain, limelight, driverController, Constants.DRIVE_FWD_REV,
                 Constants.DRIVE_LEFT_RIGHT, Constants.AUTO_ALIGN));
+
+        intakeSubsystem = new IntakeSubsystem(Constants.MAIN_ROLLER_TALONSRX, Constants.SOLENOID_CHANNEL_1,
+                Constants.SOLENOID_CHANNEL_2);
+        intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, operatorController,
+                Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -94,8 +104,7 @@ public class RobotContainer {
 
     private void addConfigurableValues() {
         // Put the precision factor on the dashboard and make it configurable
-        // Add stuff to the dashboard to make them configurable
-        configTab.add("Precision Drive Factor", TeleopDrive.getPrecisionFactor())
+        configTab.add("Precision Drive Factor", TeleopDrive.getPrecisionFactor()).withPosition(0, 0).withSize(9, 4)
                 // Use a number slider from 0-1
                 .withWidget(BuiltInWidgets.kNumberSlider).withProperties(Map.of("min", 0.0, "max", 1.0)).getEntry()
                 // Add a listener to update the value in code once the entry updates
@@ -103,7 +112,8 @@ public class RobotContainer {
                     TeleopDrive.setPrecisionFactor(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
         configTab.add("Ramping Rate", TeleopDrive.getRampingRate()).withWidget(BuiltInWidgets.kNumberSlider)
-                .withProperties(Map.of("min", 0.0, "max", 1.0)).getEntry().addListener(notif -> {
+                .withPosition(9, 0).withSize(9, 4).withProperties(Map.of("min", 0.0, "max", 1.0)).getEntry()
+                .addListener(notif -> {
                     TeleopDrive.setRampingRate(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
         configTab.add("Align kP", AlignToTarget.getKP()).withWidget(BuiltInWidgets.kTextView).getEntry()
@@ -123,19 +133,23 @@ public class RobotContainer {
                     AlignToTarget.setTolerance(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
         configTab.add("Motor Warning Temp.", Constants.MOTOR_WARNING_TEMP).withWidget(BuiltInWidgets.kNumberSlider)
-                .withProperties(Map.of("min", 0.0, "max", 150.0)).getEntry().addListener(notif -> {
+                .withPosition(18, 0).withSize(9, 4).withProperties(Map.of("min", 0.0, "max", 150.0)).getEntry()
+                .addListener(notif -> {
                     Constants.MOTOR_WARNING_TEMP = notif.value.getDouble();
                 }, EntryListenerFlags.kUpdate);
         configTab.add("Motor Shutoff Temp.", Constants.MOTOR_SHUTOFF_TEMP).withWidget(BuiltInWidgets.kNumberSlider)
-                .withProperties(Map.of("min", 0.0, "max", 150.0)).getEntry().addListener(notif -> {
+                .withPosition(27, 0).withSize(9, 4).withProperties(Map.of("min", 0.0, "max", 150.0)).getEntry()
+                .addListener(notif -> {
                     Constants.MOTOR_SHUTOFF_TEMP = notif.value.getDouble();
                 }, EntryListenerFlags.kUpdate);
 
         driveReversedEntry = driveTab.add("Reversed", TeleopDrive.isReversed()).withWidget(BuiltInWidgets.kBooleanBox)
-                .getEntry();
+                .withPosition(0, 0).withSize(4, 4).getEntry();
+        precisionDriveEntry = driveTab.add("Precision", TeleopDrive.isPrecisionDrive()).withPosition(4, 0)
+                .withSize(4, 4).withWidget(BuiltInWidgets.kBooleanBox).getEntry();
         drivetrainMotorStatus = driveTab.add("DT Motor Status", true).withWidget(BuiltInWidgets.kBooleanBox)
-                .withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK, "color when false",
-                        Constants.COLOR_MOTOR_WARNING));
+                .withPosition(8, 0).withSize(6, 4).withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK,
+                        "color when false", Constants.COLOR_MOTOR_WARNING));
         drivetrain.setOverheatShutoffCallback((motor, temp) -> {
             if (!drivetrain.getOverheatShutoffOverride()) {
                 // Make it red
@@ -160,8 +174,8 @@ public class RobotContainer {
             drivetrainMotorStatus.getEntry().setBoolean(true);
         });
 
-        lastError = driveTab.add("Last Error", "").getEntry();
-        lastWarning = driveTab.add("Last Warning", "").getEntry();
+        lastError = driveTab.add("Last Error", "").withPosition(37, 0).withSize(20, 4).getEntry();
+        lastWarning = driveTab.add("Last Warning", "").withPosition(37, 4).withSize(20, 4).getEntry();
     }
 
     /**
@@ -176,15 +190,27 @@ public class RobotContainer {
         // Constants.AUTO_ALIGN);
         Button overrideMotorProtectionButton = new JoystickButton(driverController,
                 Constants.OVERRIDE_MOTOR_PROTECTION);
-        reverseDriveButton.whenPressed(new InstantCommand(() -> {
-            TeleopDrive.toggleReverseDrive();
-            driveReversedEntry.setBoolean(TeleopDrive.isReversed());
-        }));
-        // autoAlignButton.whenPressed(new AlignToTarget(drivetrain, limelight));
+        Button toggleIntakeButton = new JoystickButton(operatorController, Constants.INTAKE_TOGGLE);
+        Button precisionDriveButton = new JoystickButton(driverController, Constants.PRECISION_DRIVE_TOGGLE);
+        // Piston Toggle Code
+        toggleIntakeButton.whenPressed(new InstantCommand(() -> {
+            // Piston Code
+            boolean stateExtension = intakeSubsystem.getPistons();
+            if (stateExtension) {
+                intakeSubsystem.setPistons(false);
+            } else {
+                intakeSubsystem.setPistons(true);
+            }
+        }, intakeSubsystem));
         reverseDriveButton.whenPressed(() -> {
             TeleopDrive.toggleReverseDrive();
             driveReversedEntry.setBoolean(TeleopDrive.isReversed());
             getLogger().logInfo("Drive reverse set to " + TeleopDrive.isReversed());
+        });
+        precisionDriveButton.whenPressed(() -> {
+            TeleopDrive.togglePrecisionDrive();
+            precisionDriveEntry.setBoolean(TeleopDrive.isPrecisionDrive());
+            getLogger().logInfo(TeleopDrive.isPrecisionDrive() ? "Precision drive is ON" : "Precision drive is OFF");
         });
         overrideMotorProtectionButton.whenPressed(() -> {
             boolean override = !drivetrain.getOverheatShutoffOverride();
@@ -201,6 +227,7 @@ public class RobotContainer {
                 getLogger().logInfo("Motor temperature protection re-enabled");
             }
         });
+        // toggleIntakeButton.whenPressed()
     }
 
     private void initLogger() {

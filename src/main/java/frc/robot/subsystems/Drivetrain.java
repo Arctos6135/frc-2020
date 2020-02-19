@@ -18,6 +18,7 @@ import com.revrobotics.EncoderType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 
 public class Drivetrain extends SubsystemBase {
 
@@ -28,6 +29,8 @@ public class Drivetrain extends SubsystemBase {
     private final CANSparkMax leftMotor;
     private final CANSparkMax rightFollowerMotor;
     private final CANSparkMax leftFollowerMotor;
+    private final CANSparkMax[] motors;
+    private final short[] motorFaults = new short[4];
     private final CANEncoder leftEncoder;
     private final CANEncoder rightEncoder;
 
@@ -321,6 +324,8 @@ public class Drivetrain extends SubsystemBase {
         rightEncoder = rightMotor.getEncoder(EncoderType.kHallSensor, Constants.COUNTS_PER_REVOLUTION);
         leftEncoder = leftMotor.getEncoder(EncoderType.kHallSensor, Constants.COUNTS_PER_REVOLUTION);
 
+        motors = new CANSparkMax[] { leftMotor, leftFollowerMotor, rightMotor, rightFollowerMotor };
+
         leftFollowerMotor.follow(leftMotor);
         rightFollowerMotor.follow(rightMotor);
         leftMotor.stopMotor();
@@ -340,10 +345,20 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
-        CANSparkMax[] motors = { leftMotor, leftFollowerMotor, rightMotor, rightFollowerMotor };
         boolean shutoff = false;
         boolean warning = false;
-        for (var motor : motors) {
+        for (int i = 0; i < motors.length; i ++) {
+            var motor = motors[i];
+
+            // Check each motor for faults
+            short faults = motor.getFaults();
+            // If faults have been updated and there is at least one fault
+            // Log it as an error
+            if(faults != motorFaults[i] && faults != 0) {
+                RobotContainer.getLogger().logError("Drivetrain motor " + motor.getDeviceId() + " had fault(s) " + faults);
+            }
+            motorFaults[i] = faults;
+
             // Check every motor for temperature
             double temp = motor.getMotorTemperature();
 
