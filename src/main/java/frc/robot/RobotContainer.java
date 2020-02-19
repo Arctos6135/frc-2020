@@ -136,7 +136,7 @@ public class RobotContainer {
         drivetrainMotorStatus = driveTab.add("DT Motor Status", true).withWidget(BuiltInWidgets.kBooleanBox)
                 .withPosition(8, 0).withSize(6, 4).withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK,
                         "color when false", Constants.COLOR_MOTOR_WARNING));
-        drivetrain.setOverheatShutoffCallback((motor, temp) -> {
+        drivetrain.getMonitorGroup().setOverheatShutoffCallback((motor, temp) -> {
             if (!drivetrain.getOverheatShutoffOverride()) {
                 // Make it red
                 drivetrainMotorStatus.withProperties(Map.of("color when false", Constants.COLOR_MOTOR_SHUTOFF))
@@ -146,7 +146,7 @@ public class RobotContainer {
             getLogger().logError(
                     "Drivetrain motor " + motor.getDeviceId() + " reached overheat shutoff limit at " + temp + "C!");
         });
-        drivetrain.setOverheatWarningCallback((motor, temp) -> {
+        drivetrain.getMonitorGroup().setOverheatWarningCallback((motor, temp) -> {
             if (!drivetrain.getOverheatShutoffOverride()) {
                 // Make it yellow
                 drivetrainMotorStatus.withProperties(Map.of("color when false", Constants.COLOR_MOTOR_WARNING))
@@ -156,7 +156,7 @@ public class RobotContainer {
             getLogger().logWarning(
                     "Drivetrain motor " + motor.getDeviceId() + " reached overheat warning at " + temp + "C!");
         });
-        drivetrain.setNormalTempCallback(() -> {
+        drivetrain.getMonitorGroup().setNormalTempCallback(() -> {
             drivetrainMotorStatus.getEntry().setBoolean(true);
         });
 
@@ -207,7 +207,8 @@ public class RobotContainer {
             } else {
                 // Set the colour back
                 drivetrainMotorStatus.withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK)).getEntry()
-                        .setBoolean(!(drivetrain.isOverheating() || drivetrain.isOverheatWarning()));
+                        .setBoolean(!(drivetrain.getMonitorGroup().getOverheatShutoff()
+                                || drivetrain.getMonitorGroup().getOverheatWarning()));
                 getLogger().logInfo("Motor temperature protection re-enabled");
             }
         });

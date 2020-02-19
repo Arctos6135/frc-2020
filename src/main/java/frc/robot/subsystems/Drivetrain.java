@@ -7,8 +7,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.function.BiConsumer;
-
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
@@ -18,7 +16,7 @@ import com.revrobotics.EncoderType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.RobotContainer;
+import frc.robot.util.MonitoredCANSparkMaxGroup;
 
 public class Drivetrain extends SubsystemBase {
 
@@ -29,27 +27,51 @@ public class Drivetrain extends SubsystemBase {
     private final CANSparkMax leftMotor;
     private final CANSparkMax rightFollowerMotor;
     private final CANSparkMax leftFollowerMotor;
-    private final CANSparkMax[] motors;
-    private final short[] motorFaults = new short[4];
     private final CANEncoder leftEncoder;
     private final CANEncoder rightEncoder;
 
-    private boolean overheatShutoff = false;
-    private boolean overheatWarning = false;
+    private final MonitoredCANSparkMaxGroup monitorGroup;
+
     private boolean protectionOverridden = false;
-    private BiConsumer<CANSparkMax, Double> overheatCallback;
-    private BiConsumer<CANSparkMax, Double> overheatWarningCallback;
-    private Runnable normalTempCallback;
 
     // Having a speed multiplier allows for easy adjustment of top speeds
     private double speedMultiplier = 1.0;
 
+    /**
+     * Set the speed multiplier
+     * 
+     * <p>
+     * All set speed operations are multiplied by this first before being passed to
+     * the motors.
+     * </p>
+     * 
+     * @param multiplier The speed multiplier
+     */
     public void setSpeedMultiplier(double multiplier) {
         speedMultiplier = multiplier;
     }
 
+    /**
+     * Get the speed multiplier.
+     * 
+     * <p>
+     * All set speed operations are multiplied by this first before being passed to
+     * the motors.
+     * </p>
+     * 
+     * @return The speed multiplier
+     */
     public double getSpeedMultiplier() {
         return speedMultiplier;
+    }
+
+    /**
+     * Get the monitored SPARK MAX group used to monitor the motors.
+     * 
+     * @return The monitor group
+     */
+    public MonitoredCANSparkMaxGroup getMonitorGroup() {
+        return monitorGroup;
     }
 
     /**
@@ -73,7 +95,7 @@ public class Drivetrain extends SubsystemBase {
      * @see #setMotors(double, double)
      */
     public void setLeftMotor(double output) {
-        leftMotor.set(overheatShutoff && !protectionOverridden ? 0 : output * speedMultiplier);
+        leftMotor.set(monitorGroup.getOverheatShutoff() && !protectionOverridden ? 0 : output * speedMultiplier);
     }
 
     /**
@@ -83,7 +105,7 @@ public class Drivetrain extends SubsystemBase {
      * @see #setMotors(double, double)
      */
     public void setRightMotor(double output) {
-        rightMotor.set(overheatShutoff && !protectionOverridden ? 0 : output * speedMultiplier);
+        rightMotor.set(monitorGroup.getOverheatShutoff() && !protectionOverridden ? 0 : output * speedMultiplier);
     }
 
     /**
@@ -94,28 +116,6 @@ public class Drivetrain extends SubsystemBase {
     public void setRamping(double rate) {
         leftMotor.setOpenLoopRampRate(rate);
         rightMotor.setOpenLoopRampRate(rate);
-    }
-
-    /**
-     * Get whether any motor is overheating.
-     * 
-     * <p>
-     * If any motor is overheating, the setMotor methods will do nothing.
-     * </p>
-     * 
-     * @return Whether the motors are overheating
-     */
-    public boolean isOverheating() {
-        return overheatShutoff;
-    }
-
-    /**
-     * Get whether any motor has triggered the overheat warning.
-     * 
-     * @return Whether the motors have triggered the warning
-     */
-    public boolean isOverheatWarning() {
-        return overheatWarning;
     }
 
     /**
@@ -146,44 +146,6 @@ public class Drivetrain extends SubsystemBase {
      */
     public boolean getOverheatShutoffOverride() {
         return protectionOverridden;
-    }
-
-    /**
-     * Set the overheat shutoff callback.
-     * 
-     * <p>
-     * The first argument of the callback is the motor that's overheating, and the
-     * second is the temperature.
-     * </p>
-     * 
-     * @param callback The callback
-     */
-    public void setOverheatShutoffCallback(BiConsumer<CANSparkMax, Double> callback) {
-        overheatCallback = callback;
-    }
-
-    /**
-     * Set the overheat warning callback.
-     * 
-     * <p>
-     * The first argument of the callback is the motor that's overheating, and the
-     * second is the temperature.
-     * </p>
-     * 
-     * @param callback The callback
-     */
-    public void setOverheatWarningCallback(BiConsumer<CANSparkMax, Double> callback) {
-        overheatWarningCallback = callback;
-    }
-
-    /**
-     * Set the callback to be called when the motor's temperature has returned to
-     * normal.
-     * 
-     * @param callback The callback
-     */
-    public void setNormalTempCallback(Runnable callback) {
-        normalTempCallback = callback;
     }
 
     // Encoders
@@ -323,8 +285,8 @@ public class Drivetrain extends SubsystemBase {
         leftFollowerMotor = new CANSparkMax(leftFollower, MotorType.kBrushless);
         rightEncoder = rightMotor.getEncoder(EncoderType.kHallSensor, Constants.COUNTS_PER_REVOLUTION);
         leftEncoder = leftMotor.getEncoder(EncoderType.kHallSensor, Constants.COUNTS_PER_REVOLUTION);
-
-        motors = new CANSparkMax[] { leftMotor, leftFollowerMotor, rightMotor, rightFollowerMotor };
+        monitorGroup = new MonitoredCANSparkMaxGroup("Drivetrain", Constants.MOTOR_WARNING_TEMP,
+                Constants.MOTOR_SHUTOFF_TEMP, leftMotor, leftFollowerMotor, rightMotor, rightFollowerMotor);
 
         leftFollowerMotor.follow(leftMotor);
         rightFollowerMotor.follow(rightMotor);
@@ -345,43 +307,7 @@ public class Drivetrain extends SubsystemBase {
 
     @Override
     public void periodic() {
-        boolean shutoff = false;
-        boolean warning = false;
-        for (int i = 0; i < motors.length; i ++) {
-            var motor = motors[i];
-
-            // Check each motor for faults
-            short faults = motor.getFaults();
-            // If faults have been updated and there is at least one fault
-            // Log it as an error
-            if(faults != motorFaults[i] && faults != 0) {
-                RobotContainer.getLogger().logError("Drivetrain motor " + motor.getDeviceId() + " had fault(s) " + faults);
-            }
-            motorFaults[i] = faults;
-
-            // Check every motor for temperature
-            double temp = motor.getMotorTemperature();
-
-            if (temp >= Constants.MOTOR_SHUTOFF_TEMP) {
-                // Only call the callback if not already overheating
-                if (!overheatShutoff && overheatCallback != null) {
-                    overheatCallback.accept(motor, temp);
-                }
-                shutoff = true;
-            } else if (temp >= Constants.MOTOR_WARNING_TEMP) {
-                if (!overheatWarning && overheatWarningCallback != null) {
-                    overheatWarningCallback.accept(motor, temp);
-                }
-                warning = true;
-            }
-        }
-        // Run the return to normal callback
-        if ((overheatShutoff || overheatWarning) && (!shutoff && !warning) && normalTempCallback != null) {
-            normalTempCallback.run();
-        }
-
-        overheatShutoff = shutoff;
-        overheatWarning = warning;
+        monitorGroup.monitorOnce();
     }
 
 }
