@@ -99,7 +99,7 @@ public class RobotContainer {
 
     private void addConfigurableValues() {
         // Put the precision factor on the dashboard and make it configurable
-        configTab.add("Precision Drive Factor", TeleopDrive.getPrecisionFactor())
+        configTab.add("Precision Drive Factor", TeleopDrive.getPrecisionFactor()).withPosition(0, 0).withSize(9, 4)
                 // Use a number slider from 0-1
                 .withWidget(BuiltInWidgets.kNumberSlider).withProperties(Map.of("min", 0.0, "max", 1.0)).getEntry()
                 // Add a listener to update the value in code once the entry updates
@@ -108,25 +108,28 @@ public class RobotContainer {
                 }, EntryListenerFlags.kUpdate);
         // Do the same with the ramping rate
         configTab.add("Ramping Rate", TeleopDrive.getRampingRate()).withWidget(BuiltInWidgets.kNumberSlider)
-                .withProperties(Map.of("min", 0.0, "max", 1.0)).getEntry().addListener(notif -> {
+                .withPosition(9, 0).withSize(9, 4).withProperties(Map.of("min", 0.0, "max", 1.0)).getEntry()
+                .addListener(notif -> {
                     TeleopDrive.setRampingRate(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
         configTab.add("Motor Warning Temp.", Constants.MOTOR_WARNING_TEMP).withWidget(BuiltInWidgets.kNumberSlider)
-                .withProperties(Map.of("min", 0.0, "max", 150.0)).getEntry().addListener(notif -> {
+                .withPosition(18, 0).withSize(9, 4).withProperties(Map.of("min", 0.0, "max", 150.0)).getEntry()
+                .addListener(notif -> {
                     Constants.MOTOR_WARNING_TEMP = notif.value.getDouble();
                 }, EntryListenerFlags.kUpdate);
         configTab.add("Motor Shutoff Temp.", Constants.MOTOR_SHUTOFF_TEMP).withWidget(BuiltInWidgets.kNumberSlider)
-                .withProperties(Map.of("min", 0.0, "max", 150.0)).getEntry().addListener(notif -> {
+                .withPosition(27, 0).withSize(9, 4).withProperties(Map.of("min", 0.0, "max", 150.0)).getEntry()
+                .addListener(notif -> {
                     Constants.MOTOR_SHUTOFF_TEMP = notif.value.getDouble();
                 }, EntryListenerFlags.kUpdate);
 
         driveReversedEntry = driveTab.add("Reversed", TeleopDrive.isReversed()).withWidget(BuiltInWidgets.kBooleanBox)
-                .getEntry();
-        precisionDriveEntry = driveTab.add("Precision Drive", TeleopDrive.isPrecisionDrive())
-                .withWidget(BuiltInWidgets.kBooleanBox).getEntry();
+                .withPosition(0, 0).withSize(4, 4).getEntry();
+        precisionDriveEntry = driveTab.add("Precision", TeleopDrive.isPrecisionDrive()).withPosition(4, 0)
+                .withSize(4, 4).withWidget(BuiltInWidgets.kBooleanBox).getEntry();
         drivetrainMotorStatus = driveTab.add("DT Motor Status", true).withWidget(BuiltInWidgets.kBooleanBox)
-                .withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK, "color when false",
-                        Constants.COLOR_MOTOR_WARNING));
+                .withPosition(8, 0).withSize(6, 4).withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK,
+                        "color when false", Constants.COLOR_MOTOR_WARNING));
         drivetrain.setOverheatShutoffCallback((motor, temp) -> {
             if (!drivetrain.getOverheatShutoffOverride()) {
                 // Make it red
@@ -151,8 +154,8 @@ public class RobotContainer {
             drivetrainMotorStatus.getEntry().setBoolean(true);
         });
 
-        lastError = driveTab.add("Last Error", "").getEntry();
-        lastWarning = driveTab.add("Last Warning", "").getEntry();
+        lastError = driveTab.add("Last Error", "").withPosition(37, 0).withSize(20, 4).getEntry();
+        lastWarning = driveTab.add("Last Warning", "").withPosition(37, 4).withSize(20, 4).getEntry();
     }
 
     /**
