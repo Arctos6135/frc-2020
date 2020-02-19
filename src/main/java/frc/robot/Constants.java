@@ -7,6 +7,8 @@
 
 package frc.robot;
 
+import com.arctos6135.robotpathfinder.core.RobotSpecs;
+
 import edu.wpi.first.wpilibj.XboxController;
 
 /**
@@ -29,9 +31,9 @@ public final class Constants {
     public static final int LEFT_CANSPARKMAX_FOLLOWER = 2;
     public static final int RIGHT_CANSPARKMAX = 3;
     public static final int RIGHT_CANSPARKMAX_FOLLOWER = 4;
-    
+
     // SPARK MAX encoder constants
-	public static final int WHEEL_DIAMETER = 6;
+    public static final int WHEEL_DIAMETER = 6;
     public static final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
     public static final double GEARBOX_RATIO = 1 / 10.5; // First stage 84:12 second stage 36:24
     public static final double POSITION_CONVERSION_FACTOR = WHEEL_CIRCUMFERENCE * GEARBOX_RATIO;
@@ -42,14 +44,14 @@ public final class Constants {
     public static double MOTOR_SHUTOFF_TEMP = 90;
 
     // Driver Controller constants
-    public static final int XBOX_DRIVER = 0; 
-	public static final int DRIVE_FWD_REV = XboxController.Axis.kLeftY.value;
+    public static final int XBOX_DRIVER = 0;
+    public static final int DRIVE_FWD_REV = XboxController.Axis.kLeftY.value;
     public static final int DRIVE_LEFT_RIGHT = XboxController.Axis.kRightX.value;
     public static final int REVERSE_DRIVE_DIRECTION = XboxController.Button.kStickLeft.value;
     public static final int OVERRIDE_MOTOR_PROTECTION = XboxController.Button.kB.value;
     public static final int PRECISION_DRIVE_TOGGLE = XboxController.Button.kX.value;
-    
-    // Intake Related 
+
+    // Intake Related
     public static final int XBOX_INTAKE = 1;
     public static final int INTAKE_TOGGLE = XboxController.Button.kB.value;
     public static final int INTAKE_FORWARD_BUTTON = XboxController.Button.kBumperLeft.value;
@@ -66,4 +68,11 @@ public final class Constants {
     public static final int COLOR_MOTOR_WARNING = 0xFFFF00FF;
     public static final int COLOR_MOTOR_SHUTOFF = 0xFF0000FF;
     public static final int COLOR_MOTOR_OVERRIDDEN = 0xA72DFFFF;
+
+    // TODO: Change these
+    public static final double ROBOT_MAX_VELOCITY = 0;
+    public static final double ROBOT_MAX_ACCELERATION = 0;
+    public static final double ROBOT_BASE_WIDTH = 0;
+    public static final RobotSpecs ROBOT_SPECS = new RobotSpecs(ROBOT_MAX_VELOCITY, ROBOT_MAX_ACCELERATION,
+            ROBOT_BASE_WIDTH);
 }
