@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
@@ -57,8 +56,6 @@ public class RobotContainer {
     private final ShuffleboardTab driveTab;
     private final ShuffleboardTab prematchTab;
 
-    private final SendableChooser<Command> autoChooser = new SendableChooser<>();
-
     private NetworkTableEntry driveReversedEntry;
     private NetworkTableEntry precisionDriveEntry;
     private SimpleWidget drivetrainMotorStatus;
@@ -67,6 +64,8 @@ public class RobotContainer {
     private NetworkTableEntry lastWarning;
 
     private static RobotLogger logger = new RobotLogger();
+
+    private Autos autos;
 
     /**
      * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -81,6 +80,10 @@ public class RobotContainer {
                 Constants.SOLENOID_CHANNEL_2);
         intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, operatorController,
                 Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
+        
+        // Construct here
+        // There's a chance this may take a lot of time
+        autos = new Autos();
 
         // Configure the button bindings
         configureButtonBindings();
@@ -168,10 +171,8 @@ public class RobotContainer {
             drivetrainMotorStatus.getEntry().setBoolean(true);
         });
 
-        // Set up autos
-        autoChooser.setDefaultOption("None", null);
-        autoChooser.addOption("Debug", null);
-        prematchTab.add("Auto Mode", autoChooser);
+        // Add auto chooser
+        prematchTab.add("Auto Mode", autos.getChooser()).withPosition(0, 0).withSize(9, 4);
 
         lastError = driveTab.add("Last Error", "").withPosition(37, 0).withSize(20, 4).getEntry();
         lastWarning = driveTab.add("Last Warning", "").withPosition(37, 4).withSize(20, 4).getEntry();
@@ -257,7 +258,7 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
-        return autoChooser.getSelected();
+        return autos.getAuto(autos.getChooser().getSelected(), drivetrain);
     }
 
     /**
