@@ -103,7 +103,7 @@ public class MonitoredCANSparkMaxGroup {
     }
 
     /**
-     * Runs the monitoring loop once. 
+     * Runs the monitoring loop once.
      */
     public void monitorOnce() {
         boolean shutoff = false;

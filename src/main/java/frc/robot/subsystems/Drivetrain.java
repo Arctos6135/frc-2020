@@ -308,6 +308,10 @@ public class Drivetrain extends SubsystemBase {
     @Override
     public void periodic() {
         monitorGroup.monitorOnce();
+
+        if(monitorGroup.getOverheatShutoff()) {
+            setMotors(0, 0);
+        }
     }
 
 }

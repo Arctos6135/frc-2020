@@ -49,8 +49,10 @@ public class RobotContainer {
     private final XboxController driverController = new XboxController(Constants.XBOX_DRIVER);
     private final XboxController operatorController = new XboxController(Constants.XBOX_INTAKE);
 
-    private final Rumble errorRumble = new Rumble(driverController, Rumble.SIDE_BOTH, 1, 400, 3);
-    private final Rumble warningRumble = new Rumble(driverController, Rumble.SIDE_BOTH, 0.75, 300);
+    private final Rumble errorRumbleDriver = new Rumble(driverController, Rumble.SIDE_BOTH, 1, 400, 3);
+    private final Rumble warningRumbleDriver = new Rumble(driverController, Rumble.SIDE_BOTH, 0.75, 300);
+    private final Rumble errorRumbleOperator = new Rumble(operatorController, Rumble.SIDE_BOTH, 1, 400, 3);
+    private final Rumble warningRumbleOperator = new Rumble(operatorController, Rumble.SIDE_BOTH, 0.75, 300);
 
     private final ShuffleboardTab configTab;
     private final ShuffleboardTab driveTab;
@@ -58,6 +60,7 @@ public class RobotContainer {
     private NetworkTableEntry driveReversedEntry;
     private NetworkTableEntry precisionDriveEntry;
     private SimpleWidget drivetrainMotorStatus;
+    private SimpleWidget shooterMotorStatus;
 
     private NetworkTableEntry lastError;
     private NetworkTableEntry lastWarning;
@@ -133,31 +136,63 @@ public class RobotContainer {
                 .withPosition(0, 0).withSize(4, 4).getEntry();
         precisionDriveEntry = driveTab.add("Precision", TeleopDrive.isPrecisionDrive()).withPosition(4, 0)
                 .withSize(4, 4).withWidget(BuiltInWidgets.kBooleanBox).getEntry();
+        // Add the motor status boolean boxes
         drivetrainMotorStatus = driveTab.add("DT Motor Status", true).withWidget(BuiltInWidgets.kBooleanBox)
+                // Set the size and custom colours
                 .withPosition(8, 0).withSize(6, 4).withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK,
                         "color when false", Constants.COLOR_MOTOR_WARNING));
+        shooterMotorStatus = driveTab.add("Shooter Motor Status", true).withWidget(BuiltInWidgets.kBooleanBox)
+                .withPosition(14, 0).withSize(6, 4).withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK,
+                        "color when false", Constants.COLOR_MOTOR_WARNING));
+        // Overheat shutoff
+        // Should log error, rumble and make the status box red
         drivetrain.getMonitorGroup().setOverheatShutoffCallback((motor, temp) -> {
             if (!drivetrain.getOverheatShutoffOverride()) {
                 // Make it red
                 drivetrainMotorStatus.withProperties(Map.of("color when false", Constants.COLOR_MOTOR_SHUTOFF))
                         .getEntry().setBoolean(false);
-                errorRumble.execute();
+                errorRumbleDriver.execute();
             }
             getLogger().logError(
                     "Drivetrain motor " + motor.getDeviceId() + " reached overheat shutoff limit at " + temp + "C!");
         });
+        shooter.getMonitorGroup().setOverheatShutoffCallback((motor, temp) -> {
+            if (!shooter.getOverheatShutoffOverride()) {
+                shooterMotorStatus.withProperties(Map.of("color when false", Constants.COLOR_MOTOR_SHUTOFF)).getEntry()
+                        .setBoolean(false);
+                errorRumbleOperator.execute();
+            }
+            getLogger().logError(
+                    "Shooter motor " + motor.getDeviceId() + " reached overheat shutoff limit at " + temp + "C!");
+        });
+        // Overheat warning
+        // Should log warning, rumble and make the box yellow
         drivetrain.getMonitorGroup().setOverheatWarningCallback((motor, temp) -> {
             if (!drivetrain.getOverheatShutoffOverride()) {
                 // Make it yellow
                 drivetrainMotorStatus.withProperties(Map.of("color when false", Constants.COLOR_MOTOR_WARNING))
                         .getEntry().setBoolean(false);
-                warningRumble.execute();
+                warningRumbleDriver.execute();
             }
             getLogger().logWarning(
                     "Drivetrain motor " + motor.getDeviceId() + " reached overheat warning at " + temp + "C!");
         });
+        shooter.getMonitorGroup().setOverheatWarningCallback((motor, temp) -> {
+            if (!shooter.getOverheatShutoffOverride()) {
+                shooterMotorStatus.withProperties(Map.of("color when false", Constants.COLOR_MOTOR_WARNING)).getEntry()
+                        .setBoolean(false);
+                warningRumbleOperator.execute();
+            }
+            getLogger().logWarning(
+                    "Shooter motor " + motor.getDeviceId() + " reached overheat warning at " + temp + " C!");
+        });
+        // Return to normal callback
+        // Should just clear the box and set it to green
         drivetrain.getMonitorGroup().setNormalTempCallback(() -> {
             drivetrainMotorStatus.getEntry().setBoolean(true);
+        });
+        shooter.getMonitorGroup().setNormalTempCallback(() -> {
+            shooterMotorStatus.getEntry().setBoolean(true);
         });
 
         lastError = driveTab.add("Last Error", "").withPosition(37, 0).withSize(20, 4).getEntry();
@@ -172,7 +207,8 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         Button reverseDriveButton = new JoystickButton(driverController, Constants.REVERSE_DRIVE_DIRECTION);
-        Button overrideMotorProtectionButton = new JoystickButton(driverController,
+        Button dtOverheatOverrideButton = new JoystickButton(driverController, Constants.OVERRIDE_MOTOR_PROTECTION);
+        Button shooterOverheatOverrideButton = new JoystickButton(operatorController,
                 Constants.OVERRIDE_MOTOR_PROTECTION);
         Button toggleIntakeButton = new JoystickButton(operatorController, Constants.INTAKE_TOGGLE);
         Button precisionDriveButton = new JoystickButton(driverController, Constants.PRECISION_DRIVE_TOGGLE);
@@ -196,23 +232,39 @@ public class RobotContainer {
             precisionDriveEntry.setBoolean(TeleopDrive.isPrecisionDrive());
             getLogger().logInfo(TeleopDrive.isPrecisionDrive() ? "Precision drive is ON" : "Precision drive is OFF");
         });
-        overrideMotorProtectionButton.whenPressed(() -> {
+        // Override overheat protection
+        // This should set the colour to purple if overridden, otherwise it should
+        // restore the correct colour
+        dtOverheatOverrideButton.whenPressed(() -> {
             boolean override = !drivetrain.getOverheatShutoffOverride();
             drivetrain.setOverheatShutoffOverride(override);
             if (override) {
                 // Set the colour to a new one
                 drivetrainMotorStatus.withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OVERRIDDEN))
                         .getEntry().setBoolean(true);
-                getLogger().logWarning("Motor temperature protection overridden");
+                getLogger().logWarning("Drivetrain motor temperature protection overridden");
             } else {
                 // Set the colour back
                 drivetrainMotorStatus.withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK)).getEntry()
                         .setBoolean(!(drivetrain.getMonitorGroup().getOverheatShutoff()
                                 || drivetrain.getMonitorGroup().getOverheatWarning()));
-                getLogger().logInfo("Motor temperature protection re-enabled");
+                getLogger().logInfo("Drivetrain motor temperature protection re-enabled");
             }
         });
-        // toggleIntakeButton.whenPressed()
+        shooterOverheatOverrideButton.whenPressed(() -> {
+            boolean override = !shooter.getOverheatShutoffOverride();
+            shooter.setOverheatShutoffOverride(override);
+            if (override) {
+                shooterMotorStatus.withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OVERRIDDEN))
+                        .getEntry().setBoolean(true);
+                getLogger().logWarning("Shooter motor temperature protection overridden");
+            } else {
+                shooterMotorStatus.withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK)).getEntry()
+                        .setBoolean(!(shooter.getMonitorGroup().getOverheatShutoff()
+                                || shooter.getMonitorGroup().getOverheatWarning()));
+                getLogger().logInfo("Shooter motor temperature protection re-enabled");
+            }
+        });
     }
 
     private void initLogger() {

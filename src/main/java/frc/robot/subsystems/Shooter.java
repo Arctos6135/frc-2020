@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.MonitoredCANSparkMaxGroup;
 
 /**
  * The shooter subsystem.
@@ -31,7 +32,6 @@ public class Shooter extends SubsystemBase {
     public static class SendableCANPIDController implements Sendable {
 
         private CANPIDController controller;
-
         private double setpoint = 0;
         private boolean enabled = false;
 
@@ -83,12 +83,18 @@ public class Shooter extends SubsystemBase {
     private CANEncoder encoder;
     private CANPIDController pidController;
 
+    private MonitoredCANSparkMaxGroup monitorGroup;
+
+    private boolean protectionOverridden = false;
+
     /**
      * Creates a new Shooter.
      */
     public Shooter(int motor1, int motor2) {
         masterMotor = new CANSparkMax(motor1, MotorType.kBrushless);
         followerMotor = new CANSparkMax(motor2, MotorType.kBrushless);
+        monitorGroup = new MonitoredCANSparkMaxGroup("Shooter", Constants.MOTOR_WARNING_TEMP,
+                Constants.MOTOR_SHUTOFF_TEMP, masterMotor, followerMotor);
         encoder = masterMotor.getEncoder(EncoderType.kHallSensor, Constants.COUNTS_PER_REVOLUTION);
         pidController = masterMotor.getPIDController();
 
@@ -128,7 +134,8 @@ public class Shooter extends SubsystemBase {
      * @param rpm The desired velocity of the shooter
      */
     public void setVelocity(double rpm) {
-        pidController.setReference(rpm, ControlType.kVelocity);
+        pidController.setReference(monitorGroup.getOverheatShutoff() && !protectionOverridden ? 0 : rpm,
+                ControlType.kVelocity);
     }
 
     /**
@@ -140,8 +147,53 @@ public class Shooter extends SubsystemBase {
         return pidController;
     }
 
+    /**
+     * Get the monitored SPARK MAX group used to monitor the motors.
+     * 
+     * @return The monitor group
+     */
+    public MonitoredCANSparkMaxGroup getMonitorGroup() {
+        return monitorGroup;
+    }
+
+    /**
+     * Set whether the overheat shutoff is overridden.
+     * 
+     * <p>
+     * When overridden, the motors will still be active even if the shutoff limit
+     * was reached. However, callbacks will still be called and the motors will
+     * still be in a "shutoff" or "warning" state.
+     * </p>
+     * 
+     * @param override Whether the overheat shutoff should be overridden
+     */
+    public void setOverheatShutoffOverride(boolean override) {
+        this.protectionOverridden = override;
+    }
+
+    /**
+     * Return whether the overheat shutoff was overridden.
+     * 
+     * <p>
+     * When overridden, the motors will still be active even if the shutoff limit
+     * was reached. However, callbacks will still be called and the motors will
+     * still be in a "shutoff" or "warning" state.
+     * </p>
+     * 
+     * @return Whether the overheat shutoff has been overridden
+     */
+    public boolean getOverheatShutoffOverride() {
+        return protectionOverridden;
+    }
+
     @Override
     public void periodic() {
         // This method will be called once per scheduler run
+        monitorGroup.monitorOnce();
+
+        if (monitorGroup.getOverheatShutoff()) {
+            setVelocity(0);
+            masterMotor.stopMotor();
+        }
     }
 }
