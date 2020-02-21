@@ -45,13 +45,14 @@ public class RobotContainer {
     private final IntakeSubsystem intakeSubsystem;
 
     private final XboxController driverController = new XboxController(Constants.XBOX_DRIVER);
-    private final XboxController operatorController = new XboxController(Constants.XBOX_INTAKE);
+    private final XboxController operatorController = new XboxController(Constants.XBOX_OPERATOR);
 
     private final Rumble errorRumble = new Rumble(driverController, Rumble.SIDE_BOTH, 1, 400, 3);
     private final Rumble warningRumble = new Rumble(driverController, Rumble.SIDE_BOTH, 0.75, 300);
 
     private final ShuffleboardTab configTab;
     private final ShuffleboardTab driveTab;
+    private final ShuffleboardTab debugTab;
 
     private NetworkTableEntry driveReversedEntry;
     private NetworkTableEntry precisionDriveEntry;
@@ -71,7 +72,7 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
                 new TeleopDrive(drivetrain, driverController, Constants.DRIVE_FWD_REV, Constants.DRIVE_LEFT_RIGHT));
 
-        intakeSubsystem = new IntakeSubsystem(Constants.MAIN_ROLLER_TALONSRX, Constants.SOLENOID_CHANNEL_1,
+        intakeSubsystem = new IntakeSubsystem(Constants.INTAKE_ROLLER_VICTOR, Constants.SOLENOID_CHANNEL_1,
                 Constants.SOLENOID_CHANNEL_2);
         intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, operatorController,
                 Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
@@ -81,6 +82,7 @@ public class RobotContainer {
 
         configTab = Shuffleboard.getTab("Config");
         driveTab = Shuffleboard.getTab("Drive");
+        debugTab = Shuffleboard.getTab("Debug");
         addConfigurableValues();
 
         // Wait for DS to attach before initializing the logger
@@ -156,6 +158,8 @@ public class RobotContainer {
 
         lastError = driveTab.add("Last Error", "").withPosition(37, 0).withSize(20, 4).getEntry();
         lastWarning = driveTab.add("Last Warning", "").withPosition(37, 4).withSize(20, 4).getEntry();
+
+        debugTab.add(drivetrain).withPosition(0, 0).withSize(19, 15);
     }
 
     /**
@@ -205,7 +209,6 @@ public class RobotContainer {
                 getLogger().logInfo("Motor temperature protection re-enabled");
             }
         });
-        // toggleIntakeButton.whenPressed()
     }
 
     private void initLogger() {

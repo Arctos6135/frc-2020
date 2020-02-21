@@ -8,13 +8,14 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class IntakeSubsystem extends SubsystemBase {
     // Motor Related Variables
-    private final TalonSRX mainMotor;
+    private final VictorSPX mainMotor;
     // Pneumatic Related Variables
     private final DoubleSolenoid solenoid;
     private boolean isExtended = false;
@@ -40,12 +41,12 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     // Pneumatic related
-    public void setPistons(boolean State) {
+    public void setPistons(boolean state) {
         //true for extended, false for retracted
-        if (State && !isExtended) {
+        if (state && !isExtended) {
             isExtended = true;
             solenoid.set(DoubleSolenoid.Value.kForward);
-        } else if (!State && isExtended) {
+        } else if (!state && isExtended) {
             isExtended = false;
             solenoid.set(DoubleSolenoid.Value.kReverse);
         }
@@ -53,7 +54,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public IntakeSubsystem(int master, int forwardChannel, int reverseChannel) {
         // Motors
-        mainMotor = new TalonSRX(master);
+        mainMotor = new VictorSPX(master);
         // Pneumatics
         solenoid = new DoubleSolenoid(forwardChannel, reverseChannel);
         setPistons(true);
