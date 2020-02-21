@@ -14,6 +14,7 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.EncoderType;
 
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.MonitoredCANSparkMaxGroup;
@@ -314,4 +315,18 @@ public class Drivetrain extends SubsystemBase {
         }
     }
 
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        super.initSendable(builder);
+
+        builder.setSmartDashboardType("DifferentialDrive");
+        builder.setActuator(true);
+        builder.setSafeState(() -> {
+            setMotors(0, 0);
+        });
+        // Note: Not simulation-friendly
+        // The call to CANSparkMax.get() will result in a buffer overflow in simulations
+        builder.addDoubleProperty("Left Motor Speed", leftMotor::get, this::setLeftMotor);
+        builder.addDoubleProperty("Right Motor Speed", rightMotor::get, this::setRightMotor);
+    }
 }
