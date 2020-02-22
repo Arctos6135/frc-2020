@@ -13,22 +13,29 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
-public class Tigger extends SubsystemBase {
+public class IndexerTiggerSubsystem extends SubsystemBase {
 
-    // motors
+    // Tigger related variables
     private final TalonSRX backRoller;
     private final TalonSRX frontRoller;
-    // sensors
     private final DigitalInput bottomSensor;
     private final DigitalInput topSensor;
-    
-    // other variables
+
     private int powercellCount;
-    private double backMotorSpeed;
-    private double frontMotorSpeed;
+    private double tiggerMotorSpeed;
     
+    // Indexer related variables
+    private final TalonSRX leftRoller;
+    private final TalonSRX rightRoller;
+    
+    private double indexerMotorSpeed;
+
     public void addPowercellCount() {
         powercellCount += 1;
+    }
+
+    public void reducePowercellCount() {
+        powercellCount -= 1;
     }
 
     public int getPowercellCount()  {
@@ -39,24 +46,16 @@ public class Tigger extends SubsystemBase {
         powercellCount = 0;
     }
     
-    public void setBackMotorSpeed(double backMotorSpeed) {
-        this.backMotorSpeed = backMotorSpeed;
+    public void setTiggerMotorSpeed(double tiggerMotorSpeed) {
+        this.tiggerMotorSpeed = tiggerMotorSpeed;
     }
 
-    public double getBackMotorSpeed() {
-        return backMotorSpeed;
-    }
-
-    public void setFrontMotorSpeed(double frontMotorSpeed) {
-        this.frontMotorSpeed = frontMotorSpeed;
-    }
-
-    public double getFrontMotorSpeed() {
-        return frontMotorSpeed;
+    public double getTiggerMotorSpeed() {
+        return tiggerMotorSpeed;
     }
 
     public void startBackRoller() {
-        backRoller.set(ControlMode.PercentOutput, backMotorSpeed);
+        backRoller.set(ControlMode.PercentOutput, tiggerMotorSpeed);
     }
 
     public void stopBackRoller() {
@@ -64,7 +63,7 @@ public class Tigger extends SubsystemBase {
     }
 
     public void startFrontRoller() {
-        frontRoller.set(ControlMode.PercentOutput, frontMotorSpeed);
+        frontRoller.set(ControlMode.PercentOutput, tiggerMotorSpeed);
     }
 
     public void stopFrontRoller() {
@@ -79,18 +78,40 @@ public class Tigger extends SubsystemBase {
         return bottomSensor.get();
     }
 
+    public void setIndexerMotorSpeed(double indexerMotorSpeed) {
+		this.indexerMotorSpeed = indexerMotorSpeed;
+	}
+
+	public double getIndexerMotorSpeed() {
+		return indexerMotorSpeed;
+	}
+
+    public void startIndexer() {
+		leftRoller.set(ControlMode.PercentOutput, indexerMotorSpeed);
+	}
+
+	public void stopIndexer() {
+		leftRoller.set(ControlMode.PercentOutput, 0);
+	}
+
     /**
-      * Creates a new Tigger.
+      * Creates a new IndexerTiggerSubsystem.
       */
-    public Tigger(int backMotor, int frontMotor, int bottomSensorChannel, int topSensorChannel) {
-        // motors and sensors
+    public IndexerTiggerSubsystem(int backMotor, int frontMotor, int bottomSensorChannel, int topSensorChannel,int leftMotor, int rightMotor) {
+        // Tigger related setup
         backRoller = new TalonSRX(backMotor);
         frontRoller = new TalonSRX(frontMotor);
         bottomSensor = new DigitalInput(bottomSensorChannel);
         topSensor = new DigitalInput(topSensorChannel);
         
-        frontMotorSpeed = 0.5;
-        backMotorSpeed = 0.5;
+        tiggerMotorSpeed = 0.5;
+
+        // Indexer related setup
+        leftRoller = new TalonSRX(leftMotor);
+        rightRoller = new TalonSRX(rightMotor);
+		rightRoller.follow(leftRoller);
+
+		indexerMotorSpeed =  0.5;
     }
 
     @Override

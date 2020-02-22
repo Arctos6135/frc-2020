@@ -28,8 +28,10 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.TeleopDrive;
+import frc.robot.commands.IndexerTigger;
 import frc.robot.commands.ManualIntake;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.IndexerTiggerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -42,6 +44,7 @@ public class RobotContainer {
 
     private final Drivetrain drivetrain;
     private final IntakeSubsystem intakeSubsystem;
+    private final IndexerTiggerSubsystem indexerTiggerSubsystem;
 
     private final XboxController driverController = new XboxController(Constants.XBOX_DRIVER);
     private final XboxController operatorController = new XboxController(Constants.XBOX_INTAKE);
@@ -69,6 +72,9 @@ public class RobotContainer {
 
         intakeSubsystem = new IntakeSubsystem(Constants.MAIN_ROLLER_TALONSRX,Constants.SOLENOID_CHANNEL_1,Constants.SOLENOID_CHANNEL_2);
         intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, operatorController, Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
+        
+        indexerTiggerSubsystem = new IndexerTiggerSubsystem(Constants.TIGGER_BACK_ROLLER, Constants.TIGGER_FRONT_ROLLER, Constants.TIGGER_BOTTOM_SENSOR, Constants.TIGGER_TOP_SENSOR, Constants.INDEXER_LEFT_ROLLER, Constants.INDEXER_RIGHT_ROLLER);
+        indexerTiggerSubsystem.setDefaultCommand(new IndexerTigger(indexerTiggerSubsystem, intakeSubsystem));
         
         // Configure the button bindings
         configureButtonBindings();
