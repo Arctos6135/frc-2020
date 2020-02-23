@@ -63,6 +63,15 @@ public final class Constants {
     public static final int SOLENOID_CHANNEL_2 = 1;
 
     // | Roller Motor Constants
+    public static final int TIGGER_BACK_ROLLER = 1;
+    public static final int TIGGER_FRONT_ROLLER = 2;
+    public static final int INDEXER_LEFT_ROLLER = 3;
+    public static final int INDEXER_RIGHT_ROLLER = 4;
+    // Photoelectric Sensor place holder values
+    public static final int TIGGER_TOP_SENSOR = 0;
+    public static final int TIGGER_BOTTOM_SENSOR = 1;
+
+    // | Intake Motor Constants
     public static final int INTAKE_ROLLER_VICTOR = 0;
 
     public static final int COLOR_MOTOR_OK = 0x00FF00FF;

@@ -29,9 +29,11 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.IndexerTigger;
 import frc.robot.commands.ManualIntake;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.IndexerTiggerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.Shooter;
 
@@ -47,6 +49,7 @@ public class RobotContainer {
     private final Drivetrain drivetrain;
     private final IntakeSubsystem intakeSubsystem;
     private final Shooter shooter;
+    private final IndexerTiggerSubsystem indexerTiggerSubsystem;
 
     private final XboxController driverController = new XboxController(Constants.XBOX_DRIVER);
     private final XboxController operatorController = new XboxController(Constants.XBOX_OPERATOR);
@@ -85,6 +88,9 @@ public class RobotContainer {
                 Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
 
         shooter = new Shooter(Constants.SHOOTER_MOTOR_1, Constants.SHOOTER_MOTOR_2);
+ 
+        indexerTiggerSubsystem = new IndexerTiggerSubsystem(Constants.TIGGER_BACK_ROLLER, Constants.TIGGER_FRONT_ROLLER, Constants.TIGGER_BOTTOM_SENSOR, Constants.TIGGER_TOP_SENSOR, Constants.INDEXER_LEFT_ROLLER, Constants.INDEXER_RIGHT_ROLLER);
+        indexerTiggerSubsystem.setDefaultCommand(new IndexerTigger(indexerTiggerSubsystem, intakeSubsystem));
 
         configTab = Shuffleboard.getTab("Config");
         driveTab = Shuffleboard.getTab("Drive");
