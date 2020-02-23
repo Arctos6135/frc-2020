@@ -116,22 +116,8 @@ public class RobotContainer {
                 .addListener(notif -> {
                     TeleopDrive.setRampingRate(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
-        configTab.add("Align kP", AlignToTarget.getKP()).withWidget(BuiltInWidgets.kTextView).getEntry()
-                .addListener(notif -> {
-                    AlignToTarget.setKP(notif.value.getDouble());
-                }, EntryListenerFlags.kUpdate);
-        configTab.add("Align kI", AlignToTarget.getKI()).withWidget(BuiltInWidgets.kTextView).getEntry()
-                .addListener(notif -> {
-                    AlignToTarget.setKI(notif.value.getDouble());
-                }, EntryListenerFlags.kUpdate);
-        configTab.add("Align kD", AlignToTarget.getKD()).withWidget(BuiltInWidgets.kTextView).getEntry()
-                .addListener(notif -> {
-                    AlignToTarget.setKD(notif.value.getDouble());
-                }, EntryListenerFlags.kUpdate);
-        configTab.add("Align Tolerance", AlignToTarget.getTolerance()).withWidget(BuiltInWidgets.kTextView).getEntry()
-                .addListener(notif -> {
-                    AlignToTarget.setTolerance(notif.value.getDouble());
-                }, EntryListenerFlags.kUpdate);
+        configTab.add("Align PID", AlignToTarget.getSendable()).withWidget(BuiltInWidgets.kPIDController)
+                .withPosition(0, 1).withSize(6, 11);
         configTab.add("Motor Warning Temp.", Constants.MOTOR_WARNING_TEMP).withWidget(BuiltInWidgets.kNumberSlider)
                 .withPosition(18, 0).withSize(9, 4).withProperties(Map.of("min", 0.0, "max", 150.0)).getEntry()
                 .addListener(notif -> {
