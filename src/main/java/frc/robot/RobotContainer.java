@@ -37,7 +37,6 @@ import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.IndexerTiggerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.Shooter;
-import frc.robot.util.Limelight;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -49,7 +48,6 @@ import frc.robot.util.Limelight;
 public class RobotContainer {
 
     private final Drivetrain drivetrain;
-    private final Limelight limelight;
     private final IntakeSubsystem intakeSubsystem;
     private final Shooter shooter;
     private final IndexerTiggerSubsystem indexerTiggerSubsystem;
@@ -82,9 +80,10 @@ public class RobotContainer {
     public RobotContainer() {
         drivetrain = new Drivetrain(Constants.LEFT_CANSPARKMAX, Constants.LEFT_CANSPARKMAX_FOLLOWER,
                 Constants.RIGHT_CANSPARKMAX, Constants.RIGHT_CANSPARKMAX_FOLLOWER);
-        limelight = new Limelight();
 
-        drivetrain.setDefaultCommand(new TeleopDrive(drivetrain, limelight, driverController, Constants.DRIVE_FWD_REV,
+        shooter = new Shooter(Constants.SHOOTER_MOTOR_1, Constants.SHOOTER_MOTOR_2);
+
+        drivetrain.setDefaultCommand(new TeleopDrive(drivetrain, shooter.getLimelight(), driverController, Constants.DRIVE_FWD_REV,
                 Constants.DRIVE_LEFT_RIGHT, Constants.AUTO_ALIGN));
 
         intakeSubsystem = new IntakeSubsystem(Constants.INTAKE_ROLLER_VICTOR, Constants.SOLENOID_CHANNEL_1,
@@ -92,7 +91,6 @@ public class RobotContainer {
         intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, operatorController,
                 Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
 
-        shooter = new Shooter(Constants.SHOOTER_MOTOR_1, Constants.SHOOTER_MOTOR_2);
 
         indexerTiggerSubsystem = new IndexerTiggerSubsystem(Constants.TIGGER_BACK_ROLLER, Constants.TIGGER_FRONT_ROLLER,
                 Constants.TIGGER_BOTTOM_SENSOR, Constants.TIGGER_TOP_SENSOR, Constants.INDEXER_LEFT_ROLLER,

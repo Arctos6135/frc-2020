@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.Limelight;
 import frc.robot.util.MonitoredCANSparkMaxGroup;
 import frc.robot.util.RangeTable;
 
@@ -90,6 +91,8 @@ public class Shooter extends SubsystemBase {
     private CANEncoder encoder;
     private CANPIDController pidController;
 
+    private Limelight limelight;
+
     private MonitoredCANSparkMaxGroup monitorGroup;
 
     private boolean protectionOverridden = false;
@@ -98,6 +101,8 @@ public class Shooter extends SubsystemBase {
      * Creates a new Shooter.
      */
     public Shooter(int motor1, int motor2) {
+        limelight = new Limelight();
+
         masterMotor = new CANSparkMax(motor1, MotorType.kBrushless);
         followerMotor = new CANSparkMax(motor2, MotorType.kBrushless);
         monitorGroup = new MonitoredCANSparkMaxGroup("Shooter", Constants.MOTOR_WARNING_TEMP,
@@ -139,6 +144,15 @@ public class Shooter extends SubsystemBase {
      */
     public static RangeTable getRangeTable() {
         return rangeTable;
+    }
+
+    /**
+     * Return the shooter's Limelight.
+     * 
+     * @return The Limelight
+     */
+    public Limelight getLimelight() {
+        return limelight;
     }
 
     /**
