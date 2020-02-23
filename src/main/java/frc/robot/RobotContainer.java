@@ -96,7 +96,7 @@ public class RobotContainer {
 
         intakeSubsystem = new IntakeSubsystem(Constants.INTAKE_ROLLER_VICTOR, Constants.SOLENOID_CHANNEL_1,
                 Constants.SOLENOID_CHANNEL_2);
-        intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, operatorController,
+        intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, driverController,
                 Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
         
         // Construct here
@@ -261,7 +261,7 @@ public class RobotContainer {
         Button dtOverheatOverrideButton = new JoystickButton(driverController, Constants.OVERRIDE_MOTOR_PROTECTION);
         Button shooterOverheatOverrideButton = new JoystickButton(operatorController,
                 Constants.OVERRIDE_MOTOR_PROTECTION);
-        Button toggleIntakeButton = new JoystickButton(operatorController, Constants.INTAKE_TOGGLE);
+        Button toggleIntakeButton = new JoystickButton(driverController, Constants.INTAKE_TOGGLE);
         Button precisionDriveButton = new JoystickButton(driverController, Constants.PRECISION_DRIVE_TOGGLE);
         // Piston Toggle Code
         toggleIntakeButton.whenPressed(new InstantCommand(() -> {

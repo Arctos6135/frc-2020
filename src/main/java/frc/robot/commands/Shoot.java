@@ -7,6 +7,8 @@
 
 package frc.robot.commands;
 
+import com.arctos6135.robotlib.oi.Rumble;
+
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
@@ -24,6 +26,8 @@ public class Shoot extends CommandBase {
     private final IndexerTiggerSubsystem indexerTigger;
 
     private final boolean stopWhenEmpty;
+    private final Rumble errorRumble;
+    private final Rumble emptyRumble;
 
     private boolean finish = false;
 
@@ -42,12 +46,17 @@ public class Shoot extends CommandBase {
      * @param shooter       The shooter
      * @param indexerTigger The indexer-Tigger subsystem
      * @param stopWhenEmpty Whether to stop the command when Tigger is empty
+     * @param errorRumble   A Rumble to run when an error occurs
+     * @param emptyRumble   A Rumble to run when Tigger is empty
      */
-    public Shoot(Shooter shooter, IndexerTiggerSubsystem indexerTigger, boolean stopWhenEmpty) {
+    public Shoot(Shooter shooter, IndexerTiggerSubsystem indexerTigger, boolean stopWhenEmpty, Rumble errorRumble,
+            Rumble emptyRumble) {
         addRequirements(shooter, indexerTigger);
         this.shooter = shooter;
         this.indexerTigger = indexerTigger;
         this.stopWhenEmpty = stopWhenEmpty;
+        this.errorRumble = errorRumble;
+        this.emptyRumble = emptyRumble;
     }
 
     // Called when the command is initially scheduled.
@@ -61,7 +70,7 @@ public class Shoot extends CommandBase {
             if (!shooter.getOverheatShutoffOverride() && shooter.getMonitorGroup().getOverheatShutoff()) {
                 finish = true;
                 RobotContainer.getLogger().logError("Shooter is overheating, cannot shoot!");
-                RobotContainer.warningRumbleOperator.execute();
+                errorRumble.execute();
                 return;
             }
             // Estimate the velocity needed to reach the target
@@ -72,7 +81,7 @@ public class Shoot extends CommandBase {
             } catch (IllegalArgumentException e) {
                 finish = true;
                 RobotContainer.getLogger().logError(e.getMessage());
-                RobotContainer.warningRumbleOperator.execute();
+                errorRumble.execute();
                 return;
             }
             // Spin up the shooter
@@ -80,7 +89,7 @@ public class Shoot extends CommandBase {
         } else {
             finish = true;
             RobotContainer.getLogger().logError("Shoot command was executed but no target can be found");
-            RobotContainer.warningRumbleOperator.execute();
+            errorRumble.execute();
         }
     }
 
@@ -105,7 +114,7 @@ public class Shoot extends CommandBase {
                     indexerTigger.reducePowercellCount();
                 }
                 if (indexerTigger.getPowercellCount() == 0) {
-                    RobotContainer.infoRumbleOperator.execute();
+                    emptyRumble.execute();
                 }
             }
             velocityReached = false;

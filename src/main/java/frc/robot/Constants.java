@@ -55,12 +55,12 @@ public final class Constants {
     public static final int AUTO_ALIGN = XboxController.Button.kA.value;
     public static final int OVERRIDE_MOTOR_PROTECTION = XboxController.Button.kB.value;
     public static final int PRECISION_DRIVE_TOGGLE = XboxController.Button.kX.value;
+    public static final int INTAKE_TOGGLE = XboxController.Button.kY.value;
+    public static final int INTAKE_FORWARD_BUTTON = XboxController.Button.kBumperLeft.value;
+    public static final int INTAKE_REVERSE_BUTTON = XboxController.Button.kBumperRight.value;
     
     // Intake Related 
     public static final int XBOX_OPERATOR = 1;
-    public static final int INTAKE_TOGGLE = XboxController.Button.kA.value;
-    public static final int INTAKE_FORWARD_BUTTON = XboxController.Button.kBumperLeft.value;
-    public static final int INTAKE_REVERSE_BUTTON = XboxController.Button.kBumperRight.value;
 
     // | Pneumatics Constants
     public static final int SOLENOID_CHANNEL_1 = 0;
