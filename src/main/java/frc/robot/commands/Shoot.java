@@ -100,13 +100,19 @@ public class Shoot extends CommandBase {
         if (Math.abs(shooter.getVelocity() - targetVelocity) < VELOCITY_TOLERANCE) {
             // Shoot
             indexerTigger.startBackRoller();
+            indexerTigger.startFrontRoller();
+            indexerTigger.startIndexer();
             velocityReached = true;
         } else {
             // Stop feeding balls immediately
             indexerTigger.stopBackRoller();
-            // Velocity reached went from true to false
-            // A ball was shot
-            if (velocityReached) {
+            indexerTigger.stopFrontRoller();
+            indexerTigger.stopIndexer();
+            // Velocity reached went from true to false - A ball was shot
+            // Reduce power cell count by 1
+            // But if the bottom is blocked, a new Power Cell is now at the bottom
+            // So there is no net change in the number of power cells
+            if (velocityReached && !indexerTigger.isBottomBlocked()) {
                 // Reduce power cell count by 1 if there are still any
                 // If it's 0 then there's a counting error
                 // For now don't do anything about it
@@ -124,6 +130,8 @@ public class Shoot extends CommandBase {
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
+        indexerTigger.stopFrontRoller();
+        indexerTigger.stopIndexer();
         indexerTigger.stopBackRoller();
         shooter.setVelocity(0);
     }
