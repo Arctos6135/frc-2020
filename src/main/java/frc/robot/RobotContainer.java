@@ -14,6 +14,7 @@ import java.util.logging.Level;
 
 import com.arctos6135.robotlib.logging.RobotLogger;
 import com.arctos6135.robotlib.oi.Rumble;
+import com.arctos6135.stdplug.api.StdPlugWidgets;
 
 import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -37,6 +38,7 @@ import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.IndexerTiggerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.Shooter;
+import frc.robot.util.Limelight;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -143,7 +145,7 @@ public class RobotContainer {
                     TeleopDrive.setRampingRate(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
         configTab.add("Align PID", AlignToTarget.getSendable()).withWidget(BuiltInWidgets.kPIDController)
-                .withPosition(0, 1).withSize(6, 11);
+                .withPosition(0, 4).withSize(6, 11);
         configTab.add("Motor Warning Temp.", Constants.MOTOR_WARNING_TEMP).withWidget(BuiltInWidgets.kNumberSlider)
                 .withPosition(18, 0).withSize(9, 4).withProperties(Map.of("min", 0.0, "max", 150.0)).getEntry()
                 .addListener(notif -> {
@@ -155,7 +157,7 @@ public class RobotContainer {
                     Constants.MOTOR_SHUTOFF_TEMP = notif.value.getDouble();
                 }, EntryListenerFlags.kUpdate);
         configTab.add("Shooter PID", new Shooter.SendableCANPIDController(shooter.getPIDController()))
-                .withWidget(BuiltInWidgets.kPIDController).withPosition(0, 4);
+                .withWidget(BuiltInWidgets.kPIDController).withPosition(6, 4).withSize(6, 11);
 
         driveReversedEntry = driveTab.add("Reversed", TeleopDrive.isReversed()).withWidget(BuiltInWidgets.kBooleanBox)
                 .withPosition(0, 0).withSize(4, 4).getEntry();
@@ -169,6 +171,8 @@ public class RobotContainer {
         shooterMotorStatus = driveTab.add("Shooter Motor Status", true).withWidget(BuiltInWidgets.kBooleanBox)
                 .withPosition(14, 0).withSize(6, 4).withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK,
                         "color when false", Constants.COLOR_MOTOR_WARNING));
+        shooter.getLimelight().setStreamingMode(Limelight.StreamingMode.STANDARD);
+        driveTab.add("Camera Stream", Limelight.STREAM_URL).withWidget(StdPlugWidgets.MJPEG_STREAM_VIEWER).withPosition(20, 0).withSize(17, 13);
         // Overheat shutoff
         // Should log error, rumble and make the status box red
         drivetrain.getMonitorGroup().setOverheatShutoffCallback((motor, temp) -> {

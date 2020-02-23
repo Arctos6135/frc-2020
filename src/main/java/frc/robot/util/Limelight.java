@@ -16,6 +16,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
  */
 public class Limelight {
 
+    public static final String STREAM_URL = "http://10.61.35.11:5800";
+
     /**
      * Whether there are valid targets (0 or 1)
      */
