@@ -7,6 +7,9 @@
 
 package frc.robot.subsystems;
 
+import java.io.File;
+import java.io.IOException;
+
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
@@ -14,11 +17,13 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.ControlType;
 import com.revrobotics.EncoderType;
 
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.util.MonitoredCANSparkMaxGroup;
+import frc.robot.util.RangeTable;
 
 /**
  * The shooter subsystem.
@@ -78,6 +83,8 @@ public class Shooter extends SubsystemBase {
 
     private static final double kP = 0, kI = 0, kD = 0, kF = 0;
 
+    private static RangeTable rangeTable;
+
     private CANSparkMax masterMotor;
     private CANSparkMax followerMotor;
     private CANEncoder encoder;
@@ -108,6 +115,30 @@ public class Shooter extends SubsystemBase {
         pidController.setFF(kF);
         pidController.setOutputRange(-1, 1);
         pidController.setReference(0, ControlType.kVelocity);
+    }
+
+    /**
+     * Load the range table for the shooter.
+     * 
+     * @throws IOException              If an I/O error occurs
+     * @throws FileNotFoundException    If the file is not found
+     * @throws IllegalArgumentException If the format is incorrect
+     */
+    public static void loadRangeTable() throws IOException {
+        rangeTable = RangeTable.fromCSV(new File(Filesystem.getDeployDirectory() + "/rangetable.csv"));
+    }
+
+    /**
+     * Get the range table for the shooter.
+     * 
+     * <p>
+     * If not loaded, this will return null.
+     * </p>
+     * 
+     * @return The range table for the shooter
+     */
+    public static RangeTable getRangeTable() {
+        return rangeTable;
     }
 
     /**

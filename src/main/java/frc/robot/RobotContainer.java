@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
@@ -17,6 +18,7 @@ import com.arctos6135.robotlib.oi.Rumble;
 import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -84,9 +86,6 @@ public class RobotContainer {
 
         shooter = new Shooter(Constants.SHOOTER_MOTOR_1, Constants.SHOOTER_MOTOR_2);
 
-        // Configure the button bindings
-        configureButtonBindings();
-
         configTab = Shuffleboard.getTab("Config");
         driveTab = Shuffleboard.getTab("Drive");
         debugTab = Shuffleboard.getTab("Debug");
@@ -104,6 +103,17 @@ public class RobotContainer {
             }
         }
         initLogger();
+
+        // Configure the button bindings
+        configureButtonBindings();
+        
+        // Try to load the shooter range table
+        try {
+            Shooter.getRangeTable();
+        }
+        catch(Exception e) {
+            getLogger().logError("Error loading range table: " + e.getMessage());
+        }
     }
 
     private void addConfigurableValues() {
@@ -131,7 +141,7 @@ public class RobotContainer {
                 .addListener(notif -> {
                     Constants.MOTOR_SHUTOFF_TEMP = notif.value.getDouble();
                 }, EntryListenerFlags.kUpdate);
-        configTab.add(new Shooter.SendableCANPIDController(shooter.getPIDController()))
+        configTab.add("Shooter PID", new Shooter.SendableCANPIDController(shooter.getPIDController()))
                 .withWidget(BuiltInWidgets.kPIDController).withPosition(0, 4);
 
         driveReversedEntry = driveTab.add("Reversed", TeleopDrive.isReversed()).withWidget(BuiltInWidgets.kBooleanBox)
@@ -273,7 +283,8 @@ public class RobotContainer {
 
     private void initLogger() {
         try {
-            logger.init(Robot.class);
+            logger.init(Robot.class,
+                    new File(Filesystem.getOperatingDirectory().getCanonicalPath() + "/frc-robot-logs"));
 
             // Set logger level
             // Change this to include or exclude information
