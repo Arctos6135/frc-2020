@@ -32,7 +32,7 @@ import frc.robot.commands.ManualIntake;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.Limelight;
+import frc.robot.util.Limelight;
 
 /**
  * This class is where the bulk of the robot should be declared. Since

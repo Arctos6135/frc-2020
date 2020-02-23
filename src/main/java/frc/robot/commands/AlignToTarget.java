@@ -10,7 +10,7 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
 import frc.robot.subsystems.Drivetrain;
-import frc.robot.subsystems.Limelight;
+import frc.robot.util.Limelight;
 
 /**
  * Align the robot to the target using a PID loop and a Limelight.
@@ -77,8 +77,7 @@ public class AlignToTarget extends PIDCommand {
                 });
 
         this.drivetrain = drivetrain;
-        this.limelight = limelight;
-        addRequirements(this.drivetrain, this.limelight);
+        addRequirements(this.drivetrain);
 
         PIDController controller = getController();
         controller.setTolerance(tolerance);
