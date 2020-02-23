@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.AlignToTarget;
 import frc.robot.commands.IndexerTigger;
 import frc.robot.commands.ManualIntake;
 import frc.robot.commands.TeleopDrive;
@@ -36,6 +37,7 @@ import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.IndexerTiggerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.Shooter;
+import frc.robot.util.Limelight;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -47,6 +49,7 @@ import frc.robot.subsystems.Shooter;
 public class RobotContainer {
 
     private final Drivetrain drivetrain;
+    private final Limelight limelight;
     private final IntakeSubsystem intakeSubsystem;
     private final Shooter shooter;
     private final IndexerTiggerSubsystem indexerTiggerSubsystem;
@@ -79,8 +82,10 @@ public class RobotContainer {
     public RobotContainer() {
         drivetrain = new Drivetrain(Constants.LEFT_CANSPARKMAX, Constants.LEFT_CANSPARKMAX_FOLLOWER,
                 Constants.RIGHT_CANSPARKMAX, Constants.RIGHT_CANSPARKMAX_FOLLOWER);
-        drivetrain.setDefaultCommand(
-                new TeleopDrive(drivetrain, driverController, Constants.DRIVE_FWD_REV, Constants.DRIVE_LEFT_RIGHT));
+        limelight = new Limelight();
+
+        drivetrain.setDefaultCommand(new TeleopDrive(drivetrain, limelight, driverController, Constants.DRIVE_FWD_REV,
+                Constants.DRIVE_LEFT_RIGHT, Constants.AUTO_ALIGN));
 
         intakeSubsystem = new IntakeSubsystem(Constants.INTAKE_ROLLER_VICTOR, Constants.SOLENOID_CHANNEL_1,
                 Constants.SOLENOID_CHANNEL_2);
@@ -88,8 +93,10 @@ public class RobotContainer {
                 Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
 
         shooter = new Shooter(Constants.SHOOTER_MOTOR_1, Constants.SHOOTER_MOTOR_2);
- 
-        indexerTiggerSubsystem = new IndexerTiggerSubsystem(Constants.TIGGER_BACK_ROLLER, Constants.TIGGER_FRONT_ROLLER, Constants.TIGGER_BOTTOM_SENSOR, Constants.TIGGER_TOP_SENSOR, Constants.INDEXER_LEFT_ROLLER, Constants.INDEXER_RIGHT_ROLLER);
+
+        indexerTiggerSubsystem = new IndexerTiggerSubsystem(Constants.TIGGER_BACK_ROLLER, Constants.TIGGER_FRONT_ROLLER,
+                Constants.TIGGER_BOTTOM_SENSOR, Constants.TIGGER_TOP_SENSOR, Constants.INDEXER_LEFT_ROLLER,
+                Constants.INDEXER_RIGHT_ROLLER);
         indexerTiggerSubsystem.setDefaultCommand(new IndexerTigger(indexerTiggerSubsystem, intakeSubsystem));
 
         configTab = Shuffleboard.getTab("Config");
@@ -112,12 +119,11 @@ public class RobotContainer {
 
         // Configure the button bindings
         configureButtonBindings();
-        
+
         // Try to load the shooter range table
         try {
             Shooter.getRangeTable();
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             getLogger().logError("Error loading range table: " + e.getMessage());
         }
     }
@@ -131,12 +137,13 @@ public class RobotContainer {
                 .addListener(notif -> {
                     TeleopDrive.setPrecisionFactor(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
-        // Do the same with the ramping rate
         configTab.add("Ramping Rate", TeleopDrive.getRampingRate()).withWidget(BuiltInWidgets.kNumberSlider)
                 .withPosition(9, 0).withSize(9, 4).withProperties(Map.of("min", 0.0, "max", 1.0)).getEntry()
                 .addListener(notif -> {
                     TeleopDrive.setRampingRate(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
+        configTab.add("Align PID", AlignToTarget.getSendable()).withWidget(BuiltInWidgets.kPIDController)
+                .withPosition(0, 1).withSize(6, 11);
         configTab.add("Motor Warning Temp.", Constants.MOTOR_WARNING_TEMP).withWidget(BuiltInWidgets.kNumberSlider)
                 .withPosition(18, 0).withSize(9, 4).withProperties(Map.of("min", 0.0, "max", 150.0)).getEntry()
                 .addListener(notif -> {
