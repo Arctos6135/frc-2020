@@ -52,13 +52,15 @@ public class RobotContainer {
     private final Shooter shooter;
     private final IndexerTiggerSubsystem indexerTiggerSubsystem;
 
-    private final XboxController driverController = new XboxController(Constants.XBOX_DRIVER);
-    private final XboxController operatorController = new XboxController(Constants.XBOX_OPERATOR);
+    private static final XboxController driverController = new XboxController(Constants.XBOX_DRIVER);
+    private static final XboxController operatorController = new XboxController(Constants.XBOX_OPERATOR);
 
-    private final Rumble errorRumbleDriver = new Rumble(driverController, Rumble.SIDE_BOTH, 1, 400, 3);
-    private final Rumble warningRumbleDriver = new Rumble(driverController, Rumble.SIDE_BOTH, 0.75, 300);
-    private final Rumble errorRumbleOperator = new Rumble(operatorController, Rumble.SIDE_BOTH, 1, 400, 3);
-    private final Rumble warningRumbleOperator = new Rumble(operatorController, Rumble.SIDE_BOTH, 0.75, 300);
+    public static final Rumble infoRumbleDriver = new Rumble(driverController, Rumble.SIDE_BOTH, 1, 200);
+    public static final Rumble errorRumbleDriver = new Rumble(driverController, Rumble.SIDE_BOTH, 1, 400, 3);
+    public static final Rumble warningRumbleDriver = new Rumble(driverController, Rumble.SIDE_BOTH, 0.75, 300);
+    public static final Rumble infoRumbleOperator = new Rumble(operatorController, Rumble.SIDE_BOTH, 1, 200);
+    public static final Rumble errorRumbleOperator = new Rumble(operatorController, Rumble.SIDE_BOTH, 1, 400, 3);
+    public static final Rumble warningRumbleOperator = new Rumble(operatorController, Rumble.SIDE_BOTH, 0.75, 300);
 
     private final ShuffleboardTab configTab;
     private final ShuffleboardTab driveTab;

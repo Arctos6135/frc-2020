@@ -75,6 +75,10 @@ public final class Constants {
     // | Intake Motor Constants
     public static final int INTAKE_ROLLER_VICTOR = 0;
 
+    public static final double LIMELIGHT_HEIGHT = 34;
+    public static final double TARGET_HEIGHT = 115.25;
+    public static final double LIMELIGHT_ANGLE = 0;
+
     public static final int COLOR_MOTOR_OK = 0x00FF00FF;
     public static final int COLOR_MOTOR_WARNING = 0xFFFF00FF;
     public static final int COLOR_MOTOR_SHUTOFF = 0xFF0000FF;
