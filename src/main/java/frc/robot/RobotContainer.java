@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
@@ -18,6 +19,7 @@ import com.arctos6135.stdplug.api.StdPlugWidgets;
 import edu.wpi.first.networktables.EntryListenerFlags;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
@@ -28,11 +30,16 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.AlignToTarget;
 import frc.robot.commands.FollowTrajectory;
+import frc.robot.commands.IndexerTigger;
 import frc.robot.commands.ManualIntake;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.IndexerTiggerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.Shooter;
+import frc.robot.util.Limelight;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -45,20 +52,28 @@ public class RobotContainer {
 
     private final Drivetrain drivetrain;
     private final IntakeSubsystem intakeSubsystem;
+    private final Shooter shooter;
+    private final IndexerTiggerSubsystem indexerTiggerSubsystem;
 
-    private final XboxController driverController = new XboxController(Constants.XBOX_DRIVER);
-    private final XboxController operatorController = new XboxController(Constants.XBOX_INTAKE);
+    private static final XboxController driverController = new XboxController(Constants.XBOX_DRIVER);
+    private static final XboxController operatorController = new XboxController(Constants.XBOX_OPERATOR);
 
-    private final Rumble errorRumble = new Rumble(driverController, Rumble.SIDE_BOTH, 1, 400, 3);
-    private final Rumble warningRumble = new Rumble(driverController, Rumble.SIDE_BOTH, 0.75, 300);
+    public static final Rumble infoRumbleDriver = new Rumble(driverController, Rumble.SIDE_BOTH, 1, 200);
+    public static final Rumble errorRumbleDriver = new Rumble(driverController, Rumble.SIDE_BOTH, 1, 400, 3);
+    public static final Rumble warningRumbleDriver = new Rumble(driverController, Rumble.SIDE_BOTH, 0.75, 300);
+    public static final Rumble infoRumbleOperator = new Rumble(operatorController, Rumble.SIDE_BOTH, 1, 200);
+    public static final Rumble errorRumbleOperator = new Rumble(operatorController, Rumble.SIDE_BOTH, 1, 400, 3);
+    public static final Rumble warningRumbleOperator = new Rumble(operatorController, Rumble.SIDE_BOTH, 0.75, 300);
 
     private final ShuffleboardTab configTab;
     private final ShuffleboardTab driveTab;
     private final ShuffleboardTab prematchTab;
+    private final ShuffleboardTab debugTab;
 
     private NetworkTableEntry driveReversedEntry;
     private NetworkTableEntry precisionDriveEntry;
     private SimpleWidget drivetrainMotorStatus;
+    private SimpleWidget shooterMotorStatus;
 
     private NetworkTableEntry lastError;
     private NetworkTableEntry lastWarning;
@@ -73,10 +88,13 @@ public class RobotContainer {
     public RobotContainer() {
         drivetrain = new Drivetrain(Constants.LEFT_CANSPARKMAX, Constants.LEFT_CANSPARKMAX_FOLLOWER,
                 Constants.RIGHT_CANSPARKMAX, Constants.RIGHT_CANSPARKMAX_FOLLOWER);
-        drivetrain.setDefaultCommand(
-                new TeleopDrive(drivetrain, driverController, Constants.DRIVE_FWD_REV, Constants.DRIVE_LEFT_RIGHT));
 
-        intakeSubsystem = new IntakeSubsystem(Constants.MAIN_ROLLER_TALONSRX, Constants.SOLENOID_CHANNEL_1,
+        shooter = new Shooter(Constants.SHOOTER_MOTOR_1, Constants.SHOOTER_MOTOR_2);
+
+        drivetrain.setDefaultCommand(new TeleopDrive(drivetrain, shooter.getLimelight(), driverController, Constants.DRIVE_FWD_REV,
+                Constants.DRIVE_LEFT_RIGHT, Constants.AUTO_ALIGN));
+
+        intakeSubsystem = new IntakeSubsystem(Constants.INTAKE_ROLLER_VICTOR, Constants.SOLENOID_CHANNEL_1,
                 Constants.SOLENOID_CHANNEL_2);
         intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, operatorController,
                 Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
@@ -85,12 +103,16 @@ public class RobotContainer {
         // There's a chance this may take a lot of time
         autos = new Autos();
 
-        // Configure the button bindings
-        configureButtonBindings();
+
+        indexerTiggerSubsystem = new IndexerTiggerSubsystem(Constants.TIGGER_BACK_ROLLER, Constants.TIGGER_FRONT_ROLLER,
+                Constants.TIGGER_BOTTOM_SENSOR, Constants.TIGGER_TOP_SENSOR, Constants.INDEXER_LEFT_ROLLER,
+                Constants.INDEXER_RIGHT_ROLLER);
+        indexerTiggerSubsystem.setDefaultCommand(new IndexerTigger(indexerTiggerSubsystem, intakeSubsystem));
 
         configTab = Shuffleboard.getTab("Config");
         driveTab = Shuffleboard.getTab("Drive");
         prematchTab = Shuffleboard.getTab("Pre-match");
+        debugTab = Shuffleboard.getTab("Debug");
         configureDashboard();
 
         // Wait for DS to attach before initializing the logger
@@ -105,6 +127,16 @@ public class RobotContainer {
             }
         }
         initLogger();
+
+        // Configure the button bindings
+        configureButtonBindings();
+
+        // Try to load the shooter range table
+        try {
+            Shooter.getRangeTable();
+        } catch (Exception e) {
+            getLogger().logError("Error loading range table: " + e.getMessage());
+        }
     }
 
     private void configureDashboard() {
@@ -122,6 +154,8 @@ public class RobotContainer {
                 .addListener(notif -> {
                     TeleopDrive.setRampingRate(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
+        configTab.add("Align PID", AlignToTarget.getSendable()).withWidget(BuiltInWidgets.kPIDController)
+                .withPosition(0, 4).withSize(6, 11);
         configTab.add("Motor Warning Temp.", Constants.MOTOR_WARNING_TEMP).withWidget(BuiltInWidgets.kNumberSlider)
                 .withPosition(18, 0).withSize(9, 4).withProperties(Map.of("min", 0.0, "max", 150.0)).getEntry()
                 .addListener(notif -> {
@@ -138,37 +172,73 @@ public class RobotContainer {
                 .addListener(notif -> {
                     FollowTrajectory.setUpdateDelay(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
+        configTab.add("Shooter PID", new Shooter.SendableCANPIDController(shooter.getPIDController()))
+                .withWidget(BuiltInWidgets.kPIDController).withPosition(6, 4).withSize(6, 11);
 
         driveTab.add("Gyro", drivetrain.getAHRS()).withWidget(BuiltInWidgets.kGyro);
         driveReversedEntry = driveTab.add("Reversed", TeleopDrive.isReversed()).withWidget(BuiltInWidgets.kBooleanBox)
                 .withPosition(0, 0).withSize(4, 4).getEntry();
         precisionDriveEntry = driveTab.add("Precision", TeleopDrive.isPrecisionDrive()).withPosition(4, 0)
                 .withSize(4, 4).withWidget(BuiltInWidgets.kBooleanBox).getEntry();
+        // Add the motor status boolean boxes
         drivetrainMotorStatus = driveTab.add("DT Motor Status", true).withWidget(BuiltInWidgets.kBooleanBox)
+                // Set the size and custom colours
                 .withPosition(8, 0).withSize(6, 4).withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK,
                         "color when false", Constants.COLOR_MOTOR_WARNING));
-        drivetrain.setOverheatShutoffCallback((motor, temp) -> {
+        shooterMotorStatus = driveTab.add("Shooter Motor Status", true).withWidget(BuiltInWidgets.kBooleanBox)
+                .withPosition(14, 0).withSize(6, 4).withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK,
+                        "color when false", Constants.COLOR_MOTOR_WARNING));
+        shooter.getLimelight().setStreamingMode(Limelight.StreamingMode.STANDARD);
+        driveTab.add("Camera Stream", Limelight.STREAM_URL).withWidget(StdPlugWidgets.MJPEG_STREAM_VIEWER).withPosition(20, 0).withSize(17, 13);
+        // Overheat shutoff
+        // Should log error, rumble and make the status box red
+        drivetrain.getMonitorGroup().setOverheatShutoffCallback((motor, temp) -> {
             if (!drivetrain.getOverheatShutoffOverride()) {
                 // Make it red
                 drivetrainMotorStatus.withProperties(Map.of("color when false", Constants.COLOR_MOTOR_SHUTOFF))
                         .getEntry().setBoolean(false);
-                errorRumble.execute();
+                errorRumbleDriver.execute();
             }
             getLogger().logError(
                     "Drivetrain motor " + motor.getDeviceId() + " reached overheat shutoff limit at " + temp + "C!");
         });
-        drivetrain.setOverheatWarningCallback((motor, temp) -> {
+        shooter.getMonitorGroup().setOverheatShutoffCallback((motor, temp) -> {
+            if (!shooter.getOverheatShutoffOverride()) {
+                shooterMotorStatus.withProperties(Map.of("color when false", Constants.COLOR_MOTOR_SHUTOFF)).getEntry()
+                        .setBoolean(false);
+                errorRumbleOperator.execute();
+            }
+            getLogger().logError(
+                    "Shooter motor " + motor.getDeviceId() + " reached overheat shutoff limit at " + temp + "C!");
+        });
+        // Overheat warning
+        // Should log warning, rumble and make the box yellow
+        drivetrain.getMonitorGroup().setOverheatWarningCallback((motor, temp) -> {
             if (!drivetrain.getOverheatShutoffOverride()) {
                 // Make it yellow
                 drivetrainMotorStatus.withProperties(Map.of("color when false", Constants.COLOR_MOTOR_WARNING))
                         .getEntry().setBoolean(false);
-                warningRumble.execute();
+                warningRumbleDriver.execute();
             }
             getLogger().logWarning(
                     "Drivetrain motor " + motor.getDeviceId() + " reached overheat warning at " + temp + "C!");
         });
-        drivetrain.setNormalTempCallback(() -> {
+        shooter.getMonitorGroup().setOverheatWarningCallback((motor, temp) -> {
+            if (!shooter.getOverheatShutoffOverride()) {
+                shooterMotorStatus.withProperties(Map.of("color when false", Constants.COLOR_MOTOR_WARNING)).getEntry()
+                        .setBoolean(false);
+                warningRumbleOperator.execute();
+            }
+            getLogger().logWarning(
+                    "Shooter motor " + motor.getDeviceId() + " reached overheat warning at " + temp + " C!");
+        });
+        // Return to normal callback
+        // Should just clear the box and set it to green
+        drivetrain.getMonitorGroup().setNormalTempCallback(() -> {
             drivetrainMotorStatus.getEntry().setBoolean(true);
+        });
+        shooter.getMonitorGroup().setNormalTempCallback(() -> {
+            shooterMotorStatus.getEntry().setBoolean(true);
         });
 
         // Add auto chooser
@@ -176,6 +246,8 @@ public class RobotContainer {
 
         lastError = driveTab.add("Last Error", "").withPosition(37, 0).withSize(20, 4).getEntry();
         lastWarning = driveTab.add("Last Warning", "").withPosition(37, 4).withSize(20, 4).getEntry();
+
+        debugTab.add(drivetrain).withPosition(0, 0).withSize(19, 15);
     }
 
     /**
@@ -186,7 +258,8 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         Button reverseDriveButton = new JoystickButton(driverController, Constants.REVERSE_DRIVE_DIRECTION);
-        Button overrideMotorProtectionButton = new JoystickButton(driverController,
+        Button dtOverheatOverrideButton = new JoystickButton(driverController, Constants.OVERRIDE_MOTOR_PROTECTION);
+        Button shooterOverheatOverrideButton = new JoystickButton(operatorController,
                 Constants.OVERRIDE_MOTOR_PROTECTION);
         Button toggleIntakeButton = new JoystickButton(operatorController, Constants.INTAKE_TOGGLE);
         Button precisionDriveButton = new JoystickButton(driverController, Constants.PRECISION_DRIVE_TOGGLE);
@@ -210,27 +283,45 @@ public class RobotContainer {
             precisionDriveEntry.setBoolean(TeleopDrive.isPrecisionDrive());
             getLogger().logInfo(TeleopDrive.isPrecisionDrive() ? "Precision drive is ON" : "Precision drive is OFF");
         });
-        overrideMotorProtectionButton.whenPressed(() -> {
+        // Override overheat protection
+        // This should set the colour to purple if overridden, otherwise it should
+        // restore the correct colour
+        dtOverheatOverrideButton.whenPressed(() -> {
             boolean override = !drivetrain.getOverheatShutoffOverride();
             drivetrain.setOverheatShutoffOverride(override);
             if (override) {
                 // Set the colour to a new one
                 drivetrainMotorStatus.withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OVERRIDDEN))
                         .getEntry().setBoolean(true);
-                getLogger().logWarning("Motor temperature protection overridden");
+                getLogger().logWarning("Drivetrain motor temperature protection overridden");
             } else {
                 // Set the colour back
                 drivetrainMotorStatus.withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK)).getEntry()
-                        .setBoolean(!(drivetrain.isOverheating() || drivetrain.isOverheatWarning()));
-                getLogger().logInfo("Motor temperature protection re-enabled");
+                        .setBoolean(!(drivetrain.getMonitorGroup().getOverheatShutoff()
+                                || drivetrain.getMonitorGroup().getOverheatWarning()));
+                getLogger().logInfo("Drivetrain motor temperature protection re-enabled");
             }
         });
-        // toggleIntakeButton.whenPressed()
+        shooterOverheatOverrideButton.whenPressed(() -> {
+            boolean override = !shooter.getOverheatShutoffOverride();
+            shooter.setOverheatShutoffOverride(override);
+            if (override) {
+                shooterMotorStatus.withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OVERRIDDEN))
+                        .getEntry().setBoolean(true);
+                getLogger().logWarning("Shooter motor temperature protection overridden");
+            } else {
+                shooterMotorStatus.withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK)).getEntry()
+                        .setBoolean(!(shooter.getMonitorGroup().getOverheatShutoff()
+                                || shooter.getMonitorGroup().getOverheatWarning()));
+                getLogger().logInfo("Shooter motor temperature protection re-enabled");
+            }
+        });
     }
 
     private void initLogger() {
         try {
-            logger.init(Robot.class);
+            logger.init(Robot.class,
+                    new File(Filesystem.getOperatingDirectory().getCanonicalPath() + "/frc-robot-logs"));
 
             // Set logger level
             // Change this to include or exclude information

@@ -26,12 +26,16 @@ import edu.wpi.first.wpilibj.XboxController;
  */
 public final class Constants {
 
-    // SPARK MAX motors; placeholder port values
+    // SPARK MAX motors
     public static final int LEFT_CANSPARKMAX = 1;
     public static final int LEFT_CANSPARKMAX_FOLLOWER = 2;
     public static final int RIGHT_CANSPARKMAX = 3;
     public static final int RIGHT_CANSPARKMAX_FOLLOWER = 4;
 
+    // Shooter motors
+    public static final int SHOOTER_MOTOR_1 = 5;
+    public static final int SHOOTER_MOTOR_2 = 6;
+    
     // SPARK MAX encoder constants
     public static final int WHEEL_DIAMETER = 6;
     public static final double WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * Math.PI;
@@ -48,12 +52,13 @@ public final class Constants {
     public static final int DRIVE_FWD_REV = XboxController.Axis.kLeftY.value;
     public static final int DRIVE_LEFT_RIGHT = XboxController.Axis.kRightX.value;
     public static final int REVERSE_DRIVE_DIRECTION = XboxController.Button.kStickLeft.value;
+    public static final int AUTO_ALIGN = XboxController.Button.kA.value;
     public static final int OVERRIDE_MOTOR_PROTECTION = XboxController.Button.kB.value;
     public static final int PRECISION_DRIVE_TOGGLE = XboxController.Button.kX.value;
-
-    // Intake Related
-    public static final int XBOX_INTAKE = 1;
-    public static final int INTAKE_TOGGLE = XboxController.Button.kB.value;
+    
+    // Intake Related 
+    public static final int XBOX_OPERATOR = 1;
+    public static final int INTAKE_TOGGLE = XboxController.Button.kA.value;
     public static final int INTAKE_FORWARD_BUTTON = XboxController.Button.kBumperLeft.value;
     public static final int INTAKE_REVERSE_BUTTON = XboxController.Button.kBumperRight.value;
 
@@ -62,7 +67,20 @@ public final class Constants {
     public static final int SOLENOID_CHANNEL_2 = 1;
 
     // | Roller Motor Constants
-    public static final int MAIN_ROLLER_TALONSRX = 0;
+    public static final int TIGGER_BACK_ROLLER = 1;
+    public static final int TIGGER_FRONT_ROLLER = 2;
+    public static final int INDEXER_LEFT_ROLLER = 3;
+    public static final int INDEXER_RIGHT_ROLLER = 4;
+    // Photoelectric Sensor place holder values
+    public static final int TIGGER_TOP_SENSOR = 0;
+    public static final int TIGGER_BOTTOM_SENSOR = 1;
+
+    // | Intake Motor Constants
+    public static final int INTAKE_ROLLER_VICTOR = 0;
+
+    public static final double LIMELIGHT_HEIGHT = 34;
+    public static final double TARGET_HEIGHT = 115.25;
+    public static final double LIMELIGHT_ANGLE = 0;
 
     public static final int COLOR_MOTOR_OK = 0x00FF00FF;
     public static final int COLOR_MOTOR_WARNING = 0xFFFF00FF;
