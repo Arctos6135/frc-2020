@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import com.arctos6135.robotlib.oi.XboxControllerButtons;
 import com.arctos6135.robotpathfinder.core.RobotSpecs;
 
 import edu.wpi.first.wpilibj.XboxController;
@@ -59,8 +60,16 @@ public final class Constants {
     public static final int INTAKE_FORWARD_BUTTON = XboxController.Button.kBumperLeft.value;
     public static final int INTAKE_REVERSE_BUTTON = XboxController.Button.kBumperRight.value;
     
-    // Intake Related 
+    // Operator Controls Related 
     public static final int XBOX_OPERATOR = 1;
+    public static final int INDEXER_ONLY_SAME_POV = XboxControllerButtons.POV_LEFT;
+    public static final int INDEXER_ONLY_OPPOSITE_POV = XboxControllerButtons.POV_RIGHT;
+    public static final int INDEXER_FRONT_ROLLER_SAME_BUTTON = XboxController.Button.kBumperLeft.value;
+    public static final int INDEXER_FRONT_ROLLER_OPPOSITE_BUTTON = XboxController.Button.kBumperRight.value;
+    public static final int INDEXER_FRONT_ROLLER_SAME_TRIGGER = XboxController.Axis.kLeftTrigger.value;
+    public static final int INDEXER_FRONT_ROLLER_OPPOSITE_TRIGGER = XboxController.Axis.kRightTrigger.value;
+    public static final int OVERRIDE_RUN_TIGGER = XboxController.Button.kY.value;
+    public static final int TOGGLE_OVERRIDE_MODE = XboxController.Button.kStart.value;
 
     // | Pneumatics Constants
     public static final int SOLENOID_CHANNEL_1 = 0;
