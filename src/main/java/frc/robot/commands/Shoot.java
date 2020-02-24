@@ -25,38 +25,54 @@ public class Shoot extends CommandBase {
     private final Shooter shooter;
     private final IndexerTiggerSubsystem indexerTigger;
 
-    private final boolean stopWhenEmpty;
-    private final Rumble errorRumble;
-    private final Rumble emptyRumble;
+    private final Rumble ERROR_RUMBLE;
+    private final Rumble EMPTY_RUMBLE;
+    private final int MAX_SHOTS;
 
     private boolean finish = false;
 
     private double targetVelocity = 0;
     private boolean velocityReached = false;
+    private int shots;
 
     /**
      * Create a new Shoot command.
      * 
      * <p>
-     * If stopWhenEmpty is true, this command will terminate when Tigger is empty.
-     * This will be set to false during manual operator control so that even when
-     * the power cells are miscounted we can still shoot, but will be true in autos.
+     * Set maxShots to {@link Integer#MAX_VALUE} to have this command shoot until
+     * Tigger is empty. If maxShots is -1, this command will never terminate.
      * </p>
      * 
      * @param shooter       The shooter
      * @param indexerTigger The indexer-Tigger subsystem
-     * @param stopWhenEmpty Whether to stop the command when Tigger is empty
+     * @param maxShots      The maximum number of Power Cells to shoot
+     */
+    public Shoot(Shooter shooter, IndexerTiggerSubsystem indexerTigger, int maxShots) {
+        this(shooter, indexerTigger, maxShots, null, null);
+    }
+
+    /**
+     * Create a new Shoot command.
+     * 
+     * <p>
+     * Set maxShots to {@link Integer#MAX_VALUE} to have this command shoot until
+     * Tigger is empty. If maxShots is -1, this command will never terminate.
+     * </p>
+     * 
+     * @param shooter       The shooter
+     * @param indexerTigger The indexer-Tigger subsystem
+     * @param maxShots      The maximum number of shots
      * @param errorRumble   A Rumble to run when an error occurs
      * @param emptyRumble   A Rumble to run when Tigger is empty
      */
-    public Shoot(Shooter shooter, IndexerTiggerSubsystem indexerTigger, boolean stopWhenEmpty, Rumble errorRumble,
+    public Shoot(Shooter shooter, IndexerTiggerSubsystem indexerTigger, int maxShots, Rumble errorRumble,
             Rumble emptyRumble) {
         addRequirements(shooter, indexerTigger);
         this.shooter = shooter;
         this.indexerTigger = indexerTigger;
-        this.stopWhenEmpty = stopWhenEmpty;
-        this.errorRumble = errorRumble;
-        this.emptyRumble = emptyRumble;
+        this.MAX_SHOTS = maxShots;
+        this.ERROR_RUMBLE = errorRumble;
+        this.EMPTY_RUMBLE = emptyRumble;
     }
 
     // Called when the command is initially scheduled.
@@ -64,13 +80,16 @@ public class Shoot extends CommandBase {
     public void initialize() {
         finish = false;
         velocityReached = false;
+        shots = 0;
         // Verify that there are targets
         if (shooter.getLimelight().hasValidTargets()) {
             // Verify that the shooter is not overheating
             if (!shooter.getOverheatShutoffOverride() && shooter.getMonitorGroup().getOverheatShutoff()) {
                 finish = true;
                 RobotContainer.getLogger().logError("Shooter is overheating, cannot shoot!");
-                errorRumble.execute();
+                if (ERROR_RUMBLE != null) {
+                    ERROR_RUMBLE.execute();
+                }
                 return;
             }
             // Estimate the velocity needed to reach the target
@@ -81,7 +100,9 @@ public class Shoot extends CommandBase {
             } catch (IllegalArgumentException e) {
                 finish = true;
                 RobotContainer.getLogger().logError(e.getMessage());
-                errorRumble.execute();
+                if (ERROR_RUMBLE != null) {
+                    ERROR_RUMBLE.execute();
+                }
                 return;
             }
             // Spin up the shooter
@@ -89,7 +110,9 @@ public class Shoot extends CommandBase {
         } else {
             finish = true;
             RobotContainer.getLogger().logError("Shoot command was executed but no target can be found");
-            errorRumble.execute();
+            if (ERROR_RUMBLE != null) {
+                ERROR_RUMBLE.execute();
+            }
         }
     }
 
@@ -112,15 +135,28 @@ public class Shoot extends CommandBase {
             // Reduce power cell count by 1
             // But if the bottom is blocked, a new Power Cell is now at the bottom
             // So there is no net change in the number of power cells
-            if (velocityReached && !indexerTigger.isBottomBlocked()) {
+            if (velocityReached) {
                 // Reduce power cell count by 1 if there are still any
                 // If it's 0 then there's a counting error
                 // For now don't do anything about it
-                if (indexerTigger.getPowercellCount() > 0) {
+                if (indexerTigger.getPowercellCount() > 0 && !indexerTigger.isBottomBlocked()) {
                     indexerTigger.reducePowercellCount();
                 }
+                shots ++;
+                
                 if (indexerTigger.getPowercellCount() == 0) {
-                    emptyRumble.execute();
+                    if (EMPTY_RUMBLE != null) {
+                        EMPTY_RUMBLE.execute();
+                    }
+
+                    // If the command is not set to run forever, terminate when empty
+                    if(MAX_SHOTS != -1) {
+                        finish = true;
+                    }
+                }
+                // If the command is not set to run forever and enough balls were shot, terminate
+                if(MAX_SHOTS != -1 && shots >= MAX_SHOTS) {
+                    finish = true;
                 }
             }
             velocityReached = false;
@@ -141,6 +177,6 @@ public class Shoot extends CommandBase {
     public boolean isFinished() {
         // Finish if either finish is true or Tigger is empty and the command is
         // supposed to stop
-        return finish || (stopWhenEmpty && indexerTigger.getPowercellCount() == 0);
+        return finish || (MAX_SHOTS != -1 && indexerTigger.getPowercellCount() == 0);
     }
 }
