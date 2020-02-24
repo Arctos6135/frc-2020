@@ -8,7 +8,8 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -20,8 +21,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class IndexerTiggerSubsystem extends SubsystemBase {
 
     // Tigger related variables
-    private final VictorSPX backRoller;
-    private final VictorSPX frontRoller;
+    private final WPI_VictorSPX backRoller;
+    private final WPI_VictorSPX frontRoller;
     private final DigitalInput bottomSensor;
     private final DigitalInput topSensor;
 
@@ -29,25 +30,25 @@ public class IndexerTiggerSubsystem extends SubsystemBase {
     private double tiggerMotorSpeed;
 
     // Indexer related variables
-    private final VictorSPX leftRoller;
-    private final VictorSPX rightRoller;
+    private final WPI_VictorSPX leftRoller;
+    private final WPI_VictorSPX rightRoller;
 
     private double indexerMotorSpeed;
 
     public void addPowercellCount() {
-        powercellCount += 1;
+        powercellCount ++;
     }
 
     public void reducePowercellCount() {
-        powercellCount -= 1;
+        powercellCount --;
     }
 
     public int getPowercellCount() {
         return powercellCount;
     }
 
-    public void clearPowercellCount() {
-        powercellCount = 0;
+    public void setPowercellCount(int powercellCount) {
+        this.powercellCount = powercellCount;
     }
 
     public void setTiggerMotorSpeed(double tiggerMotorSpeed) {
@@ -64,6 +65,10 @@ public class IndexerTiggerSubsystem extends SubsystemBase {
 
     public void stopBackRoller() {
         backRoller.set(ControlMode.PercentOutput, 0);
+    }
+
+    public boolean isBackRollerRunning() {
+        return backRoller.get() != 0;
     }
 
     public void startFrontRoller() {
@@ -111,17 +116,21 @@ public class IndexerTiggerSubsystem extends SubsystemBase {
     public IndexerTiggerSubsystem(int backMotor, int frontMotor, int bottomSensorChannel, int topSensorChannel,
             int leftMotor, int rightMotor) {
         // Tigger related setup
-        backRoller = new VictorSPX(backMotor);
-        frontRoller = new VictorSPX(frontMotor);
+        backRoller = new WPI_VictorSPX(backMotor);
+        frontRoller = new WPI_VictorSPX(frontMotor);
         bottomSensor = new DigitalInput(bottomSensorChannel);
         topSensor = new DigitalInput(topSensorChannel);
+        frontRoller.setNeutralMode(NeutralMode.Brake);
+        backRoller.setNeutralMode(NeutralMode.Brake);
 
         tiggerMotorSpeed = 0.5;
 
         // Indexer related setup
-        leftRoller = new VictorSPX(leftMotor);
-        rightRoller = new VictorSPX(rightMotor);
+        leftRoller = new WPI_VictorSPX(leftMotor);
+        rightRoller = new WPI_VictorSPX(rightMotor);
         rightRoller.setInverted(true);
+        leftRoller.setNeutralMode(NeutralMode.Coast);
+        rightRoller.setNeutralMode(NeutralMode.Coast);
 
         indexerMotorSpeed = 0.5;
     }

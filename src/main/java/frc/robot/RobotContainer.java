@@ -27,7 +27,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.IndexerTigger;
+import frc.robot.commands.IndexerTiggerCommand;
 import frc.robot.commands.ManualIntake;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.subsystems.Drivetrain;
@@ -59,6 +59,7 @@ public class RobotContainer {
 
     private NetworkTableEntry driveReversedEntry;
     private NetworkTableEntry precisionDriveEntry;
+    private NetworkTableEntry overrideModeEntry;
     private SimpleWidget drivetrainMotorStatus;
 
     private NetworkTableEntry lastError;
@@ -79,10 +80,12 @@ public class RobotContainer {
                 Constants.SOLENOID_CHANNEL_2);
         intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, operatorController,
                 Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
- 
-        indexerTiggerSubsystem = new IndexerTiggerSubsystem(Constants.TIGGER_BACK_ROLLER, Constants.TIGGER_FRONT_ROLLER, Constants.TIGGER_BOTTOM_SENSOR, Constants.TIGGER_TOP_SENSOR, Constants.INDEXER_LEFT_ROLLER, Constants.INDEXER_RIGHT_ROLLER);
-        indexerTiggerSubsystem.setDefaultCommand(new IndexerTigger(indexerTiggerSubsystem, intakeSubsystem));
-        
+
+        indexerTiggerSubsystem = new IndexerTiggerSubsystem(Constants.TIGGER_BACK_ROLLER, Constants.TIGGER_FRONT_ROLLER,
+                Constants.TIGGER_BOTTOM_SENSOR, Constants.TIGGER_TOP_SENSOR, Constants.INDEXER_LEFT_ROLLER,
+                Constants.INDEXER_RIGHT_ROLLER);
+        indexerTiggerSubsystem.setDefaultCommand(new IndexerTiggerCommand(indexerTiggerSubsystem, operatorController));
+
         // Configure the button bindings
         configureButtonBindings();
 
@@ -135,6 +138,8 @@ public class RobotContainer {
                 .withPosition(0, 0).withSize(4, 4).getEntry();
         precisionDriveEntry = driveTab.add("Precision", TeleopDrive.isPrecisionDrive()).withPosition(4, 0)
                 .withSize(4, 4).withWidget(BuiltInWidgets.kBooleanBox).getEntry();
+        overrideModeEntry = driveTab.add("Override", IndexerTiggerCommand.getOverrideMode())
+                .withWidget(BuiltInWidgets.kBooleanBox).withPosition(0, 4).withSize(4, 4).getEntry();
         drivetrainMotorStatus = driveTab.add("DT Motor Status", true).withWidget(BuiltInWidgets.kBooleanBox)
                 .withPosition(8, 0).withSize(6, 4).withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK,
                         "color when false", Constants.COLOR_MOTOR_WARNING));
@@ -178,8 +183,9 @@ public class RobotContainer {
         Button reverseDriveButton = new JoystickButton(driverController, Constants.REVERSE_DRIVE_DIRECTION);
         Button overrideMotorProtectionButton = new JoystickButton(driverController,
                 Constants.OVERRIDE_MOTOR_PROTECTION);
-        Button toggleIntakeButton = new JoystickButton(operatorController, Constants.INTAKE_TOGGLE);
         Button precisionDriveButton = new JoystickButton(driverController, Constants.PRECISION_DRIVE_TOGGLE);
+        Button toggleIntakeButton = new JoystickButton(operatorController, Constants.INTAKE_TOGGLE);
+        Button operatorOverrideModeButton = new JoystickButton(operatorController, Constants.TOGGLE_OVERRIDE_MODE);
         // Piston Toggle Code
         toggleIntakeButton.whenPressed(new InstantCommand(() -> {
             // Piston Code
@@ -190,6 +196,11 @@ public class RobotContainer {
                 intakeSubsystem.setPistons(true);
             }
         }, intakeSubsystem));
+        operatorOverrideModeButton.whenPressed(() -> {
+            boolean override = !IndexerTiggerCommand.getOverrideMode();
+            overrideModeEntry.setBoolean(override);
+            IndexerTiggerCommand.setOverrideMode(override);
+        });
         reverseDriveButton.whenPressed(() -> {
             TeleopDrive.toggleReverseDrive();
             driveReversedEntry.setBoolean(TeleopDrive.isReversed());
