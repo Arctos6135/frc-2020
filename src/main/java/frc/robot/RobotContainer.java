@@ -31,7 +31,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.AlignToTarget;
-import frc.robot.commands.IndexerTigger;
+import frc.robot.commands.IndexerTiggerCommand;
 import frc.robot.commands.ManualIntake;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.subsystems.Drivetrain;
@@ -70,6 +70,7 @@ public class RobotContainer {
 
     private NetworkTableEntry driveReversedEntry;
     private NetworkTableEntry precisionDriveEntry;
+    private NetworkTableEntry overrideModeEntry;
     private SimpleWidget drivetrainMotorStatus;
     private SimpleWidget shooterMotorStatus;
 
@@ -87,19 +88,18 @@ public class RobotContainer {
 
         shooter = new Shooter(Constants.SHOOTER_MOTOR_1, Constants.SHOOTER_MOTOR_2);
 
-        drivetrain.setDefaultCommand(new TeleopDrive(drivetrain, shooter.getLimelight(), driverController, Constants.DRIVE_FWD_REV,
-                Constants.DRIVE_LEFT_RIGHT, Constants.AUTO_ALIGN));
+        drivetrain.setDefaultCommand(new TeleopDrive(drivetrain, shooter.getLimelight(), driverController,
+                Constants.DRIVE_FWD_REV, Constants.DRIVE_LEFT_RIGHT, Constants.AUTO_ALIGN));
 
         intakeSubsystem = new IntakeSubsystem(Constants.INTAKE_ROLLER_VICTOR, Constants.SOLENOID_CHANNEL_1,
                 Constants.SOLENOID_CHANNEL_2);
         intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, operatorController,
                 Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
 
-
         indexerTiggerSubsystem = new IndexerTiggerSubsystem(Constants.TIGGER_BACK_ROLLER, Constants.TIGGER_FRONT_ROLLER,
                 Constants.TIGGER_BOTTOM_SENSOR, Constants.TIGGER_TOP_SENSOR, Constants.INDEXER_LEFT_ROLLER,
                 Constants.INDEXER_RIGHT_ROLLER);
-        indexerTiggerSubsystem.setDefaultCommand(new IndexerTigger(indexerTiggerSubsystem, intakeSubsystem));
+        indexerTiggerSubsystem.setDefaultCommand(new IndexerTiggerCommand(indexerTiggerSubsystem, operatorController));
 
         configTab = Shuffleboard.getTab("Config");
         driveTab = Shuffleboard.getTab("Drive");
@@ -163,6 +163,8 @@ public class RobotContainer {
                 .withPosition(0, 0).withSize(4, 4).getEntry();
         precisionDriveEntry = driveTab.add("Precision", TeleopDrive.isPrecisionDrive()).withPosition(4, 0)
                 .withSize(4, 4).withWidget(BuiltInWidgets.kBooleanBox).getEntry();
+        overrideModeEntry = driveTab.add("Override", IndexerTiggerCommand.getOverrideMode())
+                .withWidget(BuiltInWidgets.kBooleanBox).withPosition(0, 4).withSize(4, 4).getEntry();
         // Add the motor status boolean boxes
         drivetrainMotorStatus = driveTab.add("DT Motor Status", true).withWidget(BuiltInWidgets.kBooleanBox)
                 // Set the size and custom colours
@@ -172,7 +174,8 @@ public class RobotContainer {
                 .withPosition(14, 0).withSize(6, 4).withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK,
                         "color when false", Constants.COLOR_MOTOR_WARNING));
         shooter.getLimelight().setStreamingMode(Limelight.StreamingMode.STANDARD);
-        driveTab.add("Camera Stream", Limelight.STREAM_URL).withWidget(StdPlugWidgets.MJPEG_STREAM_VIEWER).withPosition(20, 0).withSize(17, 13);
+        driveTab.add("Camera Stream", Limelight.STREAM_URL).withWidget(StdPlugWidgets.MJPEG_STREAM_VIEWER)
+                .withPosition(20, 0).withSize(17, 13);
         // Overheat shutoff
         // Should log error, rumble and make the status box red
         drivetrain.getMonitorGroup().setOverheatShutoffCallback((motor, temp) -> {
@@ -241,8 +244,9 @@ public class RobotContainer {
         Button dtOverheatOverrideButton = new JoystickButton(driverController, Constants.OVERRIDE_MOTOR_PROTECTION);
         Button shooterOverheatOverrideButton = new JoystickButton(operatorController,
                 Constants.OVERRIDE_MOTOR_PROTECTION);
-        Button toggleIntakeButton = new JoystickButton(operatorController, Constants.INTAKE_TOGGLE);
         Button precisionDriveButton = new JoystickButton(driverController, Constants.PRECISION_DRIVE_TOGGLE);
+        Button toggleIntakeButton = new JoystickButton(operatorController, Constants.INTAKE_TOGGLE);
+        Button operatorOverrideModeButton = new JoystickButton(operatorController, Constants.TOGGLE_OVERRIDE_MODE);
         // Piston Toggle Code
         toggleIntakeButton.whenPressed(new InstantCommand(() -> {
             // Piston Code
@@ -253,6 +257,11 @@ public class RobotContainer {
                 intakeSubsystem.setPistons(true);
             }
         }, intakeSubsystem));
+        operatorOverrideModeButton.whenPressed(() -> {
+            boolean override = !IndexerTiggerCommand.getOverrideMode();
+            overrideModeEntry.setBoolean(override);
+            IndexerTiggerCommand.setOverrideMode(override);
+        });
         reverseDriveButton.whenPressed(() -> {
             TeleopDrive.toggleReverseDrive();
             driveReversedEntry.setBoolean(TeleopDrive.isReversed());

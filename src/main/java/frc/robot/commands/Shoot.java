@@ -92,7 +92,7 @@ public class Shoot extends CommandBase {
             // Shoot
             indexerTigger.startBackRoller();
             indexerTigger.startFrontRoller();
-            indexerTigger.startIndexer();
+            indexerTigger.startIndexerSameDirection();
             velocityReached = true;
         } else {
             // Stop feeding balls immediately

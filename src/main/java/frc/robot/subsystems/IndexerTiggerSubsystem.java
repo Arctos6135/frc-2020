@@ -7,45 +7,50 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.WPI_VictorSPX;
+
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-
+/**
+ * The Indexer-Tigger subsystem is responsible for storing and delivering the
+ * Power Cells from the Intake to the Shooter.
+ */
 public class IndexerTiggerSubsystem extends SubsystemBase {
 
     // Tigger related variables
-    private final TalonSRX backRoller;
-    private final TalonSRX frontRoller;
+    private final WPI_VictorSPX backRoller;
+    private final WPI_VictorSPX frontRoller;
     private final DigitalInput bottomSensor;
     private final DigitalInput topSensor;
 
     private int powercellCount;
     private double tiggerMotorSpeed;
-    
+
     // Indexer related variables
-    private final TalonSRX leftRoller;
-    private final TalonSRX rightRoller;
-    
+    private final WPI_VictorSPX leftRoller;
+    private final WPI_VictorSPX rightRoller;
+
     private double indexerMotorSpeed;
 
     public void addPowercellCount() {
-        powercellCount += 1;
+        powercellCount ++;
     }
 
     public void reducePowercellCount() {
-        powercellCount -= 1;
+        powercellCount --;
     }
 
-    public int getPowercellCount()  {
+    public int getPowercellCount() {
         return powercellCount;
     }
 
-    public void clearPowercellCount() {
-        powercellCount = 0;
+    public void setPowercellCount(int powercellCount) {
+        this.powercellCount = powercellCount;
     }
-    
+
     public void setTiggerMotorSpeed(double tiggerMotorSpeed) {
         this.tiggerMotorSpeed = tiggerMotorSpeed;
     }
@@ -60,6 +65,10 @@ public class IndexerTiggerSubsystem extends SubsystemBase {
 
     public void stopBackRoller() {
         backRoller.set(ControlMode.PercentOutput, 0);
+    }
+
+    public boolean isBackRollerRunning() {
+        return backRoller.get() != 0;
     }
 
     public void startFrontRoller() {
@@ -79,39 +88,51 @@ public class IndexerTiggerSubsystem extends SubsystemBase {
     }
 
     public void setIndexerMotorSpeed(double indexerMotorSpeed) {
-		this.indexerMotorSpeed = indexerMotorSpeed;
-	}
+        this.indexerMotorSpeed = indexerMotorSpeed;
+    }
 
-	public double getIndexerMotorSpeed() {
-		return indexerMotorSpeed;
-	}
+    public double getIndexerMotorSpeed() {
+        return indexerMotorSpeed;
+    }
 
-    public void startIndexer() {
-		leftRoller.set(ControlMode.PercentOutput, indexerMotorSpeed);
-	}
+    public void startIndexerSameDirection() {
+        leftRoller.set(ControlMode.PercentOutput, indexerMotorSpeed);
+        rightRoller.set(ControlMode.PercentOutput, indexerMotorSpeed);
+    }
 
-	public void stopIndexer() {
-		leftRoller.set(ControlMode.PercentOutput, 0);
-	}
+    public void startIndexerOppositeDirections() {
+        leftRoller.set(ControlMode.PercentOutput, indexerMotorSpeed);
+        rightRoller.set(ControlMode.PercentOutput, -indexerMotorSpeed);
+    }
+
+    public void stopIndexer() {
+        leftRoller.set(ControlMode.PercentOutput, 0);
+        rightRoller.set(ControlMode.PercentOutput, 0);
+    }
 
     /**
-      * Creates a new IndexerTiggerSubsystem.
-      */
-    public IndexerTiggerSubsystem(int backMotor, int frontMotor, int bottomSensorChannel, int topSensorChannel,int leftMotor, int rightMotor) {
+     * Creates a new IndexerTiggerSubsystem.
+     */
+    public IndexerTiggerSubsystem(int backMotor, int frontMotor, int bottomSensorChannel, int topSensorChannel,
+            int leftMotor, int rightMotor) {
         // Tigger related setup
-        backRoller = new TalonSRX(backMotor);
-        frontRoller = new TalonSRX(frontMotor);
+        backRoller = new WPI_VictorSPX(backMotor);
+        frontRoller = new WPI_VictorSPX(frontMotor);
         bottomSensor = new DigitalInput(bottomSensorChannel);
         topSensor = new DigitalInput(topSensorChannel);
-        
+        frontRoller.setNeutralMode(NeutralMode.Brake);
+        backRoller.setNeutralMode(NeutralMode.Brake);
+
         tiggerMotorSpeed = 0.5;
 
         // Indexer related setup
-        leftRoller = new TalonSRX(leftMotor);
-        rightRoller = new TalonSRX(rightMotor);
-		rightRoller.follow(leftRoller);
+        leftRoller = new WPI_VictorSPX(leftMotor);
+        rightRoller = new WPI_VictorSPX(rightMotor);
+        rightRoller.setInverted(true);
+        leftRoller.setNeutralMode(NeutralMode.Coast);
+        rightRoller.setNeutralMode(NeutralMode.Coast);
 
-		indexerMotorSpeed =  0.5;
+        indexerMotorSpeed = 0.5;
     }
 
     @Override
