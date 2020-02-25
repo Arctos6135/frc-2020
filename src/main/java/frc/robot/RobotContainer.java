@@ -140,7 +140,7 @@ public class RobotContainer {
 
         // Try to load the shooter range table
         try {
-            Shooter.getRangeTable();
+            shooter.loadRangeTable("rangetable.csv");
         } catch (Exception e) {
             getLogger().logError("Error loading range table: " + e.getMessage());
         }
@@ -399,7 +399,7 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         indexerTiggerSubsystem.setPowercellCount(tiggerPowerCellChooser.getSelected());
-        return autos.getAuto(autos.getChooser().getSelected(), drivetrain);
+        return autos.getAuto(autos.getChooser().getSelected(), drivetrain, indexerTiggerSubsystem, shooter);
     }
 
     /**

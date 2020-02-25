@@ -98,7 +98,7 @@ public class FollowTrajectory extends CommandBase {
         robot = new TankDriveRobot(drivetrain::setLeftMotor, drivetrain::setRightMotor,
                 new FunctionAdvancedPositionSource(drivetrain::getLeftSpeed, drivetrain::getLeftDistance),
                 new FunctionAdvancedPositionSource(drivetrain::getRightSpeed, drivetrain::getRightDistance),
-                Timer::getFPGATimestamp, drivetrain::getHeading);
+                Timer::getFPGATimestamp, () -> Math.toRadians(-drivetrain.getHeading()));
     }
 
     // Called when the command is initially scheduled.

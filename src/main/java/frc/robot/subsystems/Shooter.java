@@ -84,7 +84,7 @@ public class Shooter extends SubsystemBase {
 
     private static final double kP = 0, kI = 0, kD = 0, kF = 0;
 
-    private static RangeTable rangeTable;
+    private RangeTable rangeTable;
 
     private CANSparkMax masterMotor;
     private CANSparkMax followerMotor;
@@ -125,12 +125,14 @@ public class Shooter extends SubsystemBase {
     /**
      * Load the range table for the shooter.
      * 
+     * @param filename The name of the range table CSV file (in the deploy
+     *                 directory)
      * @throws IOException              If an I/O error occurs
      * @throws FileNotFoundException    If the file is not found
      * @throws IllegalArgumentException If the format is incorrect
      */
-    public static void loadRangeTable() throws IOException {
-        rangeTable = RangeTable.fromCSV(new File(Filesystem.getDeployDirectory() + "/rangetable.csv"));
+    public void loadRangeTable(String filename) throws IOException {
+        rangeTable = RangeTable.fromCSV(new File(Filesystem.getDeployDirectory() + File.separator + filename));
     }
 
     /**
@@ -142,7 +144,7 @@ public class Shooter extends SubsystemBase {
      * 
      * @return The range table for the shooter
      */
-    public static RangeTable getRangeTable() {
+    public RangeTable getRangeTable() {
         return rangeTable;
     }
 

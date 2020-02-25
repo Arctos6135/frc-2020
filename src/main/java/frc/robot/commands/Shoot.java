@@ -96,10 +96,11 @@ public class Shoot extends CommandBase {
             double distance = shooter.getLimelight().estimateDistance(Constants.LIMELIGHT_HEIGHT,
                     Constants.TARGET_HEIGHT, Constants.LIMELIGHT_ANGLE);
             try {
-                targetVelocity = Shooter.getRangeTable().search(distance);
-            } catch (IllegalArgumentException e) {
+                targetVelocity = shooter.getRangeTable().search(distance);
+            } catch (IllegalArgumentException | NullPointerException e) {
                 finish = true;
-                RobotContainer.getLogger().logError(e.getMessage());
+                RobotContainer.getLogger()
+                        .logError(e instanceof NullPointerException ? "Range table not loaded!" : e.getMessage());
                 if (ERROR_RUMBLE != null) {
                     ERROR_RUMBLE.execute();
                 }
@@ -142,20 +143,21 @@ public class Shoot extends CommandBase {
                 if (indexerTigger.getPowercellCount() > 0 && !indexerTigger.isBottomBlocked()) {
                     indexerTigger.reducePowercellCount();
                 }
-                shots ++;
-                
+                shots++;
+
                 if (indexerTigger.getPowercellCount() == 0) {
                     if (EMPTY_RUMBLE != null) {
                         EMPTY_RUMBLE.execute();
                     }
 
                     // If the command is not set to run forever, terminate when empty
-                    if(MAX_SHOTS != -1) {
+                    if (MAX_SHOTS != -1) {
                         finish = true;
                     }
                 }
-                // If the command is not set to run forever and enough balls were shot, terminate
-                if(MAX_SHOTS != -1 && shots >= MAX_SHOTS) {
+                // If the command is not set to run forever and enough balls were shot,
+                // terminate
+                if (MAX_SHOTS != -1 && shots >= MAX_SHOTS) {
                     finish = true;
                 }
             }

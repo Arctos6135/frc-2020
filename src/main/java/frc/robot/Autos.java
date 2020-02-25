@@ -2,8 +2,12 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.commands.AlignToTarget;
 import frc.robot.commands.DriveDistance;
+import frc.robot.commands.Shoot;
 import frc.robot.subsystems.Drivetrain;
+import frc.robot.subsystems.IndexerTiggerSubsystem;
+import frc.robot.subsystems.Shooter;
 
 /**
  * A class that sets up all the autos.
@@ -16,8 +20,9 @@ public class Autos {
      * Valid auto modes.
      */
     public enum AutoMode {
-        NONE("None"), INIT_FORWARDS("Initiation Line (Forwards"), INIT_REVERSE("Initiation Line (Reverse)"),
-        DEBUG("Debug");
+        NONE("None"), INIT_FORWARDS("Initiation Line (Forwards)"), INIT_REVERSE("Initiation Line (Reverse)"),
+        SHOOT_MOVE_BACK("Shoot & Move Back"), MOVE_BACK_SHOOT("Move Back & Shoot"),
+        SHOOT_MOVE_BACK_NOAIM("Shoot w/o Aim & Move Back"), DEBUG("Debug");
 
         String name;
 
@@ -42,7 +47,8 @@ public class Autos {
      * @param drivetrain The drivetrain
      * @return The command for the auto mode
      */
-    public Command getAuto(AutoMode mode, Drivetrain drivetrain) {
+    public Command getAuto(AutoMode mode, Drivetrain drivetrain, IndexerTiggerSubsystem indexerTigger,
+            Shooter shooter) {
         switch (mode) {
             case NONE:
                 return null;
@@ -52,6 +58,15 @@ public class Autos {
                 return new DriveDistance(drivetrain, 36);
             case INIT_REVERSE:
                 return new DriveDistance(drivetrain, -36);
+            case SHOOT_MOVE_BACK:
+                return new AlignToTarget(drivetrain, shooter.getLimelight())
+                        .andThen(new Shoot(shooter, indexerTigger, Integer.MAX_VALUE))
+                        .andThen(new DriveDistance(drivetrain, -36));
+            case MOVE_BACK_SHOOT:
+                return new DriveDistance(drivetrain, -36).andThen(new AlignToTarget(drivetrain, shooter.getLimelight()))
+                        .andThen(new Shoot(shooter, indexerTigger, Integer.MAX_VALUE));
+            case SHOOT_MOVE_BACK_NOAIM:
+                return new Shoot(shooter, indexerTigger, Integer.MAX_VALUE).andThen(new DriveDistance(drivetrain, -36));
             default:
                 return null;
         }
