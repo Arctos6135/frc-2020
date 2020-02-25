@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
@@ -73,8 +74,12 @@ public class RobotContainer {
     private NetworkTableEntry driveReversedEntry;
     private NetworkTableEntry precisionDriveEntry;
     private NetworkTableEntry overrideModeEntry;
+    private NetworkTableEntry shooterRPMEntry;
+    private NetworkTableEntry tiggerPowerCellCountEntry;
     private SimpleWidget drivetrainMotorStatus;
     private SimpleWidget shooterMotorStatus;
+
+    private SendableChooser<Integer> tiggerPowerCellChooser = new SendableChooser<>();
 
     private NetworkTableEntry lastError;
     private NetworkTableEntry lastWarning;
@@ -99,7 +104,7 @@ public class RobotContainer {
                 Constants.SOLENOID_CHANNEL_2);
         intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, driverController,
                 Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
-        
+
         // Construct here
         // There's a chance this may take a lot of time
         autos = new Autos();
@@ -139,6 +144,9 @@ public class RobotContainer {
         }
     }
 
+    /**
+     * Add stuff to the dashboard.
+     */
     private void configureDashboard() {
         // Add stuff to the dashboard to make them configurable
         // Put the precision factor on the dashboard and make it configurable
@@ -167,32 +175,38 @@ public class RobotContainer {
                     Constants.MOTOR_SHUTOFF_TEMP = notif.value.getDouble();
                 }, EntryListenerFlags.kUpdate);
         configTab.add("Follower Gains", FollowTrajectory.getGains()).withWidget(StdPlugWidgets.PIDVA_GAINS)
-                .withProperties(Map.of("Show kDP", true));
-        configTab.add("Update Delay", FollowTrajectory.getUpdateDelay()).withWidget(BuiltInWidgets.kTextView).getEntry()
-                .addListener(notif -> {
+                .withPosition(12, 4).withSize(6, 11).withProperties(Map.of("Show kDP", true));
+        configTab.add("Update Delay", FollowTrajectory.getUpdateDelay()).withWidget(BuiltInWidgets.kTextView)
+                .withPosition(18, 4).withSize(5, 4).getEntry().addListener(notif -> {
                     FollowTrajectory.setUpdateDelay(notif.value.getDouble());
                 }, EntryListenerFlags.kUpdate);
         configTab.add("Shooter PID", new Shooter.SendableCANPIDController(shooter.getPIDController()))
                 .withWidget(BuiltInWidgets.kPIDController).withPosition(6, 4).withSize(6, 11);
 
-        driveTab.add("Gyro", drivetrain.getAHRS()).withWidget(BuiltInWidgets.kGyro);
+        driveTab.add("Gyro", drivetrain.getAHRS()).withWidget(BuiltInWidgets.kGyro).withPosition(0, 4).withSize(9, 10);
         driveReversedEntry = driveTab.add("Reversed", TeleopDrive.isReversed()).withWidget(BuiltInWidgets.kBooleanBox)
                 .withPosition(0, 0).withSize(4, 4).getEntry();
         precisionDriveEntry = driveTab.add("Precision", TeleopDrive.isPrecisionDrive()).withPosition(4, 0)
                 .withSize(4, 4).withWidget(BuiltInWidgets.kBooleanBox).getEntry();
         overrideModeEntry = driveTab.add("Override", IndexerTiggerCommand.getOverrideMode())
-                .withWidget(BuiltInWidgets.kBooleanBox).withPosition(0, 4).withSize(4, 4).getEntry();
+                .withWidget(BuiltInWidgets.kBooleanBox).withPosition(9, 4).withSize(4, 4).getEntry();
+        shooterRPMEntry = driveTab.add("Shooter RPM", 0).withWidget(BuiltInWidgets.kDial).withPosition(37, 8)
+                .withSize(6, 6).withProperties(Map.of("min", 0, "max", 5000)).getEntry();
+        tiggerPowerCellCountEntry = driveTab.add("Tigger PCs", 0).withWidget(BuiltInWidgets.kNumberBar)
+                .withPosition(43, 8).withSize(5, 6)
+                .withProperties(Map.of("min", 0, "max", 3, "center", 0, "num tick marks", 4, "show text", false))
+                .getEntry();
         // Add the motor status boolean boxes
-        drivetrainMotorStatus = driveTab.add("DT Motor Status", true).withWidget(BuiltInWidgets.kBooleanBox)
+        drivetrainMotorStatus = driveTab.add("Drivetrain", true).withWidget(BuiltInWidgets.kBooleanBox)
                 // Set the size and custom colours
-                .withPosition(8, 0).withSize(6, 4).withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK,
+                .withPosition(8, 0).withSize(4, 4).withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK,
                         "color when false", Constants.COLOR_MOTOR_WARNING));
-        shooterMotorStatus = driveTab.add("Shooter Motor Status", true).withWidget(BuiltInWidgets.kBooleanBox)
-                .withPosition(14, 0).withSize(6, 4).withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK,
-                        "color when false", Constants.COLOR_MOTOR_WARNING));
+        shooterMotorStatus = driveTab.add("Shooter", true).withWidget(BuiltInWidgets.kBooleanBox).withPosition(12, 0)
+                .withSize(4, 4).withProperties(Map.of("color when true", Constants.COLOR_MOTOR_OK, "color when false",
+                        Constants.COLOR_MOTOR_WARNING));
         shooter.getLimelight().setStreamingMode(Limelight.StreamingMode.STANDARD);
         driveTab.add("Camera Stream", Limelight.STREAM_URL).withWidget(StdPlugWidgets.MJPEG_STREAM_VIEWER)
-                .withPosition(20, 0).withSize(17, 13);
+                .withPosition(16, 0).withSize(21, 14);
         // Overheat shutoff
         // Should log error, rumble and make the status box red
         drivetrain.getMonitorGroup().setOverheatShutoffCallback((motor, temp) -> {
@@ -245,12 +259,25 @@ public class RobotContainer {
         });
 
         // Add auto chooser
-        prematchTab.add("Auto Mode", autos.getChooser()).withPosition(0, 0).withSize(9, 4);
+        prematchTab.add("Auto Mode", autos.getChooser()).withPosition(0, 0).withSize(9, 5);
+        tiggerPowerCellChooser.setDefaultOption("0", 0);
+        tiggerPowerCellChooser.addOption("1", 1);
+        tiggerPowerCellChooser.addOption("2", 2);
+        tiggerPowerCellChooser.addOption("3", 3);
+        prematchTab.add("Preload", tiggerPowerCellChooser).withPosition(9, 0).withSize(5, 5);
 
         lastError = driveTab.add("Last Error", "").withPosition(37, 0).withSize(20, 4).getEntry();
         lastWarning = driveTab.add("Last Warning", "").withPosition(37, 4).withSize(20, 4).getEntry();
 
         debugTab.add(drivetrain).withPosition(0, 0).withSize(19, 15);
+    }
+
+    /**
+     * Update the dashboard.
+     */
+    public void updateDashboard() {
+        shooterRPMEntry.setNumber(shooter.getVelocity());
+        tiggerPowerCellCountEntry.setNumber(indexerTiggerSubsystem.getPowercellCount());
     }
 
     /**
@@ -281,6 +308,9 @@ public class RobotContainer {
             boolean override = !IndexerTiggerCommand.getOverrideMode();
             overrideModeEntry.setBoolean(override);
             IndexerTiggerCommand.setOverrideMode(override);
+            if (override) {
+                indexerTiggerSubsystem.setPowercellCount(0);
+            }
         });
         reverseDriveButton.whenPressed(() -> {
             TeleopDrive.toggleReverseDrive();
@@ -358,6 +388,7 @@ public class RobotContainer {
      * @return the command to run in autonomous
      */
     public Command getAutonomousCommand() {
+        indexerTiggerSubsystem.setPowercellCount(tiggerPowerCellChooser.getSelected());
         return autos.getAuto(autos.getChooser().getSelected(), drivetrain);
     }
 
