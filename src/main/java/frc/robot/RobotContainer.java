@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import com.arctos6135.robotlib.logging.RobotLogger;
+import com.arctos6135.robotlib.newcommands.triggers.AnalogTrigger;
 import com.arctos6135.robotlib.oi.Rumble;
 import com.arctos6135.stdplug.api.StdPlugWidgets;
 
@@ -28,6 +29,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.shuffleboard.SimpleWidget;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -293,6 +295,7 @@ public class RobotContainer {
                 Constants.OVERRIDE_MOTOR_PROTECTION);
         Button toggleIntakeButton = new JoystickButton(driverController, Constants.INTAKE_TOGGLE);
         Button precisionDriveButton = new JoystickButton(driverController, Constants.PRECISION_DRIVE_TOGGLE);
+        AnalogTrigger precisionDriveTrigger = new AnalogTrigger(driverController, Constants.PRECISION_DRIVE_HOLD, 0.5);
         Button operatorOverrideModeButton = new JoystickButton(operatorController, Constants.TOGGLE_OVERRIDE_MODE);
         // Piston Toggle Code
         toggleIntakeButton.whenPressed(new InstantCommand(() -> {
@@ -320,8 +323,15 @@ public class RobotContainer {
         precisionDriveButton.whenPressed(() -> {
             TeleopDrive.togglePrecisionDrive();
             precisionDriveEntry.setBoolean(TeleopDrive.isPrecisionDrive());
-            getLogger().logInfo(TeleopDrive.isPrecisionDrive() ? "Precision drive is ON" : "Precision drive is OFF");
         });
+        precisionDriveTrigger.setMinTimeRequired(0.05);
+        precisionDriveTrigger.whileActiveOnce(new FunctionalCommand(() -> {
+            TeleopDrive.togglePrecisionDrive();
+            precisionDriveEntry.setBoolean(TeleopDrive.isPrecisionDrive());
+        }, () -> {}, (interrupted) -> {
+            TeleopDrive.togglePrecisionDrive();
+            precisionDriveEntry.setBoolean(TeleopDrive.isPrecisionDrive());
+        }, () -> false));
         // Override overheat protection
         // This should set the colour to purple if overridden, otherwise it should
         // restore the correct colour
