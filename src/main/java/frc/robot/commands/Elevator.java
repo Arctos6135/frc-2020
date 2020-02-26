@@ -10,15 +10,15 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants;
 import frc.robot.subsystems.BryceFour;
 
 public class Elevator extends CommandBase {
 
     private final BryceFour bryceFour;
-	private final XboxController controller;
-
-	private double yValue;
-	private boolean override;
+    private final XboxController controller;
+    
+	private static boolean override;
     private final double DEAD_ZONE = 0.15;
 
 	/**
@@ -32,6 +32,15 @@ public class Elevator extends CommandBase {
         addRequirements(bryceFour);
  	}
 
+     public static void toggleOverride() {
+        if (override) {
+            override = false;
+        }
+        else {
+            override = true;
+        }
+     }
+
   	// Called when the command is initially scheduled.
   	@Override
   	public void initialize() {
@@ -40,19 +49,16 @@ public class Elevator extends CommandBase {
   	// Called every time the scheduler runs while the command is scheduled.
   	@Override
   	public void execute() {
-        yValue = controller.getRawAxis(XboxController.Axis.kLeftY.value);
-		override = controller.getRawButton(XboxController.Button.kStickLeft.value);
+        double yValue = controller.getRawAxis(Constants.BRYCE_FOUR_ELEVATOR_CONTROL);
 		
-		if (Math.abs(yValue) < DEAD_ZONE) {
-			yValue = 0;
-		}
+		TeleopDrive.applyDeadband(yValue, DEAD_ZONE);
 
-		// Will only lower if remaining match time is less than 30
+		// Will only raise if remaining match time is less than 30
 		// or is in override mode.
 		if (!override && DriverStation.getInstance().getMatchTime() <= 30) {
 			bryceFour.setMotorSpeed(yValue);
 		}
-		else if (!override && yValue > 0) {
+		else if (!override && yValue < 0) {
 			bryceFour.setMotorSpeed(yValue);
 		}
 		else if (override){

@@ -19,7 +19,6 @@ public class BryceFour extends SubsystemBase {
 
     public void setMotorSpeed(double motorSpeed) {
         rightMotor.set(ControlMode.PercentOutput, motorSpeed);
-        leftMotor.set(ControlMode.PercentOutput, motorSpeed);
     }
 
 	/**
@@ -28,7 +27,7 @@ public class BryceFour extends SubsystemBase {
   	public BryceFour(int leftMotor, int rightMotor) {
         this.leftMotor = new TalonSRX(leftMotor);
         this.rightMotor = new TalonSRX(rightMotor);
-        this.leftMotor.setInverted(true);
+        this.leftMotor.follow(this.rightMotor);
   	}
 
   	@Override

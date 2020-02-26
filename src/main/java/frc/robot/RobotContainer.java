@@ -80,7 +80,7 @@ public class RobotContainer {
         intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, operatorController,
                 Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
 
-        bryceFour = new BryceFour(Constants.BRYCE_LEFT_MOTOR, Constants.BRYCE_RIGHT_MOTOR);
+        bryceFour = new BryceFour(Constants.BRYCE_FOUR_LEFT_MOTOR, Constants.BRYCE_FOUR_RIGHT_MOTOR);
         bryceFour.setDefaultCommand(new Elevator(bryceFour, operatorController));
 
         // Configure the button bindings
@@ -180,6 +180,7 @@ public class RobotContainer {
                 Constants.OVERRIDE_MOTOR_PROTECTION);
         Button toggleIntakeButton = new JoystickButton(operatorController, Constants.INTAKE_TOGGLE);
         Button precisionDriveButton = new JoystickButton(driverController, Constants.PRECISION_DRIVE_TOGGLE);
+        Button overrideBryceFourButton = new JoystickButton(operatorController, Constants.BRYCE_FOUR_OVERRIDDE_TOGGLE);
         // Piston Toggle Code
         toggleIntakeButton.whenPressed(new InstantCommand(() -> {
             // Piston Code
@@ -214,6 +215,9 @@ public class RobotContainer {
                         .setBoolean(!(drivetrain.isOverheating() || drivetrain.isOverheatWarning()));
                 getLogger().logInfo("Motor temperature protection re-enabled");
             }
+        });
+        overrideBryceFourButton.whenPressed(() -> {
+            Elevator.toggleOverride();
         });
     }
 
