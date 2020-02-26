@@ -62,6 +62,10 @@ public final class Constants {
     // | Roller Motor Constants
     public static final int INTAKE_ROLLER_VICTOR = 0;
 
+    // Elevator relvated place holder values
+    public static final int BRYCE_RIGHT_MOTOR = 0;
+    public static final int BRYCE_LEFT_MOTOR = 1;
+
     public static final int COLOR_MOTOR_OK = 0x00FF00FF;
     public static final int COLOR_MOTOR_WARNING = 0xFFFF00FF;
     public static final int COLOR_MOTOR_SHUTOFF = 0xFF0000FF;
