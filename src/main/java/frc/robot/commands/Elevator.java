@@ -51,7 +51,7 @@ public class Elevator extends CommandBase {
   	public void execute() {
         double yValue = controller.getRawAxis(Constants.BRYCE_FOUR_ELEVATOR_CONTROL);
 		
-		TeleopDrive.applyDeadband(yValue, DEAD_ZONE);
+		yValue = TeleopDrive.applyDeadband(yValue, DEAD_ZONE);
 
 		// Will only raise if remaining match time is less than 30
 		// or is in override mode.
