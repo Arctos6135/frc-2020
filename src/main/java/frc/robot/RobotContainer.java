@@ -27,8 +27,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.Elevator;
 import frc.robot.commands.ManualIntake;
 import frc.robot.commands.TeleopDrive;
+import frc.robot.subsystems.BryceFour;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.IntakeSubsystem;
 
@@ -43,6 +45,7 @@ public class RobotContainer {
 
     private final Drivetrain drivetrain;
     private final IntakeSubsystem intakeSubsystem;
+    private final BryceFour bryceFour;
 
     private final XboxController driverController = new XboxController(Constants.XBOX_DRIVER);
     private final XboxController operatorController = new XboxController(Constants.XBOX_OPERATOR);
@@ -76,6 +79,9 @@ public class RobotContainer {
                 Constants.SOLENOID_CHANNEL_2);
         intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, operatorController,
                 Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
+
+        bryceFour = new BryceFour(Constants.BRYCE_FOUR_LEFT_MOTOR, Constants.BRYCE_FOUR_RIGHT_MOTOR);
+        bryceFour.setDefaultCommand(new Elevator(bryceFour, operatorController));
 
         // Configure the button bindings
         configureButtonBindings();
@@ -174,6 +180,7 @@ public class RobotContainer {
                 Constants.OVERRIDE_MOTOR_PROTECTION);
         Button toggleIntakeButton = new JoystickButton(operatorController, Constants.INTAKE_TOGGLE);
         Button precisionDriveButton = new JoystickButton(driverController, Constants.PRECISION_DRIVE_TOGGLE);
+        Button overrideBryceFourButton = new JoystickButton(operatorController, Constants.BRYCE_FOUR_OVERRIDDE_TOGGLE);
         // Piston Toggle Code
         toggleIntakeButton.whenPressed(new InstantCommand(() -> {
             // Piston Code
@@ -208,6 +215,9 @@ public class RobotContainer {
                         .setBoolean(!(drivetrain.isOverheating() || drivetrain.isOverheatWarning()));
                 getLogger().logInfo("Motor temperature protection re-enabled");
             }
+        });
+        overrideBryceFourButton.whenPressed(() -> {
+            Elevator.toggleOverride();
         });
     }
 

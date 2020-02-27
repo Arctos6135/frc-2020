@@ -62,6 +62,12 @@ public final class Constants {
     // | Roller Motor Constants
     public static final int INTAKE_ROLLER_VICTOR = 0;
 
+    // Elevator relvated place holder values
+    public static final int BRYCE_FOUR_RIGHT_MOTOR = 5;
+    public static final int BRYCE_FOUR_LEFT_MOTOR = 6;
+    public static final int BRYCE_FOUR_OVERRIDDE_TOGGLE = XboxController.Button.kStickLeft.value;
+    public static final int BRYCE_FOUR_ELEVATOR_CONTROL = XboxController.Axis.kLeftY.value;
+
     public static final int COLOR_MOTOR_OK = 0x00FF00FF;
     public static final int COLOR_MOTOR_WARNING = 0xFFFF00FF;
     public static final int COLOR_MOTOR_SHUTOFF = 0xFF0000FF;
