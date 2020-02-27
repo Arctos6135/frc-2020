@@ -71,6 +71,7 @@ public final class Constants {
     public static final int INDEXER_FRONT_ROLLER_OPPOSITE_TRIGGER = XboxController.Axis.kRightTrigger.value;
     public static final int OVERRIDE_RUN_TIGGER = XboxController.Button.kY.value;
     public static final int TOGGLE_OVERRIDE_MODE = XboxController.Button.kStart.value;
+    public static final int SHOOT = XboxController.Button.kX.value;
 
     // | Pneumatics Constants
     public static final int SOLENOID_CHANNEL_1 = 0;

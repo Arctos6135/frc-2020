@@ -37,6 +37,7 @@ import frc.robot.commands.AlignToTarget;
 import frc.robot.commands.FollowTrajectory;
 import frc.robot.commands.IndexerTiggerCommand;
 import frc.robot.commands.ManualIntake;
+import frc.robot.commands.Shoot;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.IndexerTiggerSubsystem;
@@ -297,6 +298,7 @@ public class RobotContainer {
         Button precisionDriveButton = new JoystickButton(driverController, Constants.PRECISION_DRIVE_TOGGLE);
         AnalogTrigger precisionDriveTrigger = new AnalogTrigger(driverController, Constants.PRECISION_DRIVE_HOLD, 0.5);
         Button operatorOverrideModeButton = new JoystickButton(operatorController, Constants.TOGGLE_OVERRIDE_MODE);
+        Button shootButton = new JoystickButton(operatorController, Constants.SHOOT);
         // Piston Toggle Code
         toggleIntakeButton.whenPressed(new InstantCommand(() -> {
             // Piston Code
@@ -328,7 +330,8 @@ public class RobotContainer {
         precisionDriveTrigger.whileActiveOnce(new FunctionalCommand(() -> {
             TeleopDrive.togglePrecisionDrive();
             precisionDriveEntry.setBoolean(TeleopDrive.isPrecisionDrive());
-        }, () -> {}, (interrupted) -> {
+        }, () -> {
+        }, (interrupted) -> {
             TeleopDrive.togglePrecisionDrive();
             precisionDriveEntry.setBoolean(TeleopDrive.isPrecisionDrive());
         }, () -> false));
@@ -365,6 +368,8 @@ public class RobotContainer {
                 getLogger().logInfo("Shooter motor temperature protection re-enabled");
             }
         });
+        shootButton.whileActiveOnce(
+                new Shoot(shooter, indexerTiggerSubsystem, -1, errorRumbleOperator, infoRumbleOperator));
     }
 
     private void initLogger() {
