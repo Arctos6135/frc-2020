@@ -308,12 +308,7 @@ public class RobotContainer {
         // Piston Toggle Code
         toggleIntakeButton.whenPressed(new InstantCommand(() -> {
             // Piston Code
-            boolean stateExtension = intakeSubsystem.getPistons();
-            if (stateExtension) {
-                intakeSubsystem.setPistons(false);
-            } else {
-                intakeSubsystem.setPistons(true);
-            }
+            intakeSubsystem.setExtended(!intakeSubsystem.isExtended());
         }, intakeSubsystem));
         operatorOverrideModeButton.whenPressed(() -> {
             boolean override = !IndexerTiggerCommand.getOverrideMode();
