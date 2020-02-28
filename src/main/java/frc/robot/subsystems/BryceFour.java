@@ -7,31 +7,30 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class BryceFour extends SubsystemBase {
 
-    private final TalonSRX leftMotor;
-    private final TalonSRX rightMotor;
+    private final CANSparkMax leftMotor;
+    private final CANSparkMax rightMotor;
 
     public void setMotorSpeed(double motorSpeed) {
-        rightMotor.set(ControlMode.PercentOutput, motorSpeed);
+        rightMotor.set(motorSpeed);
     }
 
 	/**
 	* Creates a new BryceFour.
 	*/
   	public BryceFour(int leftMotor, int rightMotor) {
-        this.leftMotor = new TalonSRX(leftMotor);
-        this.rightMotor = new TalonSRX(rightMotor);
+        this.leftMotor = new CANSparkMax(leftMotor, MotorType.kBrushless);
+        this.rightMotor = new CANSparkMax(rightMotor, MotorType.kBrushless);
+
         this.leftMotor.follow(this.rightMotor);
-        // Enable the current limit
-        // Once current exceeds 40A for 1.0s, limit current to 20A.
-        this.rightMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 20, 40, 1));
+        // limit to 20A
+        this.rightMotor.setSmartCurrentLimit(20);
   	}
 
   	@Override
