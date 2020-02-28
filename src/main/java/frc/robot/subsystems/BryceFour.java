@@ -8,6 +8,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,6 +30,8 @@ public class BryceFour extends SubsystemBase {
         this.rightMotor = new CANSparkMax(rightMotor, MotorType.kBrushless);
 
         this.leftMotor.follow(this.rightMotor);
+        this.leftMotor.setIdleMode(IdleMode.kBrake);
+        this.rightMotor.setIdleMode(IdleMode.kBrake);
         // limit to 20A
         this.rightMotor.setSmartCurrentLimit(20);
   	}
