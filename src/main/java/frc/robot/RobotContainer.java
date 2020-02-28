@@ -34,11 +34,13 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.commands.AlignToTarget;
+import frc.robot.commands.Elevator;
 import frc.robot.commands.FollowTrajectory;
 import frc.robot.commands.IndexerTiggerCommand;
 import frc.robot.commands.ManualIntake;
 import frc.robot.commands.Shoot;
 import frc.robot.commands.TeleopDrive;
+import frc.robot.subsystems.BryceFour;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.IndexerTiggerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -58,6 +60,7 @@ public class RobotContainer {
     private final IntakeSubsystem intakeSubsystem;
     private final Shooter shooter;
     private final IndexerTiggerSubsystem indexerTiggerSubsystem;
+    private final BryceFour bryceFour;
 
     private static final XboxController driverController = new XboxController(Constants.XBOX_DRIVER);
     private static final XboxController operatorController = new XboxController(Constants.XBOX_OPERATOR);
@@ -108,14 +111,16 @@ public class RobotContainer {
         intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, driverController,
                 Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
 
-        // Construct here
-        // There's a chance this may take a lot of time
-        autos = new Autos();
-
         indexerTiggerSubsystem = new IndexerTiggerSubsystem(Constants.TIGGER_BACK_ROLLER, Constants.TIGGER_FRONT_ROLLER,
                 Constants.TIGGER_BOTTOM_SENSOR, Constants.TIGGER_TOP_SENSOR, Constants.INDEXER_LEFT_ROLLER,
                 Constants.INDEXER_RIGHT_ROLLER);
         indexerTiggerSubsystem.setDefaultCommand(new IndexerTiggerCommand(indexerTiggerSubsystem, operatorController));
+        bryceFour = new BryceFour(Constants.BRYCE_FOUR_LEFT_MOTOR, Constants.BRYCE_FOUR_RIGHT_MOTOR);
+        bryceFour.setDefaultCommand(new Elevator(bryceFour, operatorController));
+
+        // Construct here
+        // There's a chance this may take a lot of time
+        autos = new Autos();
 
         configTab = Shuffleboard.getTab("Config");
         driveTab = Shuffleboard.getTab("Drive");
@@ -299,6 +304,7 @@ public class RobotContainer {
         AnalogTrigger precisionDriveTrigger = new AnalogTrigger(driverController, Constants.PRECISION_DRIVE_HOLD, 0.5);
         Button operatorOverrideModeButton = new JoystickButton(operatorController, Constants.TOGGLE_OVERRIDE_MODE);
         Button shootButton = new JoystickButton(operatorController, Constants.SHOOT);
+        Button overrideBryceFourButton = new JoystickButton(operatorController, Constants.BRYCE_FOUR_OVERRIDDE_TOGGLE);
         // Piston Toggle Code
         toggleIntakeButton.whenPressed(new InstantCommand(() -> {
             // Piston Code
@@ -370,6 +376,9 @@ public class RobotContainer {
         });
         shootButton.whileActiveOnce(
                 new Shoot(shooter, indexerTiggerSubsystem, -1, errorRumbleOperator, infoRumbleOperator));
+        overrideBryceFourButton.whenPressed(() -> {
+            Elevator.toggleOverride();
+        });
     }
 
     private void initLogger() {

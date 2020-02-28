@@ -72,6 +72,8 @@ public final class Constants {
     public static final int OVERRIDE_RUN_TIGGER = XboxController.Button.kY.value;
     public static final int TOGGLE_OVERRIDE_MODE = XboxController.Button.kStart.value;
     public static final int SHOOT = XboxController.Button.kX.value;
+    public static final int BRYCE_FOUR_OVERRIDDE_TOGGLE = XboxController.Button.kStickLeft.value;
+    public static final int BRYCE_FOUR_ELEVATOR_CONTROL = XboxController.Axis.kLeftY.value;
 
     // | Pneumatics Constants
     public static final int SOLENOID_CHANNEL_1 = 0;
@@ -92,6 +94,9 @@ public final class Constants {
     public static final double LIMELIGHT_HEIGHT = 34;
     public static final double TARGET_HEIGHT = 115.25;
     public static final double LIMELIGHT_ANGLE = 0;
+    // Elevator relvated place holder values
+    public static final int BRYCE_FOUR_RIGHT_MOTOR = 5;
+    public static final int BRYCE_FOUR_LEFT_MOTOR = 6;
 
     public static final int COLOR_MOTOR_OK = 0x00FF00FF;
     public static final int COLOR_MOTOR_WARNING = 0xFFFF00FF;
