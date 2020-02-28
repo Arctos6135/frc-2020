@@ -106,8 +106,8 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(new TeleopDrive(drivetrain, shooter.getLimelight(), driverController,
                 Constants.DRIVE_FWD_REV, Constants.DRIVE_LEFT_RIGHT, Constants.AUTO_ALIGN));
 
-        intakeSubsystem = new IntakeSubsystem(Constants.INTAKE_ROLLER_VICTOR, Constants.SOLENOID_CHANNEL_1,
-                Constants.SOLENOID_CHANNEL_2);
+        intakeSubsystem = new IntakeSubsystem(Constants.INTAKE_ROLLER_VICTOR, Constants.INTAKE_SOLENOID_CHANNEL_1,
+                Constants.INTAKE_SOLENOID_CHANNEL_2);
         intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, driverController,
                 Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
 
