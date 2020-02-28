@@ -408,7 +408,8 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         indexerTiggerSubsystem.setPowercellCount(tiggerPowerCellChooser.getSelected());
-        return autos.getAuto(autos.getChooser().getSelected(), drivetrain, indexerTiggerSubsystem, shooter);
+        return autos.getAuto(autos.getChooser().getSelected(), drivetrain, intakeSubsystem, indexerTiggerSubsystem,
+                shooter);
     }
 
     /**

@@ -93,7 +93,7 @@ public class IntakeSubsystem extends SubsystemBase {
         mainMotor = new VictorSPX(roller);
         // Pneumatics
         solenoid = new DoubleSolenoid(forwardChannel, reverseChannel);
-        setExtended(true);
+        setExtended(false);
     }
 
     @Override
