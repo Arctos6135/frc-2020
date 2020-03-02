@@ -233,7 +233,7 @@ public class Drivetrain extends SubsystemBase {
         return new double[] { leftAccel, rightAccel };
     }
 
-    private IdleMode idleMode;
+    private IdleMode idleMode = IdleMode.kCoast; // sreela
 
     /**
      * Sets the idle mode (brake or coast) of all the drivetrain motors.
