@@ -46,6 +46,7 @@ import frc.robot.subsystems.IndexerTiggerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.Shooter;
 import frc.robot.util.Limelight;
+import frc.robot.util.PressureSensor;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -61,6 +62,8 @@ public class RobotContainer {
     private final Shooter shooter;
     private final IndexerTiggerSubsystem indexerTiggerSubsystem;
     private final BryceFour bryceFour;
+
+    private final PressureSensor pressureSensor;
 
     private static final XboxController driverController = new XboxController(Constants.XBOX_DRIVER);
     private static final XboxController operatorController = new XboxController(Constants.XBOX_OPERATOR);
@@ -82,13 +85,13 @@ public class RobotContainer {
     private NetworkTableEntry overrideModeEntry;
     private NetworkTableEntry shooterRPMEntry;
     private NetworkTableEntry tiggerPowerCellCountEntry;
+    private NetworkTableEntry pressureEntry;
+    private NetworkTableEntry lastError;
+    private NetworkTableEntry lastWarning;
     private SimpleWidget drivetrainMotorStatus;
     private SimpleWidget shooterMotorStatus;
 
     private SendableChooser<Integer> tiggerPowerCellChooser = new SendableChooser<>();
-
-    private NetworkTableEntry lastError;
-    private NetworkTableEntry lastWarning;
 
     private static RobotLogger logger = new RobotLogger();
 
@@ -106,8 +109,8 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(new TeleopDrive(drivetrain, shooter.getLimelight(), driverController,
                 Constants.DRIVE_FWD_REV, Constants.DRIVE_LEFT_RIGHT, Constants.AUTO_ALIGN));
 
-        intakeSubsystem = new IntakeSubsystem(Constants.INTAKE_ROLLER_VICTOR, Constants.SOLENOID_CHANNEL_1,
-                Constants.SOLENOID_CHANNEL_2);
+        intakeSubsystem = new IntakeSubsystem(Constants.INTAKE_ROLLER_VICTOR, Constants.INTAKE_SOLENOID_FWD,
+                Constants.INTAKE_SOLENOID_REV);
         intakeSubsystem.setDefaultCommand(new ManualIntake(intakeSubsystem, driverController,
                 Constants.INTAKE_FORWARD_BUTTON, Constants.INTAKE_REVERSE_BUTTON));
 
@@ -117,6 +120,8 @@ public class RobotContainer {
         indexerTiggerSubsystem.setDefaultCommand(new IndexerTiggerCommand(indexerTiggerSubsystem, operatorController));
         bryceFour = new BryceFour(Constants.BRYCE_FOUR_LEFT_MOTOR, Constants.BRYCE_FOUR_RIGHT_MOTOR);
         bryceFour.setDefaultCommand(new Elevator(bryceFour, operatorController));
+
+        pressureSensor = new PressureSensor(Constants.PRESSURE_SENSOR_CHANNEL);
 
         // Construct here
         // There's a chance this may take a lot of time
@@ -204,6 +209,8 @@ public class RobotContainer {
                 .withPosition(43, 8).withSize(5, 6)
                 .withProperties(Map.of("min", 0, "max", 3, "center", 0, "num tick marks", 4, "show text", false))
                 .getEntry();
+        pressureEntry = driveTab.add("Pressure", pressureSensor.getPressure()).withWidget(BuiltInWidgets.kDial)
+                .withPosition(48, 8).withSize(6, 6).withProperties(Map.of("min", 0, "max", 115)).getEntry();
         // Add the motor status boolean boxes
         drivetrainMotorStatus = driveTab.add("Drivetrain", true).withWidget(BuiltInWidgets.kBooleanBox)
                 // Set the size and custom colours
@@ -286,6 +293,7 @@ public class RobotContainer {
     public void updateDashboard() {
         shooterRPMEntry.setNumber(shooter.getVelocity());
         tiggerPowerCellCountEntry.setNumber(indexerTiggerSubsystem.getPowercellCount());
+        pressureEntry.setDouble(pressureSensor.getPressure());
     }
 
     /**
@@ -308,12 +316,7 @@ public class RobotContainer {
         // Piston Toggle Code
         toggleIntakeButton.whenPressed(new InstantCommand(() -> {
             // Piston Code
-            boolean stateExtension = intakeSubsystem.getPistons();
-            if (stateExtension) {
-                intakeSubsystem.setPistons(false);
-            } else {
-                intakeSubsystem.setPistons(true);
-            }
+            intakeSubsystem.setExtended(!intakeSubsystem.isExtended());
         }, intakeSubsystem));
         operatorOverrideModeButton.whenPressed(() -> {
             boolean override = !IndexerTiggerCommand.getOverrideMode();
@@ -413,7 +416,8 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         indexerTiggerSubsystem.setPowercellCount(tiggerPowerCellChooser.getSelected());
-        return autos.getAuto(autos.getChooser().getSelected(), drivetrain, indexerTiggerSubsystem, shooter);
+        return autos.getAuto(autos.getChooser().getSelected(), drivetrain, intakeSubsystem, indexerTiggerSubsystem,
+                shooter);
     }
 
     /**

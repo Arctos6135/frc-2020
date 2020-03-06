@@ -38,20 +38,20 @@ public class ManualIntake extends CommandBase {
         
         //Roller Code
         if(forward & !reverse){
-            intakeSubsystem.setMotors(1);
+            intakeSubsystem.setMotor(1);
         }
         else if(!forward & reverse){
-            intakeSubsystem.setMotors(-1);
+            intakeSubsystem.setMotor(-1);
         }
         else{
-            intakeSubsystem.setMotors(0);
+            intakeSubsystem.setMotor(0);
         }
     }
 
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
-        intakeSubsystem.setMotors(0);
+        intakeSubsystem.setMotor(0);
     }
 
     // Returns true when the command should end.

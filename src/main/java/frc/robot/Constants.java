@@ -76,8 +76,9 @@ public final class Constants {
     public static final int BRYCE_FOUR_ELEVATOR_CONTROL = XboxController.Axis.kLeftY.value;
 
     // | Pneumatics Constants
-    public static final int SOLENOID_CHANNEL_1 = 0;
-    public static final int SOLENOID_CHANNEL_2 = 1;
+    public static final int INTAKE_SOLENOID_FWD = 2;
+    public static final int INTAKE_SOLENOID_REV = 3;
+    public static final int PRESSURE_SENSOR_CHANNEL = 0;
 
     // | Roller Motor Constants
     public static final int TIGGER_BACK_ROLLER = 1;
@@ -106,7 +107,18 @@ public final class Constants {
     // TODO: Change these
     public static final double ROBOT_MAX_VELOCITY = 0;
     public static final double ROBOT_MAX_ACCELERATION = 0;
-    public static final double ROBOT_BASE_WIDTH = 0;
+    public static final double ROBOT_BASE_WIDTH = 24.5;
     public static final RobotSpecs ROBOT_SPECS = new RobotSpecs(ROBOT_MAX_VELOCITY, ROBOT_MAX_ACCELERATION,
             ROBOT_BASE_WIDTH);
+    
+    // Robot Dimensions
+    public static final double BUMPER_WIDTH = 3.5;
+    public static final double ROBOT_WIDTH = BUMPER_WIDTH * 2 + 28;
+    public static final double ROBOT_LENGTH = BUMPER_WIDTH * 2 + 31.5;
+    public static final double ROBOT_LENGTH_INTAKE_DOWN = ROBOT_LENGTH + 12;
+
+    // Field dimensions
+    public static final double INIT_LINE_DISTANCE = 120;
+    public static final double INIT_LINE_TRENCH_DISTANCE = 86.6;
+    public static final double TRENCH_DISTANCE_SHORT = 42.2;
 }
