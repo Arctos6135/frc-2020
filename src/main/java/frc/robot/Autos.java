@@ -62,38 +62,36 @@ public class Autos {
          * line.
          * 
          * <ul>
-         * <li>Starts: Anywhere</li>
-         * <li>Ends: 3 feet backwards</li>
+         * <li>Starts: Anywhere, lined up with the Power Port</li>
+         * <li>Ends: 3 feet forward</li>
          * <li>Scores: 0-3 Power Cells</li>
          * <li>Preload: Any</li>
          * </ul>
          */
-        // TODO: Should move forwards
-        SHOOT_MOVE_BACK_NOAIM("Shoot w/o Aim & Move Back"),
+        SHOOT_MOVE_FORWARD_NOAIM("Shoot w/o Aim & Move Forward"),
         /**
          * Aim, then shoot all preloaded Power Cells, then drive off the initiation
          * line.
          * 
          * <ul>
          * <li>Starts: Anywhere</li>
-         * <li>Ends: 3 feet backwards</li>
+         * <li>Ends: 3 feet forward</li>
          * <li>Scores: 0-3 Power Cells</li>
          * <li>Preload: Any</li>
          * </ul>
          */
-        SHOOT_MOVE_BACK("Shoot & Move Back"),
+        SHOOT_MOVE_FORWARD("Shoot & Move Forward"),
         /**
-         * Drive backwards off the initiation line, aim, and then shoot all preloaded
-         * Power Cells.
+         * Drive off the initiation line, aim, and then shoot all preloaded Power Cells.
          * 
          * <ul>
          * <li>Starts: Anywhere</li>
-         * <li>Ends: 3 feet backwards</li>
+         * <li>Ends: 3 feet forward</li>
          * <li>Scores: 0-3 Power Cells</li>
          * <li>Preload: Any</li>
          * </ul>
          */
-        MOVE_BACK_SHOOT("Move Back & Shoot"),
+        MOVE_FORWARD_SHOOT("Move Forward & Shoot"),
         /**
          * Drives into the opponent's trench to steal the 2 Power Cells.
          * 
@@ -169,18 +167,18 @@ public class Autos {
             case DEBUG:
                 return new DriveDistance(drivetrain, 60);
             case INIT_FORWARDS:
-                return new DriveDistance(drivetrain, 36);
+                return new DriveDistance(drivetrain, 72);
             case INIT_REVERSE:
-                return new DriveDistance(drivetrain, -36);
-            case SHOOT_MOVE_BACK:
+                return new DriveDistance(drivetrain, -72);
+            case SHOOT_MOVE_FORWARD:
                 return new AlignToTarget(drivetrain, shooter.getLimelight())
                         .andThen(new Shoot(shooter, indexerTigger, Integer.MAX_VALUE))
-                        .andThen(new DriveDistance(drivetrain, -36));
-            case MOVE_BACK_SHOOT:
-                return new DriveDistance(drivetrain, -36).andThen(new AlignToTarget(drivetrain, shooter.getLimelight()))
+                        .andThen(new DriveDistance(drivetrain, 36));
+            case MOVE_FORWARD_SHOOT:
+                return new DriveDistance(drivetrain, 36).andThen(new AlignToTarget(drivetrain, shooter.getLimelight()))
                         .andThen(new Shoot(shooter, indexerTigger, Integer.MAX_VALUE));
-            case SHOOT_MOVE_BACK_NOAIM:
-                return new Shoot(shooter, indexerTigger, Integer.MAX_VALUE).andThen(new DriveDistance(drivetrain, -36));
+            case SHOOT_MOVE_FORWARD_NOAIM:
+                return new Shoot(shooter, indexerTigger, Integer.MAX_VALUE).andThen(new DriveDistance(drivetrain, 36));
             case POWER_CELL_STEAL:
                 // Run intake
                 return new RunIntake(intake, 1.0, false)
