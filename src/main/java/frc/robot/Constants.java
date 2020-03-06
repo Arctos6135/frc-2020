@@ -118,7 +118,10 @@ public final class Constants {
     public static final double ROBOT_LENGTH_INTAKE_DOWN = ROBOT_LENGTH + 12;
 
     // Field dimensions
+    // Most of the following numbers are somewhat approximate
+    // They were measured from the CAD and rounded
     public static final double INIT_LINE_DISTANCE = 120;
     public static final double INIT_LINE_TRENCH_DISTANCE = 86.6;
     public static final double TRENCH_DISTANCE_SHORT = 42.2;
+    public static final double TRENCH_PC_DISTANCE = 36;
 }
