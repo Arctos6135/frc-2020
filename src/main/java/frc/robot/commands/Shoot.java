@@ -10,7 +10,6 @@ package frc.robot.commands;
 import com.arctos6135.robotlib.oi.Rumble;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.IndexerTiggerSubsystem;
 import frc.robot.subsystems.Shooter;
@@ -82,7 +81,7 @@ public class Shoot extends CommandBase {
         velocityReached = false;
         shots = 0;
         // Verify that there are targets
-        if (shooter.getLimelight().hasValidTargets()) {
+        if (shooter.hasTarget()) {
             // Verify that the shooter is not overheating
             if (!shooter.getOverheatShutoffOverride() && shooter.getMonitorGroup().getOverheatShutoff()) {
                 finish = true;
@@ -92,22 +91,13 @@ public class Shoot extends CommandBase {
                 }
                 return;
             }
-            // Estimate the velocity needed to reach the target
-            double distance = shooter.getLimelight().estimateDistance(Constants.LIMELIGHT_HEIGHT,
-                    Constants.TARGET_HEIGHT, Constants.LIMELIGHT_ANGLE);
-            try {
-                targetVelocity = shooter.getRangeTable().search(distance);
-            } catch (IllegalArgumentException | NullPointerException e) {
+            if (!shooter.aim()) {
                 finish = true;
-                RobotContainer.getLogger()
-                        .logError(e instanceof NullPointerException ? "Range table not loaded!" : e.getMessage());
                 if (ERROR_RUMBLE != null) {
                     ERROR_RUMBLE.execute();
                 }
                 return;
             }
-            // Spin up the shooter
-            shooter.setVelocity(targetVelocity);
         } else {
             finish = true;
             RobotContainer.getLogger().logError("Shoot command was executed but no target can be found");

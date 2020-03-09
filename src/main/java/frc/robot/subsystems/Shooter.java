@@ -8,6 +8,7 @@
 package frc.robot.subsystems;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import com.revrobotics.CANEncoder;
@@ -22,6 +23,7 @@ import edu.wpi.first.wpilibj.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SendableBuilder;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.util.Limelight;
 import frc.robot.util.MonitoredCANSparkMaxGroup;
 import frc.robot.util.RangeTable;
@@ -81,6 +83,16 @@ public class Shooter extends SubsystemBase {
         }
 
     }
+
+    /**
+     * The lowest speed for shooting any distance.
+     * 
+     * <p>
+     * This speed is used for pre-accelerating the shooter wheel when the shooter
+     * cannot find a target.
+     * </p>
+     */
+    public static final double BASE_SPEED = 0;
 
     private static final double kP = 0, kI = 0, kD = 0, kF = 0;
 
@@ -155,6 +167,47 @@ public class Shooter extends SubsystemBase {
      */
     public Limelight getLimelight() {
         return limelight;
+    }
+
+    /**
+     * Return whether the shooter's limelight has detected any targets.
+     * 
+     * @return Whether the shooter has a target
+     */
+    public boolean hasTarget() {
+        return limelight.hasValidTargets();
+    }
+
+    /**
+     * Set the velocity of the shooter to aim for the detected target.
+     * 
+     * <p>
+     * If no targets are detected, the range table is not loaded or the target
+     * distance is out of range, this method will return false and the shooter will
+     * be stopped.
+     * </p>
+     * 
+     * @return Whether aiming was successful
+     */
+    public boolean aim() {
+        if (!hasTarget()) {
+            setVelocity(0);
+            return false;
+        }
+
+        // Estimate the velocity needed to reach the target
+        double distance = limelight.estimateDistance(Constants.LIMELIGHT_HEIGHT, Constants.TARGET_HEIGHT,
+                Constants.LIMELIGHT_ANGLE);
+        try {
+            setVelocity(rangeTable.search(distance));
+        } catch (IllegalArgumentException | NullPointerException e) {
+            // Table not loaded or out of range
+            RobotContainer.getLogger()
+                    .logError(e instanceof NullPointerException ? "Range table not loaded!" : e.getMessage());
+            setVelocity(0);
+            return false;
+        }
+        return true;
     }
 
     /**
