@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.commands.Aim;
 import frc.robot.commands.AlignToTarget;
 import frc.robot.commands.DriveDistance;
 import frc.robot.commands.Rotate;
@@ -171,11 +172,12 @@ public class Autos {
             case INIT_REVERSE:
                 return new DriveDistance(drivetrain, -72);
             case SHOOT_MOVE_FORWARD:
-                return new AlignToTarget(drivetrain, shooter.getLimelight())
+                return new Aim(shooter).deadlineWith(new AlignToTarget(drivetrain, shooter.getLimelight()))
                         .andThen(new Shoot(shooter, indexerTigger, Integer.MAX_VALUE))
                         .andThen(new DriveDistance(drivetrain, 36));
             case MOVE_FORWARD_SHOOT:
-                return new DriveDistance(drivetrain, 36).andThen(new AlignToTarget(drivetrain, shooter.getLimelight()))
+                return new DriveDistance(drivetrain, 36)
+                        .andThen(new Aim(shooter).deadlineWith(new AlignToTarget(drivetrain, shooter.getLimelight())))
                         .andThen(new Shoot(shooter, indexerTigger, Integer.MAX_VALUE));
             case SHOOT_MOVE_FORWARD_NOAIM:
                 return new Shoot(shooter, indexerTigger, Integer.MAX_VALUE).andThen(new DriveDistance(drivetrain, 36));
@@ -204,7 +206,7 @@ public class Autos {
                             drivetrain.zeroHeading();
                         }))
                         // Align and shoot
-                        .andThen(new AlignToTarget(drivetrain, shooter.getLimelight()))
+                        .andThen(new Aim(shooter).deadlineWith(new AlignToTarget(drivetrain, shooter.getLimelight())))
                         .andThen(new Shoot(shooter, indexerTigger, 2))
                         // Re-align to trench
                         // Note rotate takes radians and goes in the opposite direction
@@ -213,7 +215,7 @@ public class Autos {
                         .andThen(new RunIntake(intake, 1.0, false)
                                 .deadlineWith(new DriveDistance(drivetrain, Constants.TRENCH_PC_DISTANCE)))
                         // Align and shoot everything left
-                        .andThen(new AlignToTarget(drivetrain, shooter.getLimelight()))
+                        .andThen(new Aim(shooter).deadlineWith(new AlignToTarget(drivetrain, shooter.getLimelight())))
                         .andThen(new Shoot(shooter, indexerTigger, Integer.MAX_VALUE));
             default:
                 return new InstantCommand(() -> {
