@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.commands.Aim;
 import frc.robot.commands.AlignToTarget;
 import frc.robot.commands.Elevator;
 import frc.robot.commands.FollowTrajectory;
@@ -291,7 +292,7 @@ public class RobotContainer {
      * Update the dashboard.
      */
     public void updateDashboard() {
-        shooterRPMEntry.setNumber(shooter.getVelocity());
+        shooterRPMEntry.setNumber(shooter.getRealVelocity());
         tiggerPowerCellCountEntry.setNumber(indexerTiggerSubsystem.getPowercellCount());
         pressureEntry.setDouble(pressureSensor.getPressure());
     }
@@ -312,6 +313,7 @@ public class RobotContainer {
         AnalogTrigger precisionDriveTrigger = new AnalogTrigger(driverController, Constants.PRECISION_DRIVE_HOLD, 0.5);
         Button operatorOverrideModeButton = new JoystickButton(operatorController, Constants.TOGGLE_OVERRIDE_MODE);
         Button shootButton = new JoystickButton(operatorController, Constants.SHOOT);
+        Button startShooterButton = new JoystickButton(operatorController, Constants.START_SHOOTER);
         Button overrideBryceFourButton = new JoystickButton(operatorController, Constants.BRYCE_FOUR_OVERRIDDE_TOGGLE);
         // Piston Toggle Code
         toggleIntakeButton.whenPressed(new InstantCommand(() -> {
@@ -379,6 +381,19 @@ public class RobotContainer {
         });
         shootButton.whileActiveOnce(
                 new Shoot(shooter, indexerTiggerSubsystem, -1, errorRumbleOperator, infoRumbleOperator));
+        startShooterButton.whenPressed(() -> {
+            // If there is already an instance of Aim then stop it
+            if(shooter.getCurrentCommand() instanceof Aim) {
+                shooter.getCurrentCommand().cancel();
+                shooter.setVelocity(0);
+            }
+            else {
+                // Make sure shooting is not accidentally interrupted
+                if(!(shooter.getCurrentCommand() instanceof Shoot)) {
+                    new Aim(shooter).schedule();
+                }
+            }
+        });
         overrideBryceFourButton.whenPressed(() -> {
             Elevator.toggleOverride();
         });

@@ -111,7 +111,7 @@ public class Shoot extends CommandBase {
     @Override
     public void execute() {
         // Check if velocity is within tolerance
-        if (Math.abs(shooter.getVelocity() - targetVelocity) < VELOCITY_TOLERANCE) {
+        if (Math.abs(shooter.getRealVelocity() - targetVelocity) < VELOCITY_TOLERANCE) {
             // Shoot
             indexerTigger.startBackRoller();
             indexerTigger.startFrontRoller();

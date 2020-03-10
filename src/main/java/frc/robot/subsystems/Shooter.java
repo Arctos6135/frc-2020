@@ -103,6 +103,8 @@ public class Shooter extends SubsystemBase {
     private CANEncoder encoder;
     private CANPIDController pidController;
 
+    private double velocity = 0;
+
     private Limelight limelight;
 
     private MonitoredCANSparkMaxGroup monitorGroup;
@@ -220,12 +222,23 @@ public class Shooter extends SubsystemBase {
     }
 
     /**
-     * Get the velocity of the shooter in RPM.
+     * Get the actual velocity of the shooter in RPM.
      * 
      * @return The velocity
+     * @see #getVelocitySetpoint()
      */
-    public double getVelocity() {
+    public double getRealVelocity() {
         return encoder.getVelocity();
+    }
+
+    /**
+     * Get the velocity setpoint (desired velocity) of the shooter in RPM.
+     * 
+     * @return The velocity setpoint
+     * @see #getRealVelocity()
+     */
+    public double getVelocitySetpoint() {
+        return velocity;
     }
 
     /**
@@ -236,6 +249,7 @@ public class Shooter extends SubsystemBase {
     public void setVelocity(double rpm) {
         pidController.setReference(monitorGroup.getOverheatShutoff() && !protectionOverridden ? 0 : rpm,
                 ControlType.kVelocity);
+        velocity = rpm;
     }
 
     /**

@@ -72,6 +72,7 @@ public final class Constants {
     public static final int OVERRIDE_RUN_TIGGER = XboxController.Button.kY.value;
     public static final int TOGGLE_OVERRIDE_MODE = XboxController.Button.kStart.value;
     public static final int SHOOT = XboxController.Button.kX.value;
+    public static final int START_SHOOTER = XboxController.Button.kA.value;
     public static final int BRYCE_FOUR_OVERRIDDE_TOGGLE = XboxController.Button.kStickLeft.value;
     public static final int BRYCE_FOUR_ELEVATOR_CONTROL = XboxController.Axis.kLeftY.value;
 
