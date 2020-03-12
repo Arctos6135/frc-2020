@@ -8,11 +8,15 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/**
+ * The climber elevator.
+ */
 public class BryceFour extends SubsystemBase {
 
     private final TalonSRX leftMotor;
@@ -22,20 +26,25 @@ public class BryceFour extends SubsystemBase {
         rightMotor.set(ControlMode.PercentOutput, motorSpeed);
     }
 
-	/**
-	* Creates a new BryceFour.
-	*/
-  	public BryceFour(int leftMotor, int rightMotor) {
+    /**
+     * Creates a new BryceFour.
+     */
+    public BryceFour(int leftMotor, int rightMotor) {
         this.leftMotor = new TalonSRX(leftMotor);
         this.rightMotor = new TalonSRX(rightMotor);
+
+        // Put motors on brake to prevent backdrive as much as possible
+        this.leftMotor.setNeutralMode(NeutralMode.Brake);
+        this.rightMotor.setNeutralMode(NeutralMode.Coast);
+        
         this.leftMotor.follow(this.rightMotor);
         // Enable the current limit
         // Once current exceeds 40A for 1.0s, limit current to 20A.
         this.rightMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 20, 40, 1));
-  	}
+    }
 
-  	@Override
-  	public void periodic() {
-		// This method will be called once per scheduler run
-  	}
+    @Override
+    public void periodic() {
+        // This method will be called once per scheduler run
+    }
 }

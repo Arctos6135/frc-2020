@@ -7,22 +7,33 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.Shooter;
 
-public class ManualIntake extends CommandBase {
-    private final IntakeSubsystem intakeSubsystem;
-    private final GenericHID controller;
-    private final int forwardButton;
-    private final int reverseButton;
+/**
+ * A command that continuously sets the shooter's velocity to aim at a target
+ * (but not shooting).
+ * 
+ * <p>
+ * If the target cannot be found, the shooter's velocity will instead be set to
+ * {@link Shooter#BASE_SPEED}.
+ * </p>
+ * <p>
+ * When this command is interrupted, it will <b>not</b> stop the shooter.
+ * </p>
+ */
+public class Aim extends CommandBase {
 
-    public ManualIntake(IntakeSubsystem intakeSubsystem, GenericHID controller, int forwardButton, int reverseButton) {
-        this.intakeSubsystem = intakeSubsystem;
-        this.controller = controller;
-        this.forwardButton = forwardButton;
-        this.reverseButton = reverseButton;
-        addRequirements(intakeSubsystem);
+    private final Shooter shooter;
+
+    /**
+     * Create a new Aim command.
+     * 
+     * @param shooter The shooter
+     */
+    public Aim(Shooter shooter) {
+        this.shooter = shooter;
+        addRequirements(shooter);
     }
 
     // Called when the command is initially scheduled.
@@ -33,25 +44,14 @@ public class ManualIntake extends CommandBase {
     // Called every time the scheduler runs while the command is scheduled.
     @Override
     public void execute() {
-        boolean forward = controller.getRawButton(forwardButton);
-        boolean reverse = controller.getRawButton(reverseButton);
-        
-        //Roller Code
-        if(forward & !reverse){
-            intakeSubsystem.setMotor(1);
-        }
-        else if(!forward & reverse){
-            intakeSubsystem.setMotor(-1);
-        }
-        else{
-            intakeSubsystem.setMotor(0);
+        if (!shooter.aim()) {
+            shooter.setVelocity(Shooter.BASE_SPEED);
         }
     }
 
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
-        intakeSubsystem.setMotor(0);
     }
 
     // Returns true when the command should end.

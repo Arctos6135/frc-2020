@@ -13,6 +13,11 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/**
+ * The intake subsystem.
+ * 
+ * @author Jeremy Xie
+ */
 public class IntakeSubsystem extends SubsystemBase {
     // Motor Related Variables
     private final VictorSPX mainMotor;
@@ -20,29 +25,53 @@ public class IntakeSubsystem extends SubsystemBase {
     private final DoubleSolenoid solenoid;
     private boolean isExtended = false;
 
-    // Motor Related
-    public void setMotors(double scale) {
+    /**
+     * Set the speed of the motor.
+     * 
+     * @param scale The motor speed
+     */
+    public void setMotor(double scale) {
         mainMotor.set(ControlMode.PercentOutput, scale);
     }
 
     // | Neutral Mode
     NeutralMode neutralMode;
+
+    /**
+     * Set the neutral mode of the intake.
+     * 
+     * @param mode The neutral mode
+     */
     public void setNeutralMode(NeutralMode mode) {
         neutralMode = mode;
         mainMotor.setNeutralMode(mode);
     }
 
+    /**
+     * Get the neutral mode of the intake.
+     * 
+     * @return The neutral mode
+     */
     public NeutralMode getNeutralMode() {
         return neutralMode;
     }
 
-    public boolean getPistons() {
+    /**
+     * Get whether the intake is extended.
+     * 
+     * @return Whether the intake is extended
+     */
+    public boolean isExtended() {
         return isExtended;
     }
 
-    // Pneumatic related
-    public void setPistons(boolean state) {
-        //true for extended, false for retracted
+    /**
+     * Set whether the intake should be extended.
+     * 
+     * @param state Whether the intake should be extended
+     */
+    public void setExtended(boolean state) {
+        // true for extended, false for retracted
         if (state && !isExtended) {
             isExtended = true;
             solenoid.set(DoubleSolenoid.Value.kForward);
@@ -52,12 +81,19 @@ public class IntakeSubsystem extends SubsystemBase {
         }
     }
 
-    public IntakeSubsystem(int master, int forwardChannel, int reverseChannel) {
+    /**
+     * Create a new intake subsystem.
+     * 
+     * @param roller         The CAN ID of the roller motor controller
+     * @param forwardChannel The double solenoid's forward channel
+     * @param reverseChannel The double solenoid's reverse channel
+     */
+    public IntakeSubsystem(int roller, int forwardChannel, int reverseChannel) {
         // Motors
-        mainMotor = new VictorSPX(master);
+        mainMotor = new VictorSPX(roller);
         // Pneumatics
         solenoid = new DoubleSolenoid(forwardChannel, reverseChannel);
-        setPistons(true);
+        setExtended(false);
     }
 
     @Override
