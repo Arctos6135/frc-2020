@@ -310,4 +310,12 @@ public class Shooter extends SubsystemBase {
             masterMotor.stopMotor();
         }
     }
+
+    /**
+     * Writes the settings of all Spark Max motor controllers to flash.
+     */
+    public void burnFlash() {
+        masterMotor.burnFlash();
+        followerMotor.burnFlash();
+    }
 }

@@ -306,6 +306,16 @@ public class Drivetrain extends SubsystemBase {
     }
 
     /**
+     * Writes the settings of all Spark Max motor controllers to flash.
+     */
+    public void burnFlash() {
+        leftMotor.burnFlash();
+        rightMotor.burnFlash();
+        leftFollowerMotor.burnFlash();
+        rightFollowerMotor.burnFlash();
+    }
+
+    /**
      * Creates a new drivetrain.
      */
     public Drivetrain(int leftMaster, int leftFollower, int rightMaster, int rightFollower) {

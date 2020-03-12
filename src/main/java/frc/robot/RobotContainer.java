@@ -196,6 +196,12 @@ public class RobotContainer {
                 }, EntryListenerFlags.kUpdate);
         configTab.add("Shooter PID", new Shooter.SendableCANPIDController(shooter.getPIDController()))
                 .withWidget(BuiltInWidgets.kPIDController).withPosition(6, 4).withSize(6, 11);
+        InstantCommand burnFlashCommand = new InstantCommand(() -> {
+            drivetrain.burnFlash();
+            shooter.burnFlash();
+        });
+        burnFlashCommand.setName("Burn");
+        configTab.add("Burn Sparks", burnFlashCommand).withWidget(BuiltInWidgets.kCommand).withPosition(36, 0).withSize(5, 4);
 
         driveTab.add("Gyro", drivetrain.getAHRS()).withWidget(BuiltInWidgets.kGyro).withPosition(0, 4).withSize(9, 10);
         driveReversedEntry = driveTab.add("Reversed", TeleopDrive.isReversed()).withWidget(BuiltInWidgets.kBooleanBox)
