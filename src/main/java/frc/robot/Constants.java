@@ -125,4 +125,6 @@ public final class Constants {
     public static final double INIT_LINE_TRENCH_DISTANCE = 86.6;
     public static final double TRENCH_DISTANCE_SHORT = 42.2;
     public static final double TRENCH_PC_DISTANCE = 36;
+
+    public static final int LED_STRIP_LENGTH = 100;
 }

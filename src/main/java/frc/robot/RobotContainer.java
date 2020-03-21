@@ -45,6 +45,7 @@ import frc.robot.subsystems.BryceFour;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.IndexerTiggerSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.LEDStrip;
 import frc.robot.subsystems.Shooter;
 import frc.robot.util.Limelight;
 import frc.robot.util.PressureSensor;
@@ -63,6 +64,7 @@ public class RobotContainer {
     private final Shooter shooter;
     private final IndexerTiggerSubsystem indexerTiggerSubsystem;
     private final BryceFour bryceFour;
+    private final LEDStrip ledStrip; // Yay! :D
 
     private final PressureSensor pressureSensor;
 
@@ -121,6 +123,8 @@ public class RobotContainer {
         indexerTiggerSubsystem.setDefaultCommand(new IndexerTiggerCommand(indexerTiggerSubsystem, operatorController));
         bryceFour = new BryceFour(Constants.BRYCE_FOUR_LEFT_MOTOR, Constants.BRYCE_FOUR_RIGHT_MOTOR);
         bryceFour.setDefaultCommand(new Elevator(bryceFour, operatorController));
+
+        ledStrip = new LEDStrip(0, Constants.LED_STRIP_LENGTH);
 
         pressureSensor = new PressureSensor(Constants.PRESSURE_SENSOR_CHANNEL);
 
