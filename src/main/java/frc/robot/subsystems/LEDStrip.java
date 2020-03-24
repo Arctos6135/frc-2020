@@ -20,7 +20,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class LEDStrip extends SubsystemBase {
 
     private final AddressableLED leds;
-    private final AddressableLEDBuffer buffer;
+    private final AddressableLEDBuffer ledData;
+
+    private int brightness = 255;
 
     /**
      * The gamma correction table.
@@ -97,12 +99,72 @@ public class LEDStrip extends SubsystemBase {
     }
 
     /**
-     * Get the LED color data (to read or write).
+     * Get the brightness.
      * 
-     * @return The LED color data
+     * <p>
+     * The brightness is an integer between 0 and 255 inclusive, with 255 
+     * representing full brightness. All RGB values passed to 
+     * {@link #setColor(int, Color8Bit)} will first be scaled by this fraction.
+     * </p>
+     * 
+     * @return The brightness
      */
-    public AddressableLEDBuffer getData() {
-        return buffer;
+    public int getBrightness() {
+        return brightness;
+    }
+
+    /**
+     * Set the brightness.
+     * 
+     * <p>
+     * The brightness is an integer between 0 and 255 inclusive, with 255 
+     * representing full brightness. All RGB values passed to 
+     * {@link #setColor(int, Color8Bit)} will first be scaled by this fraction.
+     * </p>
+     * 
+     * <p>
+     * This function has no effect on existing LED brightnesses.
+     * </p>
+     * 
+     * @param brightness The brightness
+     */
+    public void setBrightness(int brightness) {
+        this.brightness = brightness;
+    }
+
+    /**
+     * Get the length of this LED strip.
+     * 
+     * @return The length of the strip
+     */
+    public int getLength() {
+        return ledData.getLength();
+    }
+
+    /**
+     * Set the colour of an LED in the strip.
+     * 
+     * <p>
+     * All RGB values are first scaled by the brightness, and then applied.
+     * </p>
+     * 
+     * @param index The index of the LED
+     * @param color The colour to set to
+     * @see #setBrightness(int)
+     */
+    public void setColor(int index, Color8Bit color) {
+        ledData.setLED(index, new Color8Bit(
+                color.red * brightness / 255, color.green * brightness / 255, color.blue * brightness / 255));
+    }
+
+    /**
+     * Get the colour of the LED at the specified index.
+     * 
+     * @param index The index of the LED
+     * @return The colour of the LED
+     */
+    public Color8Bit getColor(int index) {
+        return ledData.getLED8Bit(index);
     }
 
     /**
@@ -115,9 +177,9 @@ public class LEDStrip extends SubsystemBase {
     public LEDStrip(int port, int length) {
         leds = new AddressableLED(port);
         leds.setLength(length);
-        buffer = new AddressableLEDBuffer(length);
+        ledData = new AddressableLEDBuffer(length);
         
-        leds.setData(buffer);
+        leds.setData(ledData);
         // Start writing the output
         leds.start();
     }

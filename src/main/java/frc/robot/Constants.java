@@ -105,6 +105,10 @@ public final class Constants {
     public static final int COLOR_MOTOR_SHUTOFF = 0xFF0000FF;
     public static final int COLOR_MOTOR_OVERRIDDEN = 0xA72DFFFF;
 
+    public static final float RED_HUE = 0.0f;
+    public static final float GREEN_HUE = 1.0f / 3.0f;
+    public static final float BLUE_HUE = 2.0f / 3.0f;
+
     // TODO: Change these
     public static final double ROBOT_MAX_VELOCITY = 0;
     public static final double ROBOT_MAX_ACCELERATION = 0;
