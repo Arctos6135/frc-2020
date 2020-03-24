@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
@@ -39,7 +40,9 @@ import frc.robot.commands.Elevator;
 import frc.robot.commands.FollowTrajectory;
 import frc.robot.commands.IndexerTiggerCommand;
 import frc.robot.commands.ManualIntake;
+import frc.robot.commands.Rainbow;
 import frc.robot.commands.Shoot;
+import frc.robot.commands.SineColorWave;
 import frc.robot.commands.TeleopDrive;
 import frc.robot.subsystems.BryceFour;
 import frc.robot.subsystems.Drivetrain;
@@ -67,6 +70,9 @@ public class RobotContainer {
     private final LEDStrip ledStrip; // Yay! :D
 
     private final PressureSensor pressureSensor;
+
+    // The command that runs on the LED strip when the robot is enabled
+    private final Command enabledLEDCommand;
 
     private static final XboxController driverController = new XboxController(Constants.XBOX_DRIVER);
     private static final XboxController operatorController = new XboxController(Constants.XBOX_OPERATOR);
@@ -125,6 +131,7 @@ public class RobotContainer {
         bryceFour.setDefaultCommand(new Elevator(bryceFour, operatorController));
 
         ledStrip = new LEDStrip(0, Constants.LED_STRIP_LENGTH);
+        ledStrip.setDefaultCommand(new Rainbow(ledStrip));
 
         pressureSensor = new PressureSensor(Constants.PRESSURE_SENSOR_CHANNEL);
 
@@ -160,6 +167,13 @@ public class RobotContainer {
         } catch (Exception e) {
             getLogger().logError("Error loading range table: " + e.getMessage());
         }
+
+        // Create this command here
+        // Alliance info can only be retrieved when DS is connected
+        enabledLEDCommand = new SineColorWave(ledStrip,
+                DriverStation.getInstance().getAlliance() == Alliance.Red ? Constants.HUE_RED
+                        : (DriverStation.getInstance().getAlliance() == Alliance.Blue ? Constants.HUE_BLUE
+                                : Constants.HUE_GREEN));
     }
 
     /**
@@ -205,7 +219,8 @@ public class RobotContainer {
             shooter.burnFlash();
         });
         burnFlashCommand.setName("Burn");
-        configTab.add("Burn Sparks", burnFlashCommand).withWidget(BuiltInWidgets.kCommand).withPosition(36, 0).withSize(5, 4);
+        configTab.add("Burn Sparks", burnFlashCommand).withWidget(BuiltInWidgets.kCommand).withPosition(36, 0)
+                .withSize(5, 4);
 
         driveTab.add("Gyro", drivetrain.getAHRS()).withWidget(BuiltInWidgets.kGyro).withPosition(0, 4).withSize(9, 10);
         driveReversedEntry = driveTab.add("Reversed", TeleopDrive.isReversed()).withWidget(BuiltInWidgets.kBooleanBox)
@@ -393,13 +408,12 @@ public class RobotContainer {
                 new Shoot(shooter, indexerTiggerSubsystem, -1, errorRumbleOperator, infoRumbleOperator));
         startShooterButton.whenPressed(() -> {
             // If there is already an instance of Aim then stop it
-            if(shooter.getCurrentCommand() instanceof Aim) {
+            if (shooter.getCurrentCommand() instanceof Aim) {
                 shooter.getCurrentCommand().cancel();
                 shooter.setVelocity(0);
-            }
-            else {
+            } else {
                 // Make sure shooting is not accidentally interrupted
-                if(!(shooter.getCurrentCommand() instanceof Shoot)) {
+                if (!(shooter.getCurrentCommand() instanceof Shoot)) {
                     new Aim(shooter).schedule();
                 }
             }
@@ -452,5 +466,26 @@ public class RobotContainer {
      */
     public static RobotLogger getLogger() {
         return logger;
+    }
+
+    /**
+     * Should be called every time the robot is enabled.
+     */
+    public void enabledInit() {
+        // Update the command on the LED strip
+        if (ledStrip.getCurrentCommand() != enabledLEDCommand) {
+            enabledLEDCommand.schedule();
+        }
+    }
+
+    /**
+     * Should be called every time the robot is disabled.
+     */
+    public void disabledInit() {
+        // Update the command on the LED strip
+        if (ledStrip.getCurrentCommand() == enabledLEDCommand) {
+            // This should also automatically reschedule the disabled pattern
+            enabledLEDCommand.cancel();
+        }
     }
 }
