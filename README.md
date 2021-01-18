@@ -1,3 +1,7 @@
+# NOTICE
+*No future work will happen in this repository.* The repo has effectively been frozen since the FRC 2020 season was cancelled. 
+**To future Arctos programmers: If you're using this repo as a reference, please check out the `develop` branch. It is about 90 commits ahead. It will not be merged into master since this repository has been archived.**
+
 # frc-2020
 
 Official repository for Team Arctos 6135's main robot code in FRC 2020 Infinite Recharge!
